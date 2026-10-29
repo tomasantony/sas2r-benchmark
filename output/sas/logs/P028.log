@@ -4,7 +4,7 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       system cpu time     0.00 seconds
       memory              222.56k
       OS Memory           13912.00k
-      Timestamp           10/29/2026 01:40:35 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        85  Switch Count  0
       
 
@@ -21,27 +21,27 @@ NOTE: There were 5 observations read from the data set WORK.SDTM_DM.
 NOTE: SAS sort was used.
 NOTE: The data set WORK.DM_FOR_TR has 5 observations and 2 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.01 seconds
+      real time           0.00 seconds
       user cpu time       0.00 seconds
-      system cpu time     0.01 seconds
-      memory              1196.37k
+      system cpu time     0.00 seconds
+      memory              1196.18k
       OS Memory           14944.00k
-      Timestamp           10/29/2026 01:40:35 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        86  Switch Count  0
-                                                           The SAS System
-
       
 
 
 NOTE: There were 4 observations read from the data set WORK.EDC_TR.
 NOTE: The data set WORK.TR_PREP has 4 observations and 8 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.02 seconds
+      real time           0.00 seconds
+                                                           The SAS System
+
       user cpu time       0.01 seconds
-      system cpu time     0.01 seconds
-      memory              904.03k
-      OS Memory           14168.00k
-      Timestamp           10/29/2026 01:40:35 PM
+      system cpu time     0.00 seconds
+      memory              903.87k
+      OS Memory           14424.00k
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        87  Switch Count  0
       
 
@@ -50,12 +50,12 @@ NOTE: There were 4 observations read from the data set WORK.TR_PREP.
 NOTE: SAS sort was used.
 NOTE: The data set WORK.TR_PREP has 4 observations and 8 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.03 seconds
+      real time           0.00 seconds
       user cpu time       0.00 seconds
-      system cpu time     0.01 seconds
-      memory              684.56k
-      OS Memory           14428.00k
-      Timestamp           10/29/2026 01:40:35 PM
+      system cpu time     0.00 seconds
+      memory              685.21k
+      OS Memory           14684.00k
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        88  Switch Count  0
       
 
@@ -65,9 +65,9 @@ NOTE: PROCEDURE SORT used (Total process time):
       real time           0.00 seconds
       user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-      memory              258.31k
-      OS Memory           13912.00k
-      Timestamp           10/29/2026 01:40:35 PM
+      memory              258.40k
+      OS Memory           14168.00k
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        89  Switch Count  0
       
 
@@ -76,28 +76,28 @@ NOTE: There were 4 observations read from the data set WORK.TR_PREP.
 NOTE: There were 5 observations read from the data set WORK.DM_FOR_TR.
 NOTE: The data set WORK.SDTM_TR1 has 4 observations and 24 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.03 seconds
-      user cpu time       0.01 seconds
-      system cpu time     0.01 seconds
-      memory              1076.43k
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1076.68k
       OS Memory           14680.00k
-      Timestamp           10/29/2026 01:40:35 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        90  Switch Count  0
       
 
 
 NOTE: There were 4 observations read from the data set WORK.SDTM_TR1.
 NOTE: SAS sort was used.
-                                                           The SAS System
-
 NOTE: The data set WORK.SDTM_TR1 has 4 observations and 24 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.03 seconds
+      real time           0.00 seconds
       user cpu time       0.00 seconds
-      system cpu time     0.01 seconds
-      memory              681.59k
+      system cpu time     0.00 seconds
+      memory              681.46k
       OS Memory           14684.00k
-      Timestamp           10/29/2026 01:40:35 PM
+                                                           The SAS System
+
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        91  Switch Count  0
       
 
@@ -105,12 +105,12 @@ NOTE: PROCEDURE SORT used (Total process time):
 NOTE: There were 4 observations read from the data set WORK.SDTM_TR1.
 NOTE: The data set WORK.SDTM_TR has 4 observations and 16 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.03 seconds
+      real time           0.01 seconds
       user cpu time       0.00 seconds
       system cpu time     0.01 seconds
-      memory              919.46k
+      memory              909.46k
       OS Memory           14424.00k
-      Timestamp           10/29/2026 01:40:35 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        92  Switch Count  0
       
 
@@ -121,9 +121,9 @@ NOTE: PROCEDURE PRINT used (Total process time):
       real time           0.01 seconds
       user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-      memory              467.71k
+      memory              465.81k
       OS Memory           14168.00k
-      Timestamp           10/29/2026 01:40:35 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        93  Switch Count  0
       
 
@@ -131,12 +131,12 @@ NOTE: PROCEDURE PRINT used (Total process time):
 NOTE: The export data set has 4 observations and 16 variables.
 NOTE: "D:\meta_hackathon\sas2r-agent\output\sas\datasets\P028\tr.xlsx" file was successfully created.
 NOTE: PROCEDURE EXPORT used (Total process time):
-      real time           0.04 seconds
-      user cpu time       0.01 seconds
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-      memory              1041.39k
-      OS Memory           14168.00k
-      Timestamp           10/29/2026 01:40:35 PM
+      memory              1385.04k
+      OS Memory           14936.00k
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        94  Switch Count  0
       
 
@@ -144,13 +144,11 @@ NOTE: PROCEDURE EXPORT used (Total process time):
 NOTE: No rows were selected.
 NOTE: PROCEDURE SQL used (Total process time):
       real time           0.00 seconds
-      user cpu time       0.01 seconds
+      user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-      memory              5194.50k
-      OS Memory           19292.00k
-                                                           The SAS System
-
-      Timestamp           10/29/2026 01:40:35 PM
+      memory              5194.34k
+      OS Memory           20060.00k
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        95  Switch Count  0
       
 

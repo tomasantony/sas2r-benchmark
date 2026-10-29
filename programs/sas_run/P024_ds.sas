@@ -24,7 +24,7 @@ run;
 
 data edc_ds_prep;
 
-    set edc_ds;
+    set edc_ds; length TERM DECOD CAT $50 STDT $11; TERM = DS_TERM; DECOD = DS_TERM; CAT = DS_CAT; STDT = DS_DT; %* benchmark: the committed raw sheet names these columns DS_TERM/DS_CAT/DS_DT and has no DECOD column, so the program as written produced an all-blank DS;
 
     /* Create USUBJID */
 

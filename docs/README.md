@@ -130,3 +130,9 @@ unordered tie, 3 where the shipped file predates the committed program or data (
 1 where the shipped file is an R output (P001). Five faijal programs (P022, P024, P026, P027, P028)
 exported their xlsx to the D: root; `patches.csv` now redirects them to `&outds.` and the family was
 rerun. The hash list was regenerated after the usual scrub and audit chain (601 files).
+
+P024 (faijal DS) addendum, 2026-10-29: the committed raw sheet `edc_ds.xlsx` names its columns DS_TERM, DS_CAT,
+DS_DT (no DECOD) while the program reads TERM, DECOD, CAT, STDT, so the program as written produced an all-blank
+disposition domain. The run copy now carries a documented patch in `patches.csv` that maps the sheet columns to the
+names the program expects (DECOD taken from DS_TERM); the verbatim program is unchanged and the reference DS is
+populated. Remaining warning in the log (SUBJID length) is the author's.

@@ -30,3 +30,4 @@ P024|outfile="D:\ds.xlsx"|outfile="&outds./ds.xlsx"|author output path (wrote to
 P026|outfile="D:\\lb.xlsx"|outfile="&outds./lb.xlsx"|author output path (wrote to the D: root)
 P027|outfile="D:\rs.xlsx"|outfile="&outds./rs.xlsx"|author output path (wrote to the D: root)
 P028|outfile="D:\tr.xlsx"|outfile="&outds./tr.xlsx"|author output path (wrote to the D: root)
+P024|set edc_ds;|set edc_ds; length TERM DECOD CAT $50 STDT $11; TERM = DS_TERM; DECOD = DS_TERM; CAT = DS_CAT; STDT = DS_DT; %* benchmark: the committed raw sheet names these columns DS_TERM/DS_CAT/DS_DT and has no DECOD column, so the program as written produced an all-blank DS;|committed raw edc_ds.xlsx columns differ from the names the program reads

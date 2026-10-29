@@ -4,7 +4,7 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       system cpu time     0.00 seconds
       memory              222.56k
       OS Memory           13400.00k
-      Timestamp           10/29/2026 01:40:34 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        51  Switch Count  0
       
 
@@ -24,9 +24,9 @@ NOTE: PROCEDURE SORT used (Total process time):
       real time           0.00 seconds
       user cpu time       0.01 seconds
       system cpu time     0.00 seconds
-      memory              1236.43k
+      memory              1235.81k
       OS Memory           14688.00k
-      Timestamp           10/29/2026 01:40:34 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        52  Switch Count  0
       
 
@@ -34,15 +34,15 @@ NOTE: PROCEDURE SORT used (Total process time):
 NOTE: There were 7 observations read from the data set WORK.EDC_EX.
 NOTE: The data set WORK.EX_PREP has 6 observations and 16 variables.
 NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              924.81k
+      OS Memory           13656.00k
+      Timestamp           10/29/2026 01:45:33 PM
+      Step Count                        53  Switch Count  0
                                                            The SAS System
 
-      real time           0.02 seconds
-      user cpu time       0.03 seconds
-      system cpu time     0.00 seconds
-      memory              925.71k
-      OS Memory           13656.00k
-      Timestamp           10/29/2026 01:40:34 PM
-      Step Count                        53  Switch Count  0
       
 
 
@@ -50,12 +50,12 @@ NOTE: There were 6 observations read from the data set WORK.EX_PREP.
 NOTE: SAS sort was used.
 NOTE: The data set WORK.EX_PREP has 6 observations and 16 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.03 seconds
-      user cpu time       0.01 seconds
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-      memory              676.75k
+      memory              677.12k
       OS Memory           13916.00k
-      Timestamp           10/29/2026 01:40:34 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        54  Switch Count  0
       
 
@@ -64,12 +64,12 @@ NOTE: There were 6 observations read from the data set WORK.EX_PREP.
 NOTE: There were 5 observations read from the data set WORK.DM_FOR_EX.
 NOTE: The data set WORK.SDTM_EX1 has 6 observations and 31 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.04 seconds
+      real time           0.01 seconds
       user cpu time       0.00 seconds
-      system cpu time     0.03 seconds
-      memory              1084.81k
+      system cpu time     0.00 seconds
+      memory              1084.78k
       OS Memory           13912.00k
-      Timestamp           10/29/2026 01:40:34 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        55  Switch Count  0
       
 
@@ -78,12 +78,12 @@ NOTE: There were 6 observations read from the data set WORK.SDTM_EX1.
 NOTE: SAS sort was used.
 NOTE: The data set WORK.SDTM_EX1 has 6 observations and 31 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.03 seconds
+      real time           0.02 seconds
       user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-      memory              685.28k
+      memory              685.46k
       OS Memory           13916.00k
-      Timestamp           10/29/2026 01:40:34 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        56  Switch Count  0
       
 
@@ -91,17 +91,17 @@ NOTE: PROCEDURE SORT used (Total process time):
 NOTE: There were 6 observations read from the data set WORK.SDTM_EX1.
 NOTE: The data set WORK.SDTM_EX has 6 observations and 16 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.03 seconds
-      user cpu time       0.03 seconds
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-                                                           The SAS System
-
-      memory              916.31k
+      memory              916.09k
       OS Memory           13656.00k
-      Timestamp           10/29/2026 01:40:34 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        57  Switch Count  0
       
 
+
+                                                           The SAS System
 
 NOTE: There were 6 observations read from the data set WORK.SDTM_EX.
 NOTE: The PROCEDURE PRINT printed page 4.
@@ -109,21 +109,21 @@ NOTE: PROCEDURE PRINT used (Total process time):
       real time           0.01 seconds
       user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-      memory              483.43k
+      memory              484.78k
       OS Memory           13400.00k
-      Timestamp           10/29/2026 01:40:34 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        58  Switch Count  0
       
 
 1030       %_bench_capture;
 NOTE: No rows were selected.
 NOTE: PROCEDURE SQL used (Total process time):
-      real time           0.01 seconds
+      real time           0.00 seconds
       user cpu time       0.00 seconds
       system cpu time     0.00 seconds
       memory              5194.18k
       OS Memory           18524.00k
-      Timestamp           10/29/2026 01:40:34 PM
+      Timestamp           10/29/2026 01:45:33 PM
       Step Count                        59  Switch Count  0
       
 
