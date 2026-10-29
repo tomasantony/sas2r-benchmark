@@ -156,7 +156,7 @@ run;
 
 proc export
     data=sdtm_lb
-    outfile="D:\\lb.xlsx"
+    outfile="&outds./lb.xlsx"
     dbms=xlsx
     replace;
 run;

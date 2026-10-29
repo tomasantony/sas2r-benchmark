@@ -1,5 +1,7 @@
-1                                           The SAS System             11:40 Tuesday, October 27, 2026
+1                                           The SAS System            13:33 Thursday, October 29, 2026
 
+NOTE: SASUSER.PROFILE.CATALOG does not exist and is being created from SASUSER.PROFBAK.CATALOG.
+NOTE: SASUSER.PROFBAK.CATALOG has been copied to SASUSER.PROFILE.CATALOG.
 NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
 NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
       Licensed to [licence holder removed], Site [removed].
@@ -15,10 +17,29 @@ NOTE: Updated analytical products:
 NOTE: Additional host information:
 
  [platform removed]
+
 NOTE: SAS initialization used:
-      real time           1.29 seconds
-      cpu time            0.53 seconds
+      real time           0.40 seconds
+      cpu time            0.20 seconds
       
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+WARNING: Argument 2 to macro function %SUBSTR is out of range.
+WARNING: Argument 3 to macro function %SUBSTR is out of range.
+NOTE: benchmark autoexec: pid= family=
+
+NOTE: AUTOEXEC processing completed.
+
 1          libname ours1 "D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001";
 NOTE: Libref OURS1 was successfully assigned as follows: 
       Engine:        V9 
@@ -28,6 +49,7 @@ NOTE: Libref SHIP1 was successfully assigned as follows:
       Engine:        XPORT 
       Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\shipped\P001\adsl.xpt
 3          libname ours3 "D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam";
+NOTE: Libref OURS3 refers to the same physical library as PADAM.
 NOTE: Libref OURS3 was successfully assigned as follows: 
       Engine:        V9 
       Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
@@ -36,6 +58,8 @@ NOTE: Libref SHIP3 was successfully assigned as follows:
       Engine:        XPORT 
       Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adae.xpt
 5          libname oursw_a "D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\adam";
+                                                           The SAS System
+
 NOTE: Libref OURSW_A was successfully assigned as follows: 
       Engine:        V9 
       Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\adam
@@ -66,8 +90,13 @@ NOTE: There were 306 observations read from the data set SHIP1.ADSL.
 NOTE: There were 306 observations read from the data set OURS1.ADSL.
 NOTE: The PROCEDURE COMPARE printed page 1.
 NOTE: PROCEDURE COMPARE used (Total process time):
-      real time           0.05 seconds
-      cpu time            0.04 seconds
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1352.87k
+      OS Memory           9808.00k
+      Timestamp           10/29/2026 01:33:16 PM
+      Step Count                        1  Switch Count  0
       
 
 17         %cmp(P002_ADAE, ship3.adae, ours3.adae, by=USUBJID AESEQ);
@@ -77,48 +106,73 @@ NOTE: There were 1191 observations read from the data set OURS3.ADAE.
 NOTE: The PROCEDURE COMPARE printed page 2.
 NOTE: PROCEDURE COMPARE used (Total process time):
       real time           0.00 seconds
-      cpu time            0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              863.90k
+      OS Memory           10324.00k
+      Timestamp           10/29/2026 01:33:16 PM
+      Step Count                        2  Switch Count  0
       
 
 18         %cmp(P064_ADLB, shipw_a.adlb, oursw_a.adlb);
-NOTE: Data file SHIPW_A.ADLB.DATA is in a format that is native to another host, or the file encoding does not match the session encoding. Cross Environment Data Access will be used, which might 
-      require additional CPU resources and might reduce performance.
+INFO: Data file SHIPW_A.ADLB.DATA is in a format that is native to another host, or the file encoding does not match the session encoding. Cross Environment Data Access will be used, which might 
+require additional CPU resources and might reduce performance.
 
 NOTE: There were 14 observations read from the data set SHIPW_A.ADLB.
 NOTE: There were 14 observations read from the data set OURSW_A.ADLB.
 NOTE: The PROCEDURE COMPARE printed page 3.
 NOTE: PROCEDURE COMPARE used (Total process time):
-      real time           0.01 seconds
-      cpu time            0.01 seconds
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1297.81k
+      OS Memory           10836.00k
+      Timestamp           10/29/2026 01:33:16 PM
+      Step Count                        3  Switch Count  0
       
 
 19         %cmp(P065_ADLB_QC, shipw_a.adlb_qc, oursw_a.adlb_qc);
-NOTE: Data file SHIPW_A.ADLB_QC.DATA is in a format that is native to another host, or the file encoding does not match the session encoding. Cross Environment Data Access will be used, which might 
-      require additional CPU resources and might reduce performance.
+INFO: Data file SHIPW_A.ADLB_QC.DATA is in a format that is native to another host, or the file encoding does not match the session encoding. Cross Environment Data Access will be used, which might 
+require additional CPU resources and might reduce performance.
 
 NOTE: There were 14 observations read from the data set SHIPW_A.ADLB_QC.
 NOTE: There were 14 observations read from the data set OURSW_A.ADLB_QC.
 NOTE: The PROCEDURE COMPARE printed page 4.
 NOTE: PROCEDURE COMPARE used (Total process time):
-      real time           0.01 seconds
-      cpu time            0.00 seconds
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1206.87k
+      OS Memory           10836.00k
+      Timestamp           10/29/2026 01:33:16 PM
+      Step Count                        4  Switch Count  0
       
 
 20         %cmp(P067_AE, shipw_s.ae, oursw_s.ae);
-NOTE: Data file SHIPW_S.AE.DATA is in a format that is native to another host, or the file encoding does not match the session encoding. Cross Environment Data Access will be used, which might 
-      require additional CPU resources and might reduce performance.
+INFO: Data file SHIPW_S.AE.DATA is in a format that is native to another host, or the file encoding does not match the session encoding. Cross Environment Data Access will be used, which might 
+require additional CPU resources and might reduce performance.
 
 NOTE: There were 4 observations read from the data set SHIPW_S.AE.
 NOTE: There were 4 observations read from the data set OURSW_S.AE.
 NOTE: The PROCEDURE COMPARE printed page 5.
 NOTE: PROCEDURE COMPARE used (Total process time):
       real time           0.00 seconds
-      cpu time            0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1204.87k
+      OS Memory           10836.00k
+      Timestamp           10/29/2026 01:33:16 PM
+      Step Count                        5  Switch Count  0
       
 
 
 NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
 NOTE: The SAS System used:
-      real time           1.50 seconds
-      cpu time            0.70 seconds
+      real time           0.52 seconds
+      user cpu time       0.12 seconds
+      system cpu time     0.17 seconds
+      memory              9371.84k
+      OS Memory           10836.00k
+      Timestamp           10/29/2026 01:33:16 PM
+      Step Count                        5  Switch Count  24
       

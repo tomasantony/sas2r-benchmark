@@ -18,3 +18,6 @@ $MAP
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# SAS export backups
+*.bak

@@ -25,3 +25,8 @@ P081|ods rtf file="&tlfpath./f_mean_cfb.rtf"|options orientation=landscape; ods 
 P082|ods rtf file="&tlfpath./f_waterfall.rtf"|options orientation=landscape; ods rtf file="&tlfpath./f_waterfall.rtf"|10in-wide graphics on a portrait page are cut off; orientation must precede the ODS RTF open
 P050|data disp;|data outds.disp;|the author left the final transpose/print commented out; keep the last dataset as the output
 P048|ods rtf;|options orientation=landscape leftmargin=0.5in rightmargin=0.5in; ods rtf;|the 9.8in-wide disposition table is cut off on the default portrait page
+P022|outfile="D:\ae.xlsx"|outfile="&outds./ae.xlsx"|author output path (wrote to the D: root)
+P024|outfile="D:\ds.xlsx"|outfile="&outds./ds.xlsx"|author output path (wrote to the D: root)
+P026|outfile="D:\\lb.xlsx"|outfile="&outds./lb.xlsx"|author output path (wrote to the D: root)
+P027|outfile="D:\rs.xlsx"|outfile="&outds./rs.xlsx"|author output path (wrote to the D: root)
+P028|outfile="D:\tr.xlsx"|outfile="&outds./tr.xlsx"|author output path (wrote to the D: root)

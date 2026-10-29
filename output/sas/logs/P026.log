@@ -2,17 +2,17 @@ NOTE: PROCEDURE PRINTTO used (Total process time):
       real time           0.00 seconds
       user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-      memory              213.15k
-      OS Memory           13144.00k
-      Timestamp           10/27/2026 03:58:52 PM
+      memory              222.56k
+      OS Memory           13400.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        61  Switch Count  0
       
 
 1033       %let pid = P026; %let outds = &root./output/sas/datasets/P026; libname outds "&outds.";
 NOTE: Libref OUTDS was successfully assigned as follows: 
-      Engine:        V9 
                                                            The SAS System
 
+      Engine:        V9 
       Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P026
 1034       %put NOTE: ===== pipeline faijal: P026 P026_lb.sas =====;
 NOTE: ===== pipeline faijal: P026 P026_lb.sas =====
@@ -23,12 +23,12 @@ NOTE: There were 5 observations read from the data set WORK.SDTM_DM.
 NOTE: SAS sort was used.
 NOTE: The data set WORK.DM_FOR_LB has 5 observations and 2 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.00 seconds
+      real time           0.01 seconds
       user cpu time       0.00 seconds
-      system cpu time     0.01 seconds
-      memory              1201.34k
-      OS Memory           14176.00k
-      Timestamp           10/27/2026 03:58:52 PM
+      system cpu time     0.00 seconds
+      memory              1195.62k
+      OS Memory           14432.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        62  Switch Count  0
       
 
@@ -36,12 +36,12 @@ NOTE: PROCEDURE SORT used (Total process time):
 NOTE: There were 6 observations read from the data set WORK.EDC_LB.
 NOTE: The data set WORK.LB_PREP has 6 observations and 10 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.01 seconds
-      user cpu time       0.00 seconds
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
       system cpu time     0.00 seconds
-      memory              910.25k
-      OS Memory           13400.00k
-      Timestamp           10/27/2026 03:58:52 PM
+      memory              903.93k
+      OS Memory           13656.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        63  Switch Count  0
       
 
@@ -50,12 +50,12 @@ NOTE: There were 6 observations read from the data set WORK.LB_PREP.
 NOTE: SAS sort was used.
 NOTE: The data set WORK.LB_PREP has 6 observations and 10 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.01 seconds
-      user cpu time       0.00 seconds
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
       system cpu time     0.00 seconds
-      memory              688.31k
-      OS Memory           13660.00k
-      Timestamp           10/27/2026 03:58:52 PM
+      memory              682.43k
+      OS Memory           13916.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        64  Switch Count  0
       
 
@@ -65,25 +65,25 @@ NOTE: PROCEDURE SORT used (Total process time):
       real time           0.00 seconds
       user cpu time       0.00 seconds
       system cpu time     0.00 seconds
-      memory              264.15k
-      OS Memory           13144.00k
-      Timestamp           10/27/2026 03:58:52 PM
+      memory              258.31k
+      OS Memory           13400.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        65  Switch Count  0
       
-
                                                            The SAS System
+
 
 
 NOTE: There were 6 observations read from the data set WORK.LB_PREP.
 NOTE: There were 5 observations read from the data set WORK.DM_FOR_LB.
 NOTE: The data set WORK.SDTM_LB1 has 6 observations and 28 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.01 seconds
+      real time           0.04 seconds
       user cpu time       0.00 seconds
-      system cpu time     0.01 seconds
-      memory              1086.00k
-      OS Memory           13656.00k
-      Timestamp           10/27/2026 03:58:53 PM
+      system cpu time     0.03 seconds
+      memory              1080.75k
+      OS Memory           13912.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        66  Switch Count  0
       
 
@@ -92,12 +92,12 @@ NOTE: There were 6 observations read from the data set WORK.SDTM_LB1.
 NOTE: SAS sort was used.
 NOTE: The data set WORK.SDTM_LB1 has 6 observations and 28 variables.
 NOTE: PROCEDURE SORT used (Total process time):
-      real time           0.00 seconds
-      user cpu time       0.00 seconds
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
       system cpu time     0.00 seconds
-      memory              690.56k
-      OS Memory           13660.00k
-      Timestamp           10/27/2026 03:58:53 PM
+      memory              684.50k
+      OS Memory           13916.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        67  Switch Count  0
       
 
@@ -105,12 +105,12 @@ NOTE: PROCEDURE SORT used (Total process time):
 NOTE: There were 6 observations read from the data set WORK.SDTM_LB1.
 NOTE: The data set WORK.SDTM_LB has 6 observations and 18 variables.
 NOTE: DATA statement used (Total process time):
-      real time           0.01 seconds
-      user cpu time       0.00 seconds
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
       system cpu time     0.00 seconds
-      memory              927.59k
-      OS Memory           13400.00k
-      Timestamp           10/27/2026 03:58:53 PM
+      memory              921.46k
+      OS Memory           13656.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        68  Switch Count  0
       
 
@@ -118,27 +118,27 @@ NOTE: DATA statement used (Total process time):
 NOTE: There were 6 observations read from the data set WORK.SDTM_LB.
 NOTE: The PROCEDURE PRINT printed page 5.
 NOTE: PROCEDURE PRINT used (Total process time):
-      real time           0.00 seconds
+      real time           0.02 seconds
       user cpu time       0.00 seconds
-      system cpu time     0.00 seconds
-      memory              489.50k
-      OS Memory           13144.00k
-      Timestamp           10/27/2026 03:58:53 PM
+      system cpu time     0.01 seconds
+      memory              481.37k
+      OS Memory           13400.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        69  Switch Count  0
       
 
 
 NOTE: The export data set has 6 observations and 18 variables.
-NOTE: "D:\\lb.xlsx" file was successfully created.
-NOTE: PROCEDURE EXPORT used (Total process time):
+NOTE: "D:\meta_hackathon\sas2r-agent\output\sas\datasets\P026\lb.xlsx" file was successfully created.
                                                            The SAS System
 
-      real time           0.04 seconds
+NOTE: PROCEDURE EXPORT used (Total process time):
+      real time           0.03 seconds
       user cpu time       0.00 seconds
-      system cpu time     0.00 seconds
-      memory              1410.34k
-      OS Memory           13656.00k
-      Timestamp           10/27/2026 03:58:53 PM
+      system cpu time     0.01 seconds
+      memory              1041.54k
+      OS Memory           13400.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        70  Switch Count  0
       
 
@@ -146,11 +146,11 @@ NOTE: PROCEDURE EXPORT used (Total process time):
 NOTE: No rows were selected.
 NOTE: PROCEDURE SQL used (Total process time):
       real time           0.00 seconds
-      user cpu time       0.00 seconds
+      user cpu time       0.01 seconds
       system cpu time     0.00 seconds
-      memory              5193.90k
-      OS Memory           18780.00k
-      Timestamp           10/27/2026 03:58:53 PM
+      memory              5194.34k
+      OS Memory           18524.00k
+      Timestamp           10/29/2026 01:40:34 PM
       Step Count                        71  Switch Count  0
       
 

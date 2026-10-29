@@ -209,7 +209,7 @@ run;
 
 proc export
     data=sdtm_ds
-    outfile="D:\ds.xlsx"
+    outfile="&outds./ds.xlsx"
     dbms=xlsx
     replace;
 run;

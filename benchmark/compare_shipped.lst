@@ -60,28 +60,66 @@ NOTE: The MAXPRINT=10 printing limit has been reached for the variable TRTEDTM. 
                                                                   01-701-1047           ||  N                     Y
                                                                   01-704-1025           ||  N                     Y
                                                                  ______________________________________________________________________
-                                                                ===== P003_ADAE: base=shipped ship3.adae  compare=ours ours3.adae =====
+                                                                ===== P002_ADAE: base=shipped ship3.adae  compare=ours ours3.adae =====
 
                                                                                          The COMPARE Procedure
                                                                                 Comparison of SHIP3.ADAE with OURS3.ADAE
                                                                             (Method=RELATIVE(0.00000222), Criterion=1.0E-08)
 
+                                                                        Listing of Variables in SHIP3.ADAE but not in OURS3.ADAE
+
+                                                                               Variable  Type  Length  Label
+
+                                                                               ADURN     Num        8  AE Duration (N)
+                                                                               ADURU     Char       3  AE Duration Units
+
+
+                                                                        Listing of Variables in OURS3.ADAE but not in SHIP3.ADAE
+
+                                                                               Variable  Type  Length  Label
+
+                                                                               ADUR      Num        8  AE Duration (days)
+
+
+                                                                         Listing of Common Variables with Differing Attributes
+
+                                                                Variable  Dataset     Type  Length  Label
+
+                                                                AETERM    SHIP3.ADAE  Char      46  Reported Term for the Adverse Event
+                                                                          OURS3.ADAE  Char     200  Reported Term for the Adverse Event
+                                                                AELLT     SHIP3.ADAE  Char      46  Lowest Level Term
+                                                                          OURS3.ADAE  Char     100  Lowest Level Term
+                                                                AEDECOD   SHIP3.ADAE  Char      46  Dictionary-Derived Term
+                                                                          OURS3.ADAE  Char     200  Dictionary-Derived Term
+                                                                AEHLT     SHIP3.ADAE  Char       8  High Level Term
+                                                                          OURS3.ADAE  Char     100  High Level Term
+                                                                AEHLGT    SHIP3.ADAE  Char       9  High Level Group Term
+                                                                          OURS3.ADAE  Char     100  High Level Group Term
+                                                                AESOC     SHIP3.ADAE  Char      67  Primary System Organ Class
+                                                                          OURS3.ADAE  Char     100  Primary System Organ Class
+                                                                AEACN     SHIP3.ADAE  Char       1  Action Taken with Study Treatment
+                                                                          OURS3.ADAE  Char      30  Action Taken with Study Treatment
+                                                                AEOUT     SHIP3.ADAE  Char      26  Outcome of Adverse Event
+                                                                          OURS3.ADAE  Char     200  Outcome of Adverse Event
+                                                                CQ01NAM   SHIP3.ADAE  Char      19  Customized Query 01 Name
+                                                                          OURS3.ADAE  Char      25  Customized Query 01 Name
+
 NOTE: No unequal values were found. All values compared are exactly equal.
-                                                              ===== P087_ADLB: base=shipped shipw_a.adlb  compare=ours oursw_a.adlb =====
+                                                              ===== P064_ADLB: base=shipped shipw_a.adlb  compare=ours oursw_a.adlb =====
 
                                                                                          The COMPARE Procedure
                                                                               Comparison of SHIPW_A.ADLB with OURSW_A.ADLB
                                                                             (Method=RELATIVE(0.00000222), Criterion=1.0E-08)
 
 NOTE: No unequal values were found. All values compared are exactly equal.
-                                                          ===== P088_ADLB_QC: base=shipped shipw_a.adlb_qc  compare=ours oursw_a.adlb_qc =====
+                                                          ===== P065_ADLB_QC: base=shipped shipw_a.adlb_qc  compare=ours oursw_a.adlb_qc =====
 
                                                                                          The COMPARE Procedure
                                                                            Comparison of SHIPW_A.ADLB_QC with OURSW_A.ADLB_QC
                                                                             (Method=RELATIVE(0.00000222), Criterion=1.0E-08)
 
 NOTE: No unequal values were found. All values compared are exactly equal.
-                                                                 ===== P090_AE: base=shipped shipw_s.ae  compare=ours oursw_s.ae =====
+                                                                 ===== P067_AE: base=shipped shipw_s.ae  compare=ours oursw_s.ae =====
 
                                                                                          The COMPARE Procedure
                                                                                 Comparison of SHIPW_S.AE with OURSW_S.AE

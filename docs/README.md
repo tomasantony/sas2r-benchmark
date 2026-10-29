@@ -121,3 +121,12 @@ Logs, hashes, patches and pipelines all use the new ids.
   RTF tables no wider than the printable page, listings that hit the 132-column line size, datasets with zero
   rows, programs that produced nothing. Result: `benchmark/output_audit.csv`. Run order after a batch:
   scrub_logs, audit_datasets.sas, audit_outputs.ps1, then regenerate `sas_output_hashes.csv`.
+
+## Shipped-output comparison and faijal export fix (2026-10-29)
+
+`benchmark/compare_shipped_summary.md` compares every author-shipped output under `output/sas/shipped/`
+with what the reference run produced: 11 identical, 2 equal up to an output-template detail or an
+unordered tie, 3 where the shipped file predates the committed program or data (P023, P024, P040),
+1 where the shipped file is an R output (P001). Five faijal programs (P022, P024, P026, P027, P028)
+exported their xlsx to the D: root; `patches.csv` now redirects them to `&outds.` and the family was
+rerun. The hash list was regenerated after the usual scrub and audit chain (601 files).
