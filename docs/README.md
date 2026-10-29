@@ -84,7 +84,7 @@ programs carry their data inline and run as the `own-adam` pipeline, which keeps
 WORK datasets under `output/sas/datasets/Pnnn/`. Family macros live in `programs/sas/macros/own-tlf`
 and `own-adam`. Active set: 90 clinical (67 public + 23 owner) and 10 general; all 100 run with no
 ERROR in the log (74 clean, 26 warnings only). Licence for the owner programs and the synthetic
-study: MIT, to be confirmed in the repo LICENSE.
+study: MIT, as stated in the repo LICENSE (confirmed by the author on 2026-10-29).
 
 ## Scrubbing logs before publication
 
