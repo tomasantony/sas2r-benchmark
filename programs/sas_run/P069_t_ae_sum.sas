@@ -1,0 +1,160 @@
+/*****************************************************************************
+* Program:    t_ae_sum.sas
+* Purpose:    Table 14.3.1 - Overall Summary of Treatment-Emergent 
+*             Adverse Events
+* Study:      [STUDYID]
+* Author:     [Programmer Name]
+* Date:       [Date]
+* Input:      adam.adsl, adam.adae
+* Output:     t_ae_sum.rtf
+* Population: Safety Analysis Set (SAFFL='Y')
+*****************************************************************************/
+
+%include "&pgmpath./utilities/u_setup.sas";
+%include "&macpath./m_counts.sas";
+%include "&macpath./m_report.sas";
+%include "&pgmpath./utilities/u_titles.sas";
+
+/*--- Step 1: Get Big N ---*/
+%m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+
+/*--- Step 2: AE Categories ---*/
+/* Each row represents a category; count distinct subjects */
+
+%macro ae_category(where_clause=, label=, ord=);
+    proc sql noprint;
+        create table _ae&ord. as
+        select a.TRTA,
+               count(distinct a.USUBJID) as cnt,
+               "&label." as category length=80,
+               &ord. as ord
+        from adam.adae a
+        inner join adam.adsl b on a.USUBJID = b.USUBJID
+        where b.SAFFL = 'Y' 
+              and a.TRTEMFL = 'Y'
+              &where_clause.
+        group by a.TRTA;
+    quit;
+%mend ae_category;
+
+/* Any TEAE */
+%ae_category(where_clause=, 
+             label=Subjects with at least one TEAE, ord=1);
+
+/* Related TEAE */
+%ae_category(where_clause=%str(and a.AEREL in ('POSSIBLE', 'PROBABLE', 'DEFINITE', 'RELATED')),
+             label=%str(  Related TEAE), ord=2);
+
+/* Grade 3+ TEAE */
+%ae_category(where_clause=%str(and input(a.AETOXGR, best.) >= 3),
+             label=%str(  Grade >=3 TEAE), ord=3);
+
+/* Serious AE */
+%ae_category(where_clause=%str(and a.AESER = 'Y'),
+             label=%str(  Serious Adverse Event), ord=4);
+
+/* Related SAE */
+%ae_category(where_clause=%str(and a.AESER = 'Y' and a.AEREL in ('POSSIBLE', 'PROBABLE', 'DEFINITE', 'RELATED')),
+             label=%str(  Related Serious Adverse Event), ord=5);
+
+/* AE leading to discontinuation */
+%ae_category(where_clause=%str(and a.AEACN = 'DRUG WITHDRAWN'),
+             label=%str(  TEAE Leading to Study Drug Discontinuation), ord=6);
+
+/* AE leading to dose modification */
+%ae_category(where_clause=%str(and a.AEACN in ('DOSE REDUCED', 'DRUG INTERRUPTED', 'DOSE INCREASED')),
+             label=%str(  TEAE Leading to Dose Modification), ord=7);
+
+/* AE leading to death */
+%ae_category(where_clause=%str(and a.AEOUT = 'FATAL'),
+             label=%str(  TEAE with Outcome of Death), ord=8);
+
+/*--- Step 3: Subjects with no TEAE ---*/
+proc sql noprint;
+    create table _ae0 as
+    select b.TRTA,
+           count(distinct b.USUBJID) as cnt,
+           'Subjects with no TEAE' as category length=80,
+           0 as ord
+    from adam.adsl b
+    left join (select distinct USUBJID from adam.adae 
+               where TRTEMFL = 'Y') a
+    on b.USUBJID = a.USUBJID
+    where b.SAFFL = 'Y' and a.USUBJID is null
+    group by b.TRTA;
+quit;
+
+/*--- Step 4: Combine all categories ---*/
+data all_ae;
+    set _ae0 _ae1 _ae2 _ae3 _ae4 _ae5 _ae6 _ae7 _ae8;
+run;
+
+/*--- Step 5: Calculate percentages ---*/
+proc sql noprint;
+    create table all_ae2 as
+    select a.*,
+           b.bign,
+           case when b.bign > 0 
+                then a.cnt / b.bign * 100 
+                else . 
+           end as pct
+    from all_ae a
+    left join work._bign b
+    on a.TRTA = b.TRTA
+    order by ord, TRTA;
+quit;
+
+data all_ae3;
+    set all_ae2;
+    length value $30;
+    if cnt > 0 then 
+        value = cat(strip(put(cnt, 8.)), ' (', strip(put(pct, 5.1)), ')');
+    else value = '0';
+run;
+
+/*--- Step 6: Transpose ---*/
+proc sort data=all_ae3; by ord category; run;
+
+proc transpose data=all_ae3 out=final(drop=_name_ rename=(colPlacebo=col1 colDrug_X_Low_Dose=col2 colDrug_X_High_Dose=col3)) prefix=col;  /* test-copy patch: name the transposed columns col1-col3 as the report expects */
+    by ord category;
+    id TRTA;
+    var value;
+run;
+
+/*--- Step 7: Ensure zero rows display ---*/
+data report;
+    set final;
+    array cols{*} col:;
+    do i = 1 to dim(cols);
+        if cols{i} = '' then cols{i} = '0';
+    end;
+    drop i;
+run;
+
+/*--- Step 8: Generate output ---*/
+%set_titles(output=T_AE_SUM, population=Safety Analysis Set);
+%ods_on(filename=t_ae_sum);
+
+proc report data=report nowd split='~'
+    style(report)=[outputwidth=9.5in]
+    style(header)=[just=center fontweight=bold];
+
+    columns ord category col1 col2 col3;
+
+    define ord      / order noprint;
+    define category / display '' style(column)=[width=3.5in];
+    define col1     / display "&col1hdr." style(column)=[width=1.5in just=center];
+    define col2     / display "&col2hdr." style(column)=[width=1.5in just=center];
+    define col3     / display "&col3hdr." style(column)=[width=1.5in just=center];
+
+run;
+
+footnote4 j=l "TEAE = Treatment-Emergent Adverse Event; SAE = Serious Adverse Event";
+footnote5 j=l "Subjects are counted once per category.";
+
+%ods_off;
+%clear_titles;
+
+proc datasets lib=work nolist; delete all_ae: final report _ae:; quit;
+
+%put NOTE: t_ae_sum.sas completed successfully.;

@@ -1,0 +1,981 @@
+1                                                          The SAS System                            10:53 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.00 seconds
+      cpu time            0.46 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P045
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:53:23 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P045 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*soh********************************************************************************************
+2             CODE NAME         : target26.sas
+3             DESCRIPTION       : Reference SAS program for target 4
+4             SOFTWARE/VERSION# : SAS V9
+5             INPUT             : http://phuse-scripts.googlecode.com/svn/trunk/scriptathon2014/data/advs.xpt
+6          --------------------------------------------------------------------------------------------------
+7             Author:    Prathamesh Athavale / Rucha Landge
+8          
+9          **eoh**********************************************************************************************/
+10         %* modification 2019-12-23 - update path as data has been moved;
+11         
+12         filename source "&rawadam./adae.xpt" ;
+13         filename an_sour "&rawadam./adsl.xpt" ;
+14         
+15          libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adae.xpt
+16          libname an_sour xport ;
+NOTE: Libref AN_SOUR was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+17         
+18          **** SAE data***;
+19         
+20          data work.adae ;
+21            set source.adae ;
+22            keep usubjid trtan aedecod aeser aocc02fl aocc04fl saffl;
+23            where (aocc02fl='Y' or aocc04fl='Y') and (aeser='Y') and (saffl='Y');
+24          run ;
+
+NOTE: There were 3 observations read from the data set SOURCE.ADAE.
+      WHERE ((aocc02fl='Y') or (aocc04fl='Y')) and (aeser='Y') and (saffl='Y');
+NOTE: The data set WORK.ADAE has 3 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              888.09k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:23 AM
+      Step Count                        2  Switch Count  0
+      
+
+25         
+26         proc sort data = adae;
+27           by usubjid;
+28         run;
+
+NOTE: There were 3 observations read from the data set WORK.ADAE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADAE has 3 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              686.00k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:23 AM
+      Step Count                        3  Switch Count  0
+      
+
+29         
+30         ***** SUBJECT INFO DATA*****;
+31         
+32           data work.adsl ;
+33            set an_sour.adsl ;
+34            keep usubjid trt01an;
+35            where trt01an ne .;
+36          run ;
+
+NOTE: There were 254 observations read from the data set AN_SOUR.ADSL.
+      WHERE trt01an not = .;
+NOTE: The data set WORK.ADSL has 254 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              898.71k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:23 AM
+      Step Count                        4  Switch Count  0
+      
+
+37         
+38         proc sort data = adsl nodupkey;
+39           by usubjid trt01an;
+40         run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: SAS sort was used.
+NOTE: 0 observations with duplicate key values were deleted.
+NOTE: The data set WORK.ADSL has 254 observations and 2 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              697.53k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:23 AM
+      Step Count                        5  Switch Count  0
+      
+
+41         
+42         proc sort data = adae;
+43           by usubjid;
+44         run;
+
+NOTE: Input data set is already sorted, no sorting done.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              259.59k
+                                                           The SAS System
+
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:23 AM
+      Step Count                        6  Switch Count  0
+      
+
+45         
+46         data adae_sl;
+47           merge adsl(in = a) adae(in = b);
+48           by usubjid;
+49           if a and b;
+50         run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: There were 3 observations read from the data set WORK.ADAE.
+NOTE: The data set WORK.ADAE_SL has 3 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1157.65k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:23 AM
+      Step Count                        7  Switch Count  0
+      
+
+51         
+52         ****DENOMINATOR CALCULATION*****;
+53         
+54         proc freq data = adsl noprint;
+55           table trt01an / out = sum_1(keep = trt01an count);
+56         run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: The data set WORK.SUM_1 has 3 observations and 2 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              763.68k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        8  Switch Count  0
+      
+
+57         
+58         data _null_;
+59           set sum_1 end = eof;
+60           call symput('trtcn'||compress(put(trt01an,8.0)), compress(put(count,8.0)));
+61           call symput('trtnum'||compress(put(_n_,8.0)), compress(put(trt01an,8.0)));
+62           if eof then  call symput('numtrt', compress(put(_n_,8.0)));
+63         run;
+
+NOTE: There were 3 observations read from the data set WORK.SUM_1.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              905.09k
+                                                           The SAS System
+
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        9  Switch Count  0
+      
+
+64         
+65         proc sort data = adae_sl out = adae_sl2 nodupkey;
+66           by usubjid aedecod;
+67         run;
+
+NOTE: There were 3 observations read from the data set WORK.ADAE_SL.
+NOTE: SAS sort was used.
+NOTE: 0 observations with duplicate key values were deleted.
+NOTE: The data set WORK.ADAE_SL2 has 3 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1192.87k
+      OS Memory           11616.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        10  Switch Count  0
+      
+
+68         
+69         proc sort data = adae_sl out = adae_dummy(keep = aedecod) nodupkey;
+70           by aedecod;
+71           where aocc02fl='Y';
+72         run;
+
+NOTE: There were 3 observations read from the data set WORK.ADAE_SL.
+      WHERE aocc02fl='Y';
+NOTE: SAS sort was used.
+NOTE: 1 observations with duplicate key values were deleted.
+NOTE: The data set WORK.ADAE_DUMMY has 2 observations and 1 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1202.25k
+      OS Memory           11616.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        11  Switch Count  0
+      
+
+73         
+74         proc sort data = adae_sl2;
+75           by aedecod;
+76         run;
+
+NOTE: There were 3 observations read from the data set WORK.ADAE_SL2.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADAE_SL2 has 3 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              678.00k
+                                                           The SAS System
+
+      OS Memory           11100.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        12  Switch Count  0
+      
+
+77         
+78         data adae_sl3;
+79           merge adae_sl2(in = a) adae_dummy(in = b);
+80           by aedecod;
+81           if a and b;
+82         run;
+
+NOTE: There were 3 observations read from the data set WORK.ADAE_SL2.
+NOTE: There were 2 observations read from the data set WORK.ADAE_DUMMY.
+NOTE: The data set WORK.ADAE_SL3 has 3 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1051.71k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        13  Switch Count  0
+      
+
+83         
+84         proc freq data = adae_sl3 noprint;
+85           table aedecod*trtan/out = sum_2(keep = aedecod trtan count);
+86         run;
+
+NOTE: There were 3 observations read from the data set WORK.ADAE_SL3.
+NOTE: The data set WORK.SUM_2 has 3 observations and 3 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.12 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1454.00k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        14  Switch Count  0
+      
+
+87         
+88         %macro dummy();
+89         data dummy_2;
+90           set adae_dummy;
+91           by aedecod;
+92           %do i = 1 %to &numtrt;
+93             if first.aedecod then trtan = &&trtnum&i; output;
+94           %end;
+95         run;
+96         %mend;
+97         
+98         %dummy;
+
+NOTE: There were 2 observations read from the data set WORK.ADAE_DUMMY.
+NOTE: The data set WORK.DUMMY_2 has 6 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+                                                           The SAS System
+
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              913.93k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        15  Switch Count  0
+      
+
+99         
+100        data adae_sl4;
+101          merge dummy_2(in = a) sum_2(in = b);
+102          by aedecod trtan;
+103        run;
+
+NOTE: There were 6 observations read from the data set WORK.DUMMY_2.
+NOTE: There were 3 observations read from the data set WORK.SUM_2.
+NOTE: The data set WORK.ADAE_SL4 has 6 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1034.93k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        16  Switch Count  0
+      
+
+104        
+105        proc sort data = adae_sl4;
+106          by trtan;
+107        run;
+
+NOTE: There were 6 observations read from the data set WORK.ADAE_SL4.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADAE_SL4 has 6 observations and 3 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              683.71k
+      OS Memory           11100.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        17  Switch Count  0
+      
+
+108        
+109        data adae_sl5;
+110          merge adae_sl4(in = a) sum_1(rename = (trt01an = trtan count = bign));
+111          by trtan;
+112          if a;
+113        run;
+
+NOTE: There were 6 observations read from the data set WORK.ADAE_SL4.
+NOTE: There were 3 observations read from the data set WORK.SUM_1.
+NOTE: The data set WORK.ADAE_SL5 has 6 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1054.78k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        18  Switch Count  0
+      
+
+114        
+115        data adae_sl6;
+116          set adae_sl5;
+117          by trtan aedecod;
+118          do j = 0 to 1;
+119          	if first.aedecod then resp = j;
+120            if resp = 1 and count ne . then count_final = count;
+121            else if resp = 1 and count eq . then count_final = 0;
+122            else if resp = 0 and count ne . then count_final = bign - count;
+123            else if resp = 0 and count eq . then count_final = bign;output;
+124          end;
+125        run;
+
+NOTE: There were 6 observations read from the data set WORK.ADAE_SL5.
+NOTE: The data set WORK.ADAE_SL6 has 12 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              909.62k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        19  Switch Count  0
+      
+
+126        
+127        proc sort data = adae_sl6;
+128          by aedecod;
+129        run;
+
+NOTE: There were 12 observations read from the data set WORK.ADAE_SL6.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADAE_SL6 has 12 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              675.00k
+      OS Memory           11100.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        20  Switch Count  0
+      
+
+130        
+131        ods trace on;
+132        
+133        ods output FishersExact = fish1;
+134        proc freq data = adae_sl6 ;
+135          table trtan*resp/out = sum_final sparse fisher;
+136          weight count_final;
+                                                           The SAS System
+
+137          by aedecod;
+138          exact fisher;
+139        run;
+
+
+Output Added:
+-------------
+Name:       CrossTabFreqs
+Label:      Cross-Tabular Freq Table
+Template:   Base.Freq.CrossTabFreqs
+Path:       Freq.ByGroup1.Table1.CrossTabFreqs
+-------------
+
+Output Added:
+-------------
+Name:       ChiSq
+Label:      Chi-Square Tests
+Template:   Base.Freq.ChiSq
+Path:       Freq.ByGroup1.Table1.ChiSq
+-------------
+
+Output Added:
+-------------
+Name:       FishersExact
+Label:      Fisher's Exact Test
+Template:   Base.Freq.ChisqExactFactoid
+Path:       Freq.ByGroup1.Table1.FishersExact
+-------------
+NOTE: The above message was for the following BY group:
+      Dictionary-Derived Term=PARTIAL SEIZURES WITH SECONDARY GENERALISATION
+
+Output Added:
+-------------
+Name:       CrossTabFreqs
+Label:      Cross-Tabular Freq Table
+Template:   Base.Freq.CrossTabFreqs
+Path:       Freq.ByGroup2.Table1.CrossTabFreqs
+-------------
+
+Output Added:
+-------------
+Name:       ChiSq
+Label:      Chi-Square Tests
+Template:   Base.Freq.ChiSq
+Path:       Freq.ByGroup2.Table1.ChiSq
+-------------
+
+Output Added:
+-------------
+Name:       FishersExact
+Label:      Fisher's Exact Test
+Template:   Base.Freq.ChisqExactFactoid
+Path:       Freq.ByGroup2.Table1.FishersExact
+-------------
+NOTE: The above message was for the following BY group:
+      Dictionary-Derived Term=SYNCOPE
+NOTE: The data set WORK.FISH1 has 4 observations and 6 variables.
+NOTE: There were 12 observations read from the data set WORK.ADAE_SL6.
+                                                           The SAS System
+
+NOTE: The data set WORK.SUM_FINAL has 12 observations and 5 variables.
+NOTE: The PROCEDURE FREQ printed pages 1-2.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.09 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              1605.20k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        21  Switch Count  0
+      
+
+140        
+141        data fish2(keep = aedecod cvalue1);
+142          set fish1;
+143          where name1 = 'XP2_FISH';
+144        run;
+
+NOTE: There were 2 observations read from the data set WORK.FISH1.
+      WHERE name1='XP2_FISH';
+NOTE: The data set WORK.FISH2 has 2 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              905.09k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        22  Switch Count  0
+      
+
+145        
+146        data sum_final;
+147          set sum_final;
+148          where resp = 1;
+149          cp = compress(put(count,8.0))||'('||compress(put(count,8.1))||')';
+150          if trtan = 81 then ord = 1;
+151          else ord = 2;
+152        run;
+
+NOTE: There were 6 observations read from the data set WORK.SUM_FINAL.
+      WHERE resp=1;
+NOTE: The data set WORK.SUM_FINAL has 6 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              923.84k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        23  Switch Count  0
+      
+
+153        
+154        proc sort data = sum_final;
+155          by aedecod ord;
+156        run;
+
+                                                           The SAS System
+
+NOTE: There were 6 observations read from the data set WORK.SUM_FINAL.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SUM_FINAL has 6 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              675.37k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        24  Switch Count  0
+      
+
+157        
+158        data sum_final;
+159          set sum_final;
+160          retain count_max;
+161          if ord = 1 then count_max = count;
+162        run;
+
+NOTE: There were 6 observations read from the data set WORK.SUM_FINAL.
+NOTE: The data set WORK.SUM_FINAL has 6 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              897.03k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        25  Switch Count  0
+      
+
+163        
+164        proc sort data = sum_final;
+165          by aedecod count_max;
+166        run;
+
+NOTE: There were 6 observations read from the data set WORK.SUM_FINAL.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SUM_FINAL has 6 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              674.37k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        26  Switch Count  0
+      
+
+167        
+168        proc transpose data = sum_final out = sum_final2 prefix = trt;
+169          by aedecod count_max;
+170          id trtan;
+171          var cp;
+172        run;
+
+NOTE: There were 6 observations read from the data set WORK.SUM_FINAL.
+                                                           The SAS System
+
+NOTE: The data set WORK.SUM_FINAL2 has 2 observations and 6 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2543.15k
+      OS Memory           13404.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        27  Switch Count  0
+      
+
+173        
+174        data sum_final2;
+175          merge sum_final2 fish2;
+176          by aedecod;
+177        run;
+
+NOTE: There were 2 observations read from the data set WORK.SUM_FINAL2.
+NOTE: There were 2 observations read from the data set WORK.FISH2.
+NOTE: The data set WORK.SUM_FINAL2 has 2 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1035.06k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        28  Switch Count  0
+      
+
+178        
+179        proc sort data = sum_final2;
+180          by descending count_max aedecod;
+181        run;
+
+NOTE: There were 2 observations read from the data set WORK.SUM_FINAL2.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SUM_FINAL2 has 2 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              673.37k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        29  Switch Count  0
+      
+
+182        
+183        proc sort data = adae_sl out = adae_sl_sub(keep = usubjid) nodupkey;
+184          by usubjid;
+185          where aocc02fl='Y';
+186        run;
+
+NOTE: There were 3 observations read from the data set WORK.ADAE_SL.
+      WHERE aocc02fl='Y';
+NOTE: SAS sort was used.
+NOTE: 0 observations with duplicate key values were deleted.
+                                                           The SAS System
+
+NOTE: The data set WORK.ADAE_SL_SUB has 3 observations and 1 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1207.21k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        30  Switch Count  0
+      
+
+187        
+188        ***At least one SAE;
+189        
+190        data adae_sl_sub2;
+191          merge adsl(in = a) adae_sl_sub(in = b);
+192          by usubjid;
+193          if a;
+194          if a and b then flg = 1;
+195          else flg = 0;
+196        run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: There were 3 observations read from the data set WORK.ADAE_SL_SUB.
+NOTE: The data set WORK.ADAE_SL_SUB2 has 254 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1061.12k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        31  Switch Count  0
+      
+
+197        
+198        ***Fisher Test;
+199        
+200        ods output FishersExact = fish_sub;
+201        proc freq data = adae_sl_sub2(rename = (trt01an = trtan)) ;
+202          table trtan*flg/out = sum_final_sub sparse fisher;
+203          exact fisher;
+204        run;
+
+
+Output Added:
+-------------
+Name:       CrossTabFreqs
+Label:      Cross-Tabular Freq Table
+Template:   Base.Freq.CrossTabFreqs
+Path:       Freq.Table1.CrossTabFreqs
+-------------
+
+Output Added:
+-------------
+Name:       ChiSq
+Label:      Chi-Square Tests
+Template:   Base.Freq.ChiSq
+                                                           The SAS System
+
+Path:       Freq.Table1.ChiSq
+-------------
+
+Output Added:
+-------------
+Name:       FishersExact
+Label:      Fisher's Exact Test
+Template:   Base.Freq.ChisqExactFactoid
+Path:       Freq.Table1.FishersExact
+-------------
+NOTE: The data set WORK.FISH_SUB has 2 observations and 5 variables.
+NOTE: There were 254 observations read from the data set WORK.ADAE_SL_SUB2.
+NOTE: The data set WORK.SUM_FINAL_SUB has 6 observations and 4 variables.
+NOTE: The PROCEDURE FREQ printed page 3.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.07 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1219.62k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        32  Switch Count  0
+      
+
+205        
+206        data fish_sub2(keep = cvalue1);
+207          set fish_sub;
+208          where name1 = 'XP2_FISH';
+209        run;
+
+NOTE: There were 1 observations read from the data set WORK.FISH_SUB.
+      WHERE name1='XP2_FISH';
+NOTE: The data set WORK.FISH_SUB2 has 1 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              892.90k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        33  Switch Count  0
+      
+
+210        
+211        data sum_final_sub;
+212          length aedecod $100;
+213          set sum_final_sub;
+214          where flg = 1;
+215          cp = compress(put(count,8.0))||'('||compress(put(count,8.1))||')';
+216          aedecod = 'Number of subjects reporting serious adverse events';
+217        run;
+
+NOTE: There were 3 observations read from the data set WORK.SUM_FINAL_SUB.
+      WHERE flg=1;
+NOTE: The data set WORK.SUM_FINAL_SUB has 3 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+                                                           The SAS System
+
+      system cpu time     0.01 seconds
+      memory              898.65k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        34  Switch Count  0
+      
+
+218        
+219        proc sort data = sum_final_sub;
+220          by aedecod;
+221        run;
+
+NOTE: There were 3 observations read from the data set WORK.SUM_FINAL_SUB.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SUM_FINAL_SUB has 3 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              670.18k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        35  Switch Count  0
+      
+
+222        
+223        proc transpose data = sum_final_sub out = sum_final_sub2 prefix = trt;
+224          by aedecod;
+225          id trtan;
+226          var cp;
+227        run;
+
+NOTE: There were 3 observations read from the data set WORK.SUM_FINAL_SUB.
+NOTE: The data set WORK.SUM_FINAL_SUB2 has 1 observations and 5 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              2540.46k
+      OS Memory           13404.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        36  Switch Count  0
+      
+
+228        
+229        data sum_final_sub2;
+230          merge sum_final_sub2 fish_sub2;
+231        run;
+
+NOTE: There were 1 observations read from the data set WORK.SUM_FINAL_SUB2.
+NOTE: There were 1 observations read from the data set WORK.FISH_SUB2.
+NOTE: The data set WORK.SUM_FINAL_SUB2 has 1 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1035.71k
+      OS Memory           11608.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        37  Switch Count  0
+      
+
+232        
+233        data final_report;
+234          set sum_final_sub2 sum_final2;
+235        run;
+
+NOTE: There were 1 observations read from the data set WORK.SUM_FINAL_SUB2.
+NOTE: There were 2 observations read from the data set WORK.SUM_FINAL2.
+NOTE: The data set WORK.FINAL_REPORT has 3 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1035.71k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:53:24 AM
+      Step Count                        38  Switch Count  0
+      
+
+236        
+237        proc report data = final_report headline headskip nowd split = "#";
+238          column aedecod trt0 trt54 trt81 cvalue1;
+239          define aedecod /"Preferred Term" width = 40 flow;
+240          define trt0 /"Placebo#N=&trtcn0" width = 30 flow;
+241          define trt54/"Treatment 1#N=&trtcn54" width = 30 flow;
+242          define trt81/"Treatment 2#N=&trtcn81" width = 30 flow;
+243          define cvalue1/"p-value*b" width = 30 flow;
+244        
+245          compute before _page_;
+246            line @1 "Table 7.5 Summary of Serious Adverse Events";
+247        	line @1 "Safety Population";
+248            line @1 "-";
+249          endcomp;
+250        
+251            compute after _page_;
+252            line @1 "-";
+253            line @1 "Denominator for each % is treatment column N";
+254        	line @1 "*b = p-values are from Fisher's Exact Test";
+255          endcomp;
+256          run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+
+Output Added:
+-------------
+Name:       Report
+Label:      
+Data Name:  ProcReportTable
+Path:       Report.Report.Report
+-------------
+NOTE: There were 3 observations read from the data set WORK.FINAL_REPORT.
+NOTE: The PROCEDURE REPORT printed pages 4-5.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+                                                           The SAS System
+
+      system cpu time     0.00 seconds
+      memory              7234.31k
+      OS Memory           17512.00k
+      Timestamp           10/27/2026 10:53:25 AM
+      Step Count                        39  Switch Count  0
+      
+
+257        
+258        **END OF CODE;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.27 seconds
+      user cpu time       0.53 seconds
+      system cpu time     0.54 seconds
+      memory              16202.95k
+      OS Memory           17512.00k
+      Timestamp           10/27/2026 10:53:25 AM
+      Step Count                        39  Switch Count  90
+      

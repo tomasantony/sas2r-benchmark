@@ -1,0 +1,170 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+                                                           The SAS System
+
+      memory              244.71k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 03:58:42 PM
+      Step Count                        1  Switch Count  0
+      
+
+4          %let pid = P011; %let outds = &root./output/sas/datasets/P011; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P011
+5          %put NOTE: ===== pipeline c2c: P011 P011_sdtm_dm.sas =====;
+NOTE: ===== pipeline c2c: P011 P011_sdtm_dm.sas =====
+6          %let _bench_t0 = %sysfunc(datetime());
+7          %include "&root./programs/sas_run/P011_sdtm_dm.sas";
+
+24          /**********************************************************************
+25          *   PRODUCT:   SAS
+26          *   VERSION:   9.4
+27          *   CREATOR:   External File Interface
+28          *   DATE:      27OCT26
+29          *   DESC:      Generated SAS Datastep Code
+30          *   TEMPLATE SOURCE:  (None Specified.)
+31          ***********************************************************************/
+32             data WORK.RAW_DM    ;
+33             %let _EFIERR_ = 0; /* set the ERROR detection macro variable */
+34             infile 'D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_demog.csv' delimiter = ',' MISSOVER DSD
+34       ! lrecl=32767 firstobs=2 ;
+35                informat SUBJ_ID $7. ;
+36                informat SITE best32. ;
+37                informat BRTH_DT ddmmyy10. ;
+38                informat GENDER $6. ;
+39                informat RACE_TXT $5. ;
+40                informat ICF_DAT yymmdd10. ;
+41                informat STUDY_END_DAT yymmdd10. ;
+42                informat RANDOMIZED_ARM $16. ;
+43                informat ENROLLED $1. ;
+44                informat DISPOSITION $17. ;
+45                informat DISPOSITION_REASON $21. ;
+46                format SUBJ_ID $7. ;
+47                format SITE best12. ;
+48                format BRTH_DT ddmmyy10. ;
+49                format GENDER $6. ;
+50                format RACE_TXT $5. ;
+51                format ICF_DAT yymmdd10. ;
+52                format STUDY_END_DAT yymmdd10. ;
+53                format RANDOMIZED_ARM $16. ;
+54                format ENROLLED $1. ;
+55                format DISPOSITION $17. ;
+56                format DISPOSITION_REASON $21. ;
+57             input
+58                         SUBJ_ID $
+59                         SITE
+60                         BRTH_DT
+61                         GENDER $
+62                         RACE_TXT $
+63                         ICF_DAT
+64                         STUDY_END_DAT
+65                         RANDOMIZED_ARM $
+                                                           The SAS System
+
+66                         ENROLLED $
+67                         DISPOSITION $
+68                         DISPOSITION_REASON $
+69             ;
+70             if _ERROR_ then call symputx('_EFIERR_',1);  /* set ERROR detection macro variable */
+71             run;
+
+NOTE: The infile 'D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_demog.csv' is:
+      Filename=D:\meta_hackathon\sas2r-agent\data\derived\c2c\data\raw\raw_demog.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=4758,
+      Last Modified=27Oct2026:10:26:07,
+      Create Time=27Oct2026:10:26:07
+
+NOTE: 50 records were read from the infile 'D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_demog.csv'.
+      The minimum record length was 82.
+      The maximum record length was 112.
+NOTE: The data set WORK.RAW_DM has 50 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              10106.35k
+      OS Memory           19552.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        2  Switch Count  0
+      
+
+50 rows created in WORK.RAW_DM from D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_demog.csv.
+  
+  
+  
+NOTE: WORK.RAW_DM data set was successfully created.
+NOTE: The data set WORK.RAW_DM has 50 observations and 11 variables.
+NOTE: PROCEDURE IMPORT used (Total process time):
+      real time           0.19 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.10 seconds
+      memory              10106.35k
+      OS Memory           19808.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        2  Switch Count  7
+      
+
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      91:46    134:58   140:58   147:65   
+NOTE: There were 50 observations read from the data set WORK.RAW_DM.
+NOTE: The data set SDTM.DM has 50 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              950.10k
+      OS Memory           14940.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        3  Switch Count  0
+      
+
+                                                           The SAS System
+
+
+NOTE: There were 10 observations read from the data set SDTM.DM.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              436.87k
+      OS Memory           14684.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        4  Switch Count  0
+      
+
+166        %_bench_capture;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.04 seconds
+      memory              5285.06k
+      OS Memory           19808.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        5  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying SDTM.DM to OUTDS.DM (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 50 observations read from the data set SDTM.DM.
+NOTE: The data set OUTDS.DM has 50 observations and 14 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              642.28k
+      OS Memory           15456.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        6  Switch Count  0
+      
+
+NOTE: benchmark capture: 1 permanent dataset(s) copied to outds (SDTM DM)
+167        proc printto; run;
+

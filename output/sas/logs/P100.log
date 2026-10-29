@@ -1,0 +1,212 @@
+1                                                          The SAS System                            15:36 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.39 seconds
+      cpu time            0.48 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P100
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:36:11 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P100 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          %let gpath='C:\Work\Sugi\SGF2016\SuperDemos\Clinical_Graphs\Image';
+2          %let dpi=300;
+                                                           The SAS System
+
+3          ods html close;
+4          ods listing gpath=&gpath image_dpi=&dpi;
+5          
+6          data TumorSize;
+7            length Cid $ 3;
+8            label Change='Change from Baseline (%)';
+9            do Id=1 to 25;
+10             cid=put(id, 2.0);
+11             change=30-120*ranuni(2);
+12                 Group=ifc(int(ranuni(2)+0.5), 'Treatment 1', 'Treatment 2');
+13                 if mod(id, 5) = 1 then Label='C';
+14                 if mod(id, 5) = 2 then label='R';
+15                 if mod(id, 5) = 3 then label='S';
+16                 if mod(id, 5) = 4 then label='P';
+17                 if mod(id, 5) = 0 then label='E';
+18                 output;
+19           end;
+20         run;
+
+INFO: Character variables have defaulted to a length of 200 at the places given by: (Line):(Column). Truncation can result.
+      12:9     Group
+NOTE: The data set WORK.TUMORSIZE has 25 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              771.59k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 03:36:11 PM
+      Step Count                        2  Switch Count  0
+      
+
+21         
+22         ods html;
+NOTE: Writing HTML Body file: sashtml.htm
+23         proc print data=TumorSize(obs=5);
+24         run;
+
+NOTE: There were 5 observations read from the data set WORK.TUMORSIZE.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1572.84k
+      OS Memory           15444.00k
+      Timestamp           10/27/2026 03:36:13 PM
+      Step Count                        3  Switch Count  0
+      
+
+25         ods html close;
+26         
+27         /*--Change in Tumor Size--*/
+28         ods listing style=listing;
+29         ods graphics / reset width=5in height=3in imagename='TumorSize_SG_V94';
+30         title 'Change in Tumor Size';
+31         title2 'ITT Population';
+32         proc sgplot data=TumorSize nowall noborder;
+                                                           The SAS System
+
+33           styleattrs datacolors=(cxbf0000 cxafafaf) datacontrastcolors=(black);
+34           vbar cid / response=change group=group categoryorder=respdesc datalabel=label
+35                      datalabelattrs=(size=5 weight=bold) groupdisplay=cluster clusterwidth=1;
+36           refline 20 -30 / lineattrs=(pattern=shortdash);
+37           xaxis display=none;
+38           yaxis values=(60 to -100 by -20);
+39           inset "C= Complete Response" "R= Partial Response" "S= Stable Disease"
+40                 "P= Progressive Disease" "E= Early Death" / title='BCR'
+41                  position=bottomleft border textattrs=(size=6 weight=bold) titleattrs=(size=7);
+42           keylegend / title='' location=inside position=topright across=1 border;
+43         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           3.86 seconds
+      user cpu time       0.17 seconds
+      system cpu time     0.40 seconds
+      memory              11142.45k
+      OS Memory           22988.00k
+      Timestamp           10/27/2026 03:36:17 PM
+      Step Count                        4  Switch Count  0
+      
+WARNING: GPATH or PATH is not a writable directory. It will be ignored.
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P100\TumorSize_SG_V94.png.
+NOTE: There were 25 observations read from the data set WORK.TUMORSIZE.
+
+44         title;
+45         
+46         proc sort data=TumorSize out=TumorSizeDesc;
+47           by descending change;
+48         run;
+
+NOTE: There were 25 observations read from the data set WORK.TUMORSIZE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TUMORSIZEDESC has 25 observations and 5 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1185.84k
+      OS Memory           19808.00k
+      Timestamp           10/27/2026 03:36:17 PM
+      Step Count                        5  Switch Count  0
+      
+
+49         
+50         ods listing style=listing;
+51         ods graphics / reset width=5in height=3in imagename='TumorSize_Band_SG_V94';
+52         title 'Change in Tumor Size';
+53         title2 'ITT Population';
+54         proc sgplot data=TumorSizeDesc nowall noborder;
+55           styleattrs datacolors=(cxbf0000 gold) datacontrastcolors=(black) axisextent=data;
+56           band x=cid upper=20 lower=-30 / transparency=0.5 fill nooutline legendlabel='Confidence';
+57           vbarparm category=cid  response=change / group=group datalabel=label
+58                      datalabelattrs=(size=5 weight=bold) groupdisplay=cluster
+59                      dataskin=pressed;
+60           xaxis display=none;
+61           yaxis values=(60 to -100 by -20) grid gridattrs=(color=cxf0f0f0);
+62           inset "C= Complete Response" "R= Partial Response" "S= Stable Disease"
+                                                           The SAS System
+
+63                 "P= Progressive Disease" "E= Early Death" / title='BCR'
+64                  position=bottomleft border textattrs=(size=6 weight=bold) titleattrs=(size=7);
+65           keylegend / title='' location=inside position=topright across=1 border opaque;
+66         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           1.07 seconds
+      user cpu time       0.07 seconds
+      system cpu time     0.03 seconds
+      memory              4942.93k
+      OS Memory           23244.00k
+      Timestamp           10/27/2026 03:36:18 PM
+      Step Count                        6  Switch Count  0
+      
+WARNING: GPATH or PATH is not a writable directory. It will be ignored.
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P100\TumorSize_Band_SG_V94.png.
+NOTE: There were 25 observations read from the data set WORK.TUMORSIZEDESC.
+
+67         title;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           8.00 seconds
+      user cpu time       0.73 seconds
+      system cpu time     1.15 seconds
+      memory              21617.40k
+      OS Memory           23244.00k
+      Timestamp           10/27/2026 03:36:18 PM
+      Step Count                        6  Switch Count  24
+      

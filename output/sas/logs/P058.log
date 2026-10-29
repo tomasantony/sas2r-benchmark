@@ -1,0 +1,282 @@
+1                                                          The SAS System                            10:54 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.02 seconds
+      cpu time            0.65 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P058
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:54:42 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P058 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          ******************************************;
+2          * Program name: P_ADPC.sas               *;
+3          *                                        *;
+4          * Description:  Plot of PK Conc          *;
+5          *               (Target 11)              *;
+6          *                                        *;
+7          * Author:       John Salter              *;
+8          *               12OCT2014                *;
+9          ******************************************;
+10         
+11         %* modification 2019-12-23 - update path as data has been moved;
+12         
+13         filename source "&rawadam./adpc.xpt";
+14         libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adpc.xpt
+15         
+16         * Bring in specified data;
+17         data conc;
+18          set source.adpc (keep=usubjid trta aperiodc atpt parcat3l aval adtm saffn pkfn paexcfln pclloq parcat1);
+19          t=input(compress(atpt,' HOURSPOSTDOSE'),best.);
+20          concen=aval;
+21          order=input(compress(parcat1,' DRUGANALPlasma'),best.);
+22          label t='Time'
+23                concen='Concentration (ug/mL)';
+24          * Apply LLOQ;
+25          if pclloq ne . then concen=pclloq;
+26         run;
+
+NOTE: There were 2463 observations read from the data set SOURCE.ADPC.
+NOTE: The data set WORK.CONC has 2463 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              956.25k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:54:42 AM
+      Step Count                        2  Switch Count  0
+      
+
+27         
+28         proc sort data=conc;
+29         *  by order trta usubjid t;
+30           by usubjid t;
+31         run;
+
+NOTE: There were 2463 observations read from the data set WORK.CONC.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.CONC has 2463 observations and 15 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              3882.53k
+                                                           The SAS System
+
+      OS Memory           13928.00k
+      Timestamp           10/27/2026 10:54:43 AM
+      Step Count                        3  Switch Count  0
+      
+
+32         
+33         
+34         
+35         * END DATA MANIPULATION *;
+36         ods graphics on /width=24cm height=12cm noborder ;
+37         ods listing image_dpi=300 style=listing;
+38         
+39         proc template;
+40         define statgraph pkplot;
+41           begingraph;
+42            layout lattice / columns=2 columnweights=(.50 .50);
+43            /* LINEAR PLOT  */
+44            layout OVERLAY / walldisplay=none border=false
+45              	           halign=center;
+46              entry halign=center "Linear view" /  location=outside valign=top;
+47              seriesplot x=t y=concen/group=usubjid lineattrs=(color=black pattern=1);
+48            endlayout;
+49            /* LOG-LINEAR PLOT */
+50            layout OVERLAY / walldisplay=none border=false
+51              	           halign=center
+52              yaxisopts=(type=log logopts=(base=10 minorticks=TRUE) label=(' ')   );
+53              entry halign=center "Semilogarithmic view" /  location=outside valign=top;
+54              seriesplot x=t y=concen/group=usubjid lineattrs=(color=black pattern=1);
+55            endlayout;
+56           endlayout;
+57         endgraph;
+58         end;
+NOTE: Overwriting existing template/link: Pkplot
+NOTE: STATGRAPH 'Pkplot' has been saved to: SASUSER.TEMPLAT
+59         run;	
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              309.00k
+      OS Memory           11092.00k
+      Timestamp           10/27/2026 10:54:43 AM
+      Step Count                        4  Switch Count  0
+      
+
+60         
+61         %macro plot(trta=);
+62         
+63         %do i=1 %to 3;
+64         
+65         title1 "Overlaid PK Concentration Plots";
+66         title2 "Analyte: &I; Treatment=&TRTA";
+67         proc sgrender data=conc template=PKPlot;
+68           where order=&I and trta="&TRTA";
+69         run;
+70         
+71         %end;
+72         
+                                                           The SAS System
+
+73         %mend;
+74         %plot(trta=A);
+
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P058\SGRender.png.
+NOTE: There were 419 observations read from the data set WORK.CONC.
+      WHERE (order=1) and (trta='A');
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           4.46 seconds
+      user cpu time       0.43 seconds
+      system cpu time     0.25 seconds
+      memory              18755.34k
+      OS Memory           29520.00k
+      Timestamp           10/27/2026 10:54:47 AM
+      Step Count                        5  Switch Count  0
+      
+
+
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P058\SGRender1.png.
+NOTE: There were 419 observations read from the data set WORK.CONC.
+      WHERE (order=2) and (trta='A');
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           1.06 seconds
+      user cpu time       0.26 seconds
+      system cpu time     0.04 seconds
+      memory              13160.21k
+      OS Memory           30288.00k
+      Timestamp           10/27/2026 10:54:48 AM
+      Step Count                        6  Switch Count  0
+      
+
+
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P058\SGRender2.png.
+NOTE: There were 419 observations read from the data set WORK.CONC.
+      WHERE (order=3) and (trta='A');
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           0.85 seconds
+      user cpu time       0.23 seconds
+      system cpu time     0.06 seconds
+      memory              13162.50k
+      OS Memory           30032.00k
+      Timestamp           10/27/2026 10:54:49 AM
+      Step Count                        7  Switch Count  0
+      
+
+75         %plot(trta=C);
+
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P058\SGRender3.png.
+NOTE: There were 401 observations read from the data set WORK.CONC.
+      WHERE (order=1) and (trta='C');
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           0.85 seconds
+      user cpu time       0.18 seconds
+      system cpu time     0.04 seconds
+      memory              13160.31k
+      OS Memory           30032.00k
+      Timestamp           10/27/2026 10:54:50 AM
+      Step Count                        8  Switch Count  0
+      
+                                                           The SAS System
+
+
+
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P058\SGRender4.png.
+NOTE: There were 401 observations read from the data set WORK.CONC.
+      WHERE (order=2) and (trta='C');
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           0.77 seconds
+      user cpu time       0.26 seconds
+      system cpu time     0.01 seconds
+      memory              13154.50k
+      OS Memory           30032.00k
+      Timestamp           10/27/2026 10:54:51 AM
+      Step Count                        9  Switch Count  0
+      
+
+
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P058\SGRender5.png.
+NOTE: There were 401 observations read from the data set WORK.CONC.
+      WHERE (order=3) and (trta='C');
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           0.78 seconds
+      user cpu time       0.18 seconds
+      system cpu time     0.04 seconds
+      memory              13167.71k
+      OS Memory           30032.00k
+      Timestamp           10/27/2026 10:54:51 AM
+      Step Count                        10  Switch Count  0
+      
+
+76         
+77         ods graphics off;
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           11.15 seconds
+      user cpu time       1.96 seconds
+      system cpu time     0.92 seconds
+      memory              28140.06k
+      OS Memory           30288.00k
+      Timestamp           10/27/2026 10:54:51 AM
+      Step Count                        10  Switch Count  32
+      

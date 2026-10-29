@@ -1,0 +1,255 @@
+1                                                          The SAS System                            11:23 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.63 seconds
+      cpu time            0.68 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*--------------------------------------------------*/
+2          /* SAS Programming for R Users - code for exercises */
+3          /* Copyright 2016 SAS Institute Inc.                */
+4          /*--------------------------------------------------*/
+5          
+6          /*SP4R06d08*/
+7          
+8          /*Part A*/
+9          proc sgplot data=sp4r.crab;
+ERROR: Libref SP4R is not assigned.
+10            histogram satellites;
+ERROR: No data set open to look up variables.
+11            density satellites / type=kernel;
+ERROR: No data set open to look up variables.
+12         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              70.06k
+                                                           The SAS System
+
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        1  Switch Count  0
+      
+13         
+
+
+14         proc means data=sp4r.crab;
+ERROR: Libref SP4R is not assigned.
+15            var satellites width weight;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+16         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              76.53k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        2  Switch Count  0
+      
+17         
+
+
+18         proc freq data=sp4r.crab;
+ERROR: Libref SP4R is not assigned.
+19            tables satellites color spine;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+20         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              29.75k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        3  Switch Count  0
+      
+21         
+22         /*Part B*/
+
+
+23         proc genmod data=sp4r.crab plots=resraw;
+ERROR: Libref SP4R is not assigned.
+24            class color(param=ref ref='1') spine(param=ref ref='1');
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+25            model satellites = width weight color spine
+ERROR: No data set open to look up variables.
+26               / dist=poi link=log type3;
+                                                           The SAS System
+
+27            estimate 'my estimate' intercept 1 width 25 weight 2.5
+28               color 1 0 0  spine 1 0 / e exp alpha=.05;
+29            output out=sp4r.out p=pred resraw=res;
+ERROR: Libref SP4R is not assigned.
+30         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+NOTE: PROCEDURE GENMOD used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              288.62k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        4  Switch Count  0
+      
+31         
+
+
+32         proc sgplot data=sp4r.out;
+ERROR: Libref SP4R is not assigned.
+33            scatter y=res x=pred;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+34         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              69.96k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        5  Switch Count  0
+      
+35         
+36         /*Part C*/
+
+
+37         proc genmod data=sp4r.crab plots=resraw;
+ERROR: Libref SP4R is not assigned.
+38            class color(param=ref ref='1') spine(param=ref ref='1');
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+39            model satellites = width weight color spine
+ERROR: No data set open to look up variables.
+40               / dist=negbin link=log type3;
+41            estimate 'my estimate' intercept 1 width 25 weight 2.5
+42               color 1 0 0  spine 1 0 / e exp alpha=.05;
+43            output out=sp4r.out p=pred resraw=res;
+ERROR: Libref SP4R is not assigned.
+44            store mymod;
+45         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE GENMOD used (Total process time):
+                                                           The SAS System
+
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              254.25k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        6  Switch Count  0
+      
+46         
+47         /*Part D*/
+
+
+48         data sp4r.newcrab;
+49            input Color Spine Width Satellites Weight;
+50            datalines;
+
+ERROR: Libref SP4R is not assigned.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              870.81k
+      OS Memory           9036.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        7  Switch Count  0
+      
+
+52         ;run;
+53         
+NOTE: PROCEDURE PLM used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              60.68k
+      OS Memory           9036.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        8  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+54         proc plm restore=mymod;
+55            score data=sp4r.newcrab out=sp4r.scores / ilink;
+56         run;
+57         
+
+
+58         proc print data=sp4r.scores;
+ERROR: Libref SP4R is not assigned.
+59         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              73.37k
+      OS Memory           9036.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        9  Switch Count  0
+                                                           The SAS System
+
+      
+
+ERROR: Errors printed on pages 1,2,3,4.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.91 seconds
+      user cpu time       0.31 seconds
+      system cpu time     0.51 seconds
+      memory              8338.46k
+      OS Memory           9036.00k
+      Timestamp           10/27/2026 11:23:57 AM
+      Step Count                        9  Switch Count  30
+      

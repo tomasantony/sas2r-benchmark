@@ -1,0 +1,1469 @@
+1                                                          The SAS System                            10:50 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.83 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R005
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R005 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1           options ps=60 ls=80 nodate;
+2           goptions ftext=none htext=1 cell;
+NOTE: No units specified for the HTEXT option. The current units associated 
+      with GUNIT will be used.
+3          
+4          
+5           title1 'Boxchart with Summary Statistics - Laboratory Analysis';
+6           title2 'Change from Base - Lab Test 1';
+7          
+8          
+9           data one;
+10              do visit = 1 to 10 ;
+11                input n mean std;
+12         	   label lab_test_1='Measure (unit)';
+13                do i = 1 to n;
+14         		   do trt=0 to 1;
+15         		       id=i+(trt+1)*1000;
+16         	          lab_test_1 = mean + std*rannor(234111);
+17         	          output;
+18         		   end;
+19         	   end;
+20             end;
+21             drop i n mean std;
+22          cards;
+
+NOTE: LOST CARD.
+RULE:      ----+----1----+----2----+----3----+----4----+----5----+----6----+----
+32          ;
+visit=9 n=89 mean=7.1 std=0.45 lab_test_1=6.9501267512 i=90 trt=2 id=2089
+_ERROR_=1 _N_=1
+NOTE: SAS went to a new line when INPUT statement reached past the end of a 
+      line.
+NOTE: The data set WORK.ONE has 1198 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              755.28k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        2  Switch Count  0
+      
+
+32          ;
+33         run;
+34         
+35         proc sort data=one;
+36          by id trt visit;
+37         
+
+NOTE: There were 1198 observations read from the data set WORK.ONE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ONE has 1198 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+                                 The SAS System
+
+      system cpu time     0.00 seconds
+      memory              730.93k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        3  Switch Count  0
+      
+
+38         data new;
+39          set one;
+40          by id trt visit;
+41          retain bse;
+42          if first.id then do;
+43             if visit>2 then bse=0;
+44         	else bse=1;
+45          end;
+46          if bse=0 then delete;
+47          drop bse;
+48         run;
+
+NOTE: There were 1198 observations read from the data set WORK.ONE.
+NOTE: The data set WORK.NEW has 1108 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              894.93k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        4  Switch Count  0
+      
+
+49         
+50         
+51         data Base PostBse;
+52          set new;
+53          if visit<=2 then output Base;
+54          else if visit>2 then output PostBse;
+55         run;
+
+NOTE: There were 1108 observations read from the data set WORK.NEW.
+NOTE: The data set WORK.BASE has 266 observations and 4 variables.
+NOTE: The data set WORK.POSTBSE has 842 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              901.03k
+      OS Memory           10836.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        5  Switch Count  0
+      
+
+56         
+57         
+58         
+59          /*******************************************************************
+59       ! *****************
+60           * Reorder the box in the plot -Treatment side by side
+                                 The SAS System
+
+61           *******************************************************************
+61       ! *****************/
+62         
+63         %macro process(in, out, add);
+64         	proc sort data=&in;
+65         	  by id visit;
+66         	run;
+67         
+68         	data &out;
+69         	 set &in;
+70         	 by id visit;
+71         	 length label $ 40.;
+72         	 length category $15;
+73         	 keep visit id trt category label point result;
+74         	 retain min&out max&out;
+75         	 if first.id then do;
+76         	   min&out=lab_test_1;
+77         	   max&out=lab_test_1;
+78         	 end;
+79         	 else do;
+80         	  if min&out>lab_test_1 then min&out=lab_test_1;
+81         	  if max&out<lab_test_1 then max&out=lab_test_1;
+82         	 end;
+83         	 if last.id then do;
+84         	  category="&out";
+85         	  label="Last bse to last pst";
+86         	  point=1+&add;
+87         	  result=lab_test_1;
+88               output;
+89         	  label="Min bse to min pst";
+90         	  point=4+&add;
+91         	  result=min&out;
+92               output;
+93         	  label="Max bse to max pst";
+94         	  point=7+&add;
+95         	  result=max&out;
+96               output;
+97         	 end;
+98         	run;
+99         %mend process;
+100        %process(Base, bse, 0);
+
+NOTE: There were 266 observations read from the data set WORK.BASE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.BASE has 266 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              696.03k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        6  Switch Count  0
+      
+
+
+NOTE: There were 266 observations read from the data set WORK.BASE.
+NOTE: The data set WORK.BSE has 438 observations and 7 variables.
+                                 The SAS System
+
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              909.12k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        7  Switch Count  0
+      
+
+101        %process(PostBse, pst, 1.1);
+
+NOTE: There were 842 observations read from the data set WORK.POSTBSE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.POSTBSE has 842 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              696.03k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        8  Switch Count  0
+      
+
+
+NOTE: There were 842 observations read from the data set WORK.POSTBSE.
+NOTE: The data set WORK.PST has 438 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              909.09k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        9  Switch Count  0
+      
+
+102        
+103        data BasePost;
+104         set bse pst;
+105        run;
+
+NOTE: There were 438 observations read from the data set WORK.BSE.
+NOTE: There were 438 observations read from the data set WORK.PST.
+NOTE: The data set WORK.BASEPOST has 876 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1034.90k
+      OS Memory           10836.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        10  Switch Count  0
+      
+
+106        
+107        data bse_pst;
+                                 The SAS System
+
+108         set BasePost;
+109         if trt=1 then point=point+0.5;
+110        run;
+
+NOTE: There were 876 observations read from the data set WORK.BASEPOST.
+NOTE: The data set WORK.BSE_PST has 876 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              971.15k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        11  Switch Count  0
+      
+
+111        
+112        /* Annoraw is the annotate data for the display of out of normal
+112      ! limit data
+113         * In real use, if lab_test_1>9 or .<lab_test_1<5.5 need to be
+113      ! replaced with
+114         * if lab_test_1>ULN or .<lab_test_1<LLN
+115         */
+116        
+117        data annoraw;
+118         set bse_pst;
+119         length function $8;
+120         retain function color text size xsys ysys when;
+121         if result>9 or .<result<5.5;
+122         if result>9 then TE_High=1;
+123         else TE_High=0;
+124         if result<5.5 then TE_low=1;
+125         else TE_low=0;
+126          When='A'; /*'A' indcates the symbol will be draw after the plot
+126      ! procedure
+127                     'A' means the annote symbol is in the front of the plot
+128                     'B' indcates the symbol will be draw before the plot
+128      ! procedure
+129                     'B' means the annote sumbol is at the back of the plot
+130                    */
+131         xsys='2'; /* xsys= specifies a value that represents a coordinate
+131      ! system.
+132                      '2' means the Coordinate System Unit = data values */
+133         ysys='2';
+134         color = "red ";
+135         function = "symbol "; * create a symbol;
+136         text = "dot "; * (a filled circle);
+137         size = 0.5;
+138         x=point;
+139         y=result;
+140        run;
+
+NOTE: There were 876 observations read from the data set WORK.BSE_PST.
+NOTE: The data set WORK.ANNORAW has 10 observations and 18 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+                                 The SAS System
+
+      memory              982.28k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        12  Switch Count  0
+      
+
+141        
+142        proc sort data=annoraw;
+143         by label category  trt;
+144        
+145        /*
+146        data abnorcnt;
+147         set annoraw;
+148         by label category  trt;
+149         retain TE_h TE_L 0;
+150         if first.id then do;
+151          TE_h=TE_high;
+152          TE_l=TE_Low;
+153         end;
+154         else do;
+155          TE_h=TE_high+TE_h;
+156          TE_l=TE_low+TE_l;
+157         end;
+158         if last.id then do;
+159          if TE_h>0 then TE_h=1;
+160          if TE_l>0 then TE_l=1;
+161          output;
+162         end;
+163        run;
+164          */
+165        
+
+NOTE: There were 10 observations read from the data set WORK.ANNORAW.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ANNORAW has 10 observations and 18 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              678.56k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        13  Switch Count  0
+      
+
+166        data abnrmfrq;
+167         set annoraw;
+168         by label category  trt;
+169         retain CNT_H CNT_L 0;
+170         keep category label cnt_h cnt_l result TE_Low TE_High trt;
+171         if first.trt then do;
+172           cnt_h=0;
+173           cnt_l=0;
+174         end;
+175          cnt_h=cnt_h+TE_high;
+176          cnt_L=cnt_l+TE_low;
+177         if last.trt;
+178        run;
+                                 The SAS System
+
+
+NOTE: There were 10 observations read from the data set WORK.ANNORAW.
+NOTE: The data set WORK.ABNRMFRQ has 5 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              902.81k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        14  Switch Count  0
+      
+
+179        
+180        ods output CrossTabFreqs=rawfrq;
+181        ods listing close;
+182        proc freq data=bse_pst;
+183          tables label*category*trt;
+184        run;
+
+NOTE: The data set WORK.RAWFRQ has 27 observations and 11 variables.
+NOTE: There were 876 observations read from the data set WORK.BSE_PST.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1601.39k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        15  Switch Count  0
+      
+
+185        
+186        data rawfrq;
+187         set rawfrq;
+188         keep label category trt n_subj;
+189         n_subj=frequency;
+190         if _type_='111';
+191        run;
+
+NOTE: There were 27 observations read from the data set WORK.RAWFRQ.
+NOTE: The data set WORK.RAWFRQ has 12 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              911.54k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        16  Switch Count  0
+      
+
+192        
+193        proc sort data=rawfrq;
+194         by label category trt;
+
+NOTE: There were 12 observations read from the data set WORK.RAWFRQ.
+NOTE: SAS sort was used.
+                                 The SAS System
+
+NOTE: The data set WORK.RAWFRQ has 12 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              675.93k
+      OS Memory           10844.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        17  Switch Count  0
+      
+
+195        data frqs;
+196         merge rawfrq abnrmfrq;
+197         by label category  trt;
+198          TE_H_pct=round(cnt_h/n_subj*100, .1);
+199         TE_l_pct=round(cnt_l/n_subj*100, .1);
+200          if cnt_h <=0 then do;
+201           cnt_h=0;
+202           te_h_pct=0;
+203         end;
+204         if cnt_l<=0 then do;
+205           cnt_l=0;
+206           te_l_pct=0;
+207         end;
+208         TEHigh=compress(cnt_h||'('||TE_h_pct||')');
+209         TELow=compress(cnt_l||'('||TE_L_pct||')');
+210        run;
+
+NOTE: Numeric values have been converted to character 
+      values at the places given by: (Line):(Column).
+      208:18   208:30   209:17   209:29   
+NOTE: Missing values were generated as a result of performing an operation on 
+      missing values.
+      Each place is given by: (Number of times) at (Line):(Column).
+      7 at 198:12   7 at 198:23   7 at 198:30   7 at 199:11   7 at 199:22
+      7 at 199:29   
+NOTE: There were 12 observations read from the data set WORK.RAWFRQ.
+NOTE: There were 5 observations read from the data set WORK.ABNRMFRQ.
+NOTE: The data set WORK.FRQS has 12 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1070.10k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        18  Switch Count  0
+      
+
+211        
+212        
+213        * Compute subgroup size, mean, and standard deviation ;
+214         proc sort data=bse_pst;
+215          by label category  trt;
+216        
+
+NOTE: There were 876 observations read from the data set WORK.BSE_PST.
+NOTE: SAS sort was used.
+                                 The SAS System
+
+NOTE: The data set WORK.BSE_PST has 876 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              749.68k
+      OS Memory           10844.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        19  Switch Count  0
+      
+
+217         proc means data=bse_pst noprint;
+218            by label category point trt;
+219            var result;
+220            output out=stats n=n mean=mean std=std median=median min=min
+220      ! max=max q1=q1 q3=q3;
+221         run;
+
+NOTE: There were 876 observations read from the data set WORK.BSE_PST.
+NOTE: The data set WORK.STATS has 12 observations and 14 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1720.03k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        20  Switch Count  0
+      
+
+222        
+223        proc sort data=stats;
+224         by label category trt;
+225        
+
+NOTE: There were 12 observations read from the data set WORK.STATS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.STATS has 12 observations and 14 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              678.53k
+      OS Memory           10844.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        21  Switch Count  0
+      
+
+226        data allstats;
+227         merge stats frqs;
+228         by label category trt;
+229        run;
+
+NOTE: There were 12 observations read from the data set WORK.STATS.
+NOTE: There were 12 observations read from the data set WORK.FRQS.
+NOTE: The data set WORK.ALLSTATS has 12 observations and 24 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+                                 The SAS System
+
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1074.85k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        22  Switch Count  0
+      
+
+230        
+231          * Create block variables used to produce table ;
+232         data blocks;
+233            length  block0 block1 block2 block3 block4 block5 block6 block7
+233      ! block8 block9 block10 block11  $40.;
+234            keep block0 block1 block2 block3 block4 block5 block6 block7
+234      ! block8 block9 block10 block11 trt treatment n_subj tehigh telow
+234      ! point category label treatment;
+235            set allstats;
+236        		if trt=0 then Treatment=' A';
+237        	if trt=1 then Treatment=' B';
+238               blck2 = n_subj;
+239               blck3 = mean;
+240               blck4 = std;
+241        	   blck5 = min;
+242        	   blck6=q1;
+243        	   blck7=median;
+244        	   blck8=max;
+245        	   blck9=q3;
+246            block2 = strip(put(blck2,10.0));
+247            block3 = strip(put(blck3,10.2));
+248            block4 = strip(put(blck4,10.2));
+249        	block5 = strip(put(blck5,10.2));
+250            block6 = strip(put(blck6,10.2));
+251            block7 = strip(put(blck7,10.2));
+252        	block8 = strip(put(blck8,10.2));
+253            block9 = strip(put(blck9,10.2));
+254            block2 = left(block2);
+255            block3 = left(block3);
+256            block4 = left(block4);
+257        	block5 = left(block5);
+258            block6 = left(block6);
+259            block7 = left(block7);
+260        	block8 = left(block8);
+261            block9 = left(block9);
+262        	block1= treatment;
+263        	block0=category;
+264        	block10=tehigh;
+265        	block11=telow;
+266         run;
+
+NOTE: There were 12 observations read from the data set WORK.ALLSTATS.
+NOTE: The data set WORK.BLOCKS has 12 observations and 20 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              931.45k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 10:50:30 AM
+                                 The SAS System
+
+      Step Count                        23  Switch Count  0
+      
+
+267        data label;
+268           Treatment=' A';
+269          point=0;
+270          length  block0 block1 block2 block3 block4 block5 block6 block7
+270      ! block8 block9 block10 block11 $40.;
+271           block2 = 'N        ';
+272           block3 = 'Mean     ';
+273           block4 = 'Std      ';	
+274           block5 = 'Min      ';
+275           block6 = 'Q1       ';
+276           block7 = 'Median   ';
+277           block8 = 'Q3       ';
+278           block9 = 'Max      ';
+279           block0 = 'Period  ';
+280           block1 = 'Treatment';
+281           block10= left('TE High n(%)');
+282           block11= left('TE Low n(%)');
+283        run;
+
+NOTE: The data set WORK.LABEL has 1 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              749.48k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        24  Switch Count  0
+      
+
+284        proc sort data=bse_pst;
+285         by category label point trt;
+286        
+
+NOTE: There were 876 observations read from the data set WORK.BSE_PST.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.BSE_PST has 876 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              748.68k
+      OS Memory           10844.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        25  Switch Count  0
+      
+
+287        proc sort data=blocks;
+288         by category label point trt;
+289        
+
+NOTE: There were 12 observations read from the data set WORK.BLOCKS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.BLOCKS has 12 observations and 20 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+                                 The SAS System
+
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              673.53k
+      OS Memory           10844.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        26  Switch Count  0
+      
+
+290         data CenTend1;
+291            merge bse_pst blocks;
+292            by category label point trt;
+293        	*_phase_=Compress(label||'_'||category);
+294        	_phase_=label;
+295         run;
+
+NOTE: There were 876 observations read from the data set WORK.BSE_PST.
+NOTE: There were 12 observations read from the data set WORK.BLOCKS.
+NOTE: The data set WORK.CENTEND1 has 876 observations and 24 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1126.07k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        27  Switch Count  0
+      
+
+296        
+297         data centend1;
+298          set label centend1;
+299         run;
+
+NOTE: There were 1 observations read from the data set WORK.LABEL.
+NOTE: There were 876 observations read from the data set WORK.CENTEND1.
+NOTE: The data set WORK.CENTEND1 has 877 observations and 24 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1114.98k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        28  Switch Count  0
+      
+
+300        
+301        ods listing;
+302        
+303        proc sort data=CenTend1;
+304           by point treatment;
+305        
+306        /********************************************************************
+306      ! **********
+307         * Change boxplot
+308         ********************************************************************
+308      ! *********/
+                                 The SAS System
+
+309        
+
+NOTE: There were 877 observations read from the data set WORK.CENTEND1.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.CENTEND1 has 877 observations and 24 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1846.59k
+      OS Memory           11876.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        29  Switch Count  0
+      
+
+310        proc sort data=BasePost;
+311          by id label ;
+
+NOTE: There were 876 observations read from the data set WORK.BASEPOST.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.BASEPOST has 876 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              752.12k
+      OS Memory           10844.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        30  Switch Count  0
+      
+
+312        data change;
+313         set BasePost;
+314         by id label ;
+315         retain bse;
+316         if first.label then bse=result;
+317         if last.label then output;
+318         keep trt id label bse point result;
+319        run;
+
+NOTE: There were 876 observations read from the data set WORK.BASEPOST.
+NOTE: The data set WORK.CHANGE has 438 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              968.96k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        31  Switch Count  0
+      
+
+320        
+321        
+322        data change;
+323         set change;
+324         change=result-bse;
+325         if trt=1 then point=point+1;
+                                 The SAS System
+
+326         keep trt bse id label point change;
+327        run;
+
+NOTE: There were 438 observations read from the data set WORK.CHANGE.
+NOTE: The data set WORK.CHANGE has 438 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              911.28k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        32  Switch Count  0
+      
+
+328        
+329        
+330        proc sort data=change;
+331          by id label;
+332        
+333        * Compute subgroup size, mean, and standard deviation ;
+
+NOTE: There were 438 observations read from the data set WORK.CHANGE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.CHANGE has 438 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              683.03k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        33  Switch Count  0
+      
+
+334         proc sort data=change;
+335          by  label point trt;
+336        
+
+NOTE: There were 438 observations read from the data set WORK.CHANGE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.CHANGE has 438 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              682.56k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:50:30 AM
+      Step Count                        34  Switch Count  0
+      
+
+337         proc means data=change;* noprint;
+338            by label point trt;
+339            var change;
+340            output out=chgstats n=n mean=mean std=std median=median min=min
+340      ! max=max q1=q1 q3=q3;
+341         run;
+                                 The SAS System
+
+
+NOTE: There were 438 observations read from the data set WORK.CHANGE.
+NOTE: The data set WORK.CHGSTATS has 6 observations and 13 variables.
+NOTE: The PROCEDURE MEANS printed pages 1-2.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1969.06k
+      OS Memory           12380.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        35  Switch Count  0
+      
+
+342        
+343        proc sort data=chgstats;
+344         by label  trt;
+345        
+346        
+
+NOTE: There were 6 observations read from the data set WORK.CHGSTATS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.CHGSTATS has 6 observations and 13 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              680.62k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        36  Switch Count  0
+      
+
+347        proc sort data=change;
+348         by label;
+349        run;
+
+NOTE: Input data set is already sorted, no sorting done.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              265.50k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        37  Switch Count  0
+      
+
+350        
+351        ods trace on;
+352        ods trace off;
+353        ods listing close;
+354        ods output Tests3=pval;
+355        ods listing;
+356        proc mixed data=change;
+357          by label;
+358          class trt;
+359          model change=bse trt;
+                                 The SAS System
+
+360          lsmeans trt;
+361        run;
+
+NOTE: The data set WORK.PVAL has 6 observations and 6 variables.
+NOTE: The PROCEDURE MIXED printed pages 3-8.
+NOTE: PROCEDURE MIXED used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1280.25k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        38  Switch Count  0
+      
+
+362        
+363        data trtpval;
+364         set pval;
+365         trt=1;
+366        run;
+
+NOTE: There were 6 observations read from the data set WORK.PVAL.
+NOTE: The data set WORK.TRTPVAL has 6 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              894.56k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        39  Switch Count  0
+      
+
+367        proc sort data=trtpval;
+368          where effect='trt';
+369         by label trt;
+370        
+
+NOTE: There were 3 observations read from the data set WORK.TRTPVAL.
+      WHERE effect='trt';
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TRTPVAL has 3 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              685.25k
+      OS Memory           11868.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        40  Switch Count  0
+      
+
+371        proc sort data=chgstats;
+372         by label trt;
+373        
+
+NOTE: Input data set is already sorted, no sorting done.
+NOTE: PROCEDURE SORT used (Total process time):
+                                 The SAS System
+
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              262.40k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        41  Switch Count  0
+      
+
+374        data summary;
+375         merge chgstats trtpval(keep=effect label trt ProbF Fvalue);
+376         by label  trt;
+377        run;
+
+NOTE: There were 6 observations read from the data set WORK.CHGSTATS.
+NOTE: There were 3 observations read from the data set WORK.TRTPVAL.
+NOTE: The data set WORK.SUMMARY has 6 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1040.50k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        42  Switch Count  0
+      
+
+378        
+379        
+380          * Create block variables used to produce table ;
+381         data chgblocks;
+382            length  block1 block2 block3 block4 block5 block6 block7 block8
+382      ! block9 Block10 $40.;
+383            keep  block1 block2 block3 block4 block5 block6 block7 block8
+383      ! block9 block10 trt point label treatment;
+384            set summary;
+385        		if trt=0 then Treatment=' A';
+386        	if trt=1 then Treatment=' B';
+387               blck2 = n;
+388               blck3 = mean;
+389               blck4 = std;
+390        	   blck5 = min;
+391        	   blck6=q1;
+392        	   blck7=median;
+393        	   blck8=max;
+394        	   blck9=q3;
+395               blck10=ProbF;
+396            block2 = strip(put(blck2,10.0));
+397            block3 = strip(put(blck3,10.2));
+398            block4 = strip(put(blck4,10.2));
+399        	block5 = strip(put(blck5,10.2));
+400            block6 = strip(put(blck6,10.2));
+401            block7 = strip(put(blck7,10.2));
+402        	block8 = strip(put(blck8,10.2));
+403            block9 = strip(put(blck9,10.2));
+404            block10 = strip(put(blck10,5.3));
+405            block2 = left(block2);
+406            block3 = left(block3);
+                                 The SAS System
+
+407            block4 = left(block4);
+408        	block5 = left(block5);
+409            block6 = left(block6);
+410            block7 = left(block7);
+411        	block8 = left(block8);
+412            block9 = left(block9);
+413        	block10 = left(block10);
+414        	block1= treatment;
+415         run;
+
+NOTE: There were 6 observations read from the data set WORK.SUMMARY.
+NOTE: The data set WORK.CHGBLOCKS has 6 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              928.06k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        43  Switch Count  0
+      
+
+416        
+417        data label;
+418           Treatment=' A';
+419          point=0;
+420          length   block1 block2 block3 block4 block5 block6 block7 block8
+420      ! block9 block10 $40.;
+421           block2 = 'N        ';
+422           block3 = 'Mean     ';
+423           block4 = 'Std      ';	
+424           block5 = 'Min      ';
+425           block6 = 'Q1       ';
+426           block7 = 'Median   ';
+427           block8 = 'Q3       ';
+428           block9 = 'Max      ';
+429           block10= 'P Value  ';
+430           block1 = 'Treatment';
+431        run;
+
+NOTE: The data set WORK.LABEL has 1 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              743.03k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        44  Switch Count  0
+      
+
+432        
+433        proc sort data=chgblocks;
+434         by  label point trt;
+435        
+
+NOTE: There were 6 observations read from the data set WORK.CHGBLOCKS.
+NOTE: SAS sort was used.
+                                 The SAS System
+
+NOTE: The data set WORK.CHGBLOCKS has 6 observations and 14 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              670.93k
+      OS Memory           11868.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        45  Switch Count  0
+      
+
+436         data CenTend2;
+437            merge change chgblocks;
+438            by label point trt;
+439        	*_phase_=Compress(label||'_'||category);
+440        	_phase_=label;
+441         run;
+
+NOTE: There were 438 observations read from the data set WORK.CHANGE.
+NOTE: There were 6 observations read from the data set WORK.CHGBLOCKS.
+NOTE: The data set WORK.CENTEND2 has 438 observations and 18 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1050.50k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        46  Switch Count  0
+      
+
+442        
+443         data centend2;
+444          set label centend2;
+445         run;
+
+NOTE: There were 1 observations read from the data set WORK.LABEL.
+NOTE: There were 438 observations read from the data set WORK.CENTEND2.
+NOTE: The data set WORK.CENTEND2 has 439 observations and 18 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1112.37k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        47  Switch Count  0
+      
+
+446        
+447        ods listing;
+448        
+449        proc sort data=CenTend2;
+450           by point treatment;
+451        
+452        
+453        /********************************************************************
+453      ! ******
+                                 The SAS System
+
+454         *
+455         * Generate Graph Reports
+456         *
+457         *
+458         ********************************************************************
+458      ! *******/
+459        
+460         ods listing;
+461         /* Set the graphics environment */
+462        goptions reset=all cback=white border htitle=10pt htext=9pt ;
+463        
+464         /* Use the NODISPLAY graphics option when */
+465         /* creating the original graphs.          */
+466        goptions device=gif nodisplay xpixels=240 ypixels=160;
+467        
+468         /* Write 2 sample graphs to the graph catalog of WORK.Centgr */
+469        
+470         Title1 h=2pt justify=center 'Observed Values';
+471         symbol1 v=circle h=.75 c=green;
+472         symbol2 v=triangle h=.75 c=red;
+473          legend1 label=(h=2pt 'Treatment') value=(h=2pt);
+474         axis1  value=(height=0.1 color=white) label=( h=0.1 c=white
+474      ! "Baseline vs. Postbaseline by Treatment") major=none minor=none;
+475         axis2  label=(j=c h=1  "xxx Measure (Unit)") minor=(n=4);
+
+NOTE: There were 439 observations read from the data set WORK.CENTEND2.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.CENTEND2 has 439 observations and 18 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              761.78k
+      OS Memory           11868.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        48  Switch Count  0
+      
+
+476         proc shewhart graphics data=CenTend1 gout = outgr1;
+ERROR: Procedure SHEWHART not found.
+477            boxchart result*point(block11 block10 block9 block8 block7 block6
+477      !  block5 block4 block3 block2 block1 block0 )=Treatment /
+478        	 				anno=annoraw
+479                            blocklabtype  = 1.5
+480                            blockpos      = 3
+481        					blockrep
+482        				    stddevs
+483        					boxwidth=2
+484                            boxstyle      = schematic
+485        					haxis=axis1
+486        					vaxis=axis2
+487        					CvREF=Red
+488        					height=1.5
+489        				    vREFLABELS='Lower Limit' 'Upper Limit'
+490        					/*vREF= 5.5 9*/
+491                            hoffset       = 5
+492                            nolimits
+493        				    readphase = all
+                                 The SAS System
+
+494        					PHASELABTYPE=5
+495        				    phaseref
+496        				    phaselegend
+497                            notches
+498        				    nolegend
+499        					SYMBOLLEGEND=legend1
+500        	;
+501            run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. 
+      This might cause NOTE: No observations in data set.
+NOTE: PROCEDURE SHEWHART used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              37.93k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        49  Switch Count  0
+      
+502        
+503        
+504        
+505         Title1 justify=center h=2pt 'Changes from Baseline';
+506         symbol1 v=circle h=.75 c=green;
+507         symbol2 v=triangle h=.75 c=red;
+508         *  legend1 label=(h=2pt 'Treatment') value=(h=2pt);
+509         axis1  value=(height=0.1 color=white) label=( h=0.1 c=white
+509      ! "Baseline vs. Postbaseline by Treatment") major=none minor=none;
+510         axis2  label=(j=c h=1  "xxx Measure (Unit)") minor=(n=4);
+
+
+511         proc shewhart graphics data=CenTend2 gout = outgr1;
+ERROR: Procedure SHEWHART not found.
+512            boxchart change*point(block10 block9 block8 block7 block6 block5
+512      ! block4 block3 block2 block1)=Treatment /
+513                            blocklabtype  = 1.5
+514                            blockpos      = 3
+515        					blockrep
+516        				    stddevs
+517        					boxwidth=2
+518                            boxstyle      = schematic
+519        					haxis=axis1
+520        					vaxis=axis2
+521        					CvREF=Red
+522        					vREF= 0
+523        					height=1.5
+524                            hoffset       = 5
+525                            nolimits
+526        					readphase = all
+527        					PHASELABTYPE=5
+528        				    phaseref
+529        				    phaselegend
+530                            notches
+531        					nolegend
+532        					SYMBOLLEGEND=none
+533             ;
+                                 The SAS System
+
+534            run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SHEWHART used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              17.18k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        50  Switch Count  0
+      
+535        
+536        					    /*vREFLABELS='Lower Limit' 'Upper Limit'
+537        					vREF= -2.5 1.8*/
+538        quit;
+539        
+540         goptions xpixels=600 ypixels=300;
+541         /* Generate the common title and footnote */
+542         /* with PROC GSLIDE.                      */
+543         title1    h=5pt 'Laborary Analysis - Box Plot of Last/Min/Max
+543      ! Baseline vs. Last/Min/Max Postbaseline Measure';
+544         Footnote1  justify=left h=3pt '  bse=baseline; pst=postbaseline; Box
+544      !  plot type=schematic; The box shows median,interqutile range (IQR,
+544      ! edge of'
+545                                       ' the bar), min and max within 1.5 IQR
+545      !  below 25% and above 75% ends of the whisker).Values outside the 1.5'
+545      ! ;
+546         Footnote2 JUSTIFY= LEFT h=3pt '  IQR below 25% and above 75% are
+546      ! shown as outliers. Means plotted as different symbols by treatments.'
+547        							   ' Out of normal reference range data is plotted as red dots
+547      !  overlay the boxplot. Reference lines plotted the lowest of';
+548        
+549         Footnote3 justify=left h=3pt  '  the upper limited normal and the
+549      ! highest of the lower limited normal.    '
+550                                       ' P value is for the treatment
+550      ! comparison from the ANCOVA model Change=Baseline+Treatment';
+551         footnote4 h=.2 '  ';
+552        
+
+
+553        proc gslide gout=work.outgr1;
+554        run;
+
+WARNING: RUN statement ignored due to previous errors. Submit QUIT; to 
+         terminate the procedure.
+555        quit;
+
+NOTE: PROCEDURE GSLIDE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              20.46k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:50:31 AM
+      Step Count                        51  Switch Count  0
+      
+
+                                 The SAS System
+
+556        
+557         options orientation=landscape LEFTMARGIN=1.5in RIGHTMARGIN=1 in TOPMARGIN=1in
+557      ! BOTTOMMARGIN=1in;
+558         ods pdf;
+NOTE: Writing ODS PDF output to DISK destination 
+      "D:\meta_hackathon\sas2r-agent\output\sas\datasets\R005\sasprt.pdf", printer "PDF".
+559          goptions reset=all device=gif
+560                 gsfname=grafout gsfmode=replace
+561                 xpixels=600 ypixels=400 ;
+562        
+563         /* Use the GREPLAY procedure to define a   */
+564         /* 5-panel template.  The fifth panel      */
+565         /* contains the common title and footnote. */
+NOTE: PROCEDURE GREPLAY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              18.56k
+      OS Memory           14428.00k
+      Timestamp           10/27/2026 10:50:33 AM
+      Step Count                        52  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+566        proc greplay igout=work.outgr1 tc=tempcat nofs;
+567        
+568          /* Define a custom template called NEWTEMP */
+569          tdef newtemp des='Five panel template'
+570        
+571                /* Define panel 1 */
+572                1/llx=2   lly=10
+573                  ulx=2   uly=90
+                                           The SAS System
+
+574                  urx=60  ury=90
+575                  lrx=60  lry=10
+576                  color=white
+577        
+578                /* Define panel 2 */
+579                2/llx=60   lly=14
+580                  ulx=60   uly=90
+581                  urx=100  ury=90
+582                  lrx=100  lry=14
+583                  color=white
+584        
+585                /* Define panel 5 */
+586                5/llx=2   lly=0
+587                  ulx=2   uly=100
+588                  urx=100 ury=100
+589                  lrx=100 lry=0
+590                  color=black;
+591        
+592           /* Assign current template */
+593           template newtemp;
+594        
+595           /* List contents of current template */
+596           list template;
+597        
+598           /* Replay a total of five graphs using  */
+599           /* the custom template just created.    */
+600           treplay 1:Shewhart
+601                   2:Shewhar1
+602                   5:gslide
+603        ;
+604        run;
+                                           The SAS System
+
+605        goption reset=all;
+606        ods pdf close;
+NOTE: ODS PDF printed no output. 
+      (This sometimes results from failing to place a RUN statement before the ODS PDF CLOSE 
+      statement.)
+607        quit;
+608        
+609        
+
+
+ERROR: Errors printed on pages 21,22.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           5.78 seconds
+      user cpu time       1.06 seconds
+      system cpu time     1.04 seconds
+      memory              12837.09k
+      OS Memory           14428.00k
+      Timestamp           10/27/2026 10:50:33 AM
+      Step Count                        52  Switch Count  125
+      

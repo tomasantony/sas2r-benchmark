@@ -1,0 +1,138 @@
+1                                                          The SAS System                            10:55 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.79 seconds
+      cpu time            0.56 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R024
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:55:39 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R024 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          %let name=pie1;
+2          
+                                                           The SAS System
+
+3          /*
+4          Set your current-working-directory (to read/write files), if you need to ...
+5          %let rc=%sysfunc(dlgcdir('c:\someplace\public_html'));
+6          */
+7          filename odsout '.';
+8          
+9          data my_data;
+10         input NAME $ 1-8 VALUE;
+11         datalines;
+
+NOTE: The data set WORK.MY_DATA has 3 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              741.50k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:55:39 AM
+      Step Count                        2  Switch Count  0
+      
+
+15         ;
+16         run;
+17         
+18         
+19         ODS LISTING CLOSE;
+20         ODS HTML path=odsout body="&name..htm"
+21          (title="SGpie Pie Chart")
+22          style=htmlblue;
+NOTE: Writing HTML Body file: pie1.htm
+23         
+24         ods graphics / imagefmt=png imagename="&name"
+25          width=800px height=600px noborder imagemap;
+26         
+27         title1 color=gray33 ls=0.5 h=23pt "Pie Chart";
+28         title2 color=gray33 ls=0.5 h=17pt "Displays the contribution of each value to a total";
+29         
+30         proc sgpie data=my_data;
+ERROR: Procedure SGPIE not found.
+31         styleattrs datacolors=(cx9999ff cx993366 cxffffcc);
+32         pie name / response=value startangle=0 startpos=edge
+33          datalabelattrs=(size=16pt weight=bold)
+34          /*outlineattrs=(color=black)*/
+35          dataskin=none
+36          ;
+37         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+NOTE: PROCEDURE SGPIE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              21.18k
+      OS Memory           13140.00k
+      Timestamp           10/27/2026 10:55:41 AM
+      Step Count                        3  Switch Count  0
+      
+                                                           The SAS System
+
+38         
+39         quit;
+40         ODS HTML CLOSE;
+41         ODS LISTING;
+
+ERROR: Errors printed on page 2.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.83 seconds
+      user cpu time       0.59 seconds
+      system cpu time     0.65 seconds
+      memory              12201.42k
+      OS Memory           13140.00k
+      Timestamp           10/27/2026 10:55:41 AM
+      Step Count                        3  Switch Count  22
+      

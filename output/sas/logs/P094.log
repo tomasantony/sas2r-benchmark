@@ -1,0 +1,199 @@
+1                                                          The SAS System                            10:55 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.70 seconds
+      cpu time            0.54 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P094
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:55:54 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P094 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /************************************************************************************************
+2           RETAIN THE FIRST OBSERVATION IN EACH BY GROUP AND SAVE REMOVED ROWS
+                                                           The SAS System
+
+3               This program keeps only the first row for each unique value of a variable.
+4               Keywords: PROC SORT, remove duplicates
+5               SAS Versions: SAS 9, SAS Viya
+6               Documentation:
+6        ! https://documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=default&docsetId=proc&docsetTarget=p1nd17xr6wof4sn19zkmid81p926
+6        ! .htm
+7               1. Create the WORK.CLASSTEST table and print it.
+8               2. The first PROC SORT arranges rows by desending scores for each Name and Subject.
+9               3. The second PROC SORT keeps only the first occurence of each Name and Subject combination.
+10                 The DUPOUT= options saves rows that are removed in a separate table named CLASSTEST_DUPS.
+11         ************************************************************************************************/
+12         
+13         data classtest;                                                       /*1*/
+14            infile datalines dsd;
+15            input
+16               Name :$7.
+17               Subject :$7.
+18               Score;
+19         datalines4;
+
+NOTE: The data set WORK.CLASSTEST has 14 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              741.50k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:55:54 AM
+      Step Count                        2  Switch Count  0
+      
+
+34         ;;;;
+35         run;
+36         
+37         title "CLASSTEST table before sorting";
+38         proc print data=classtest;
+39         run;
+
+NOTE: There were 14 observations read from the data set WORK.CLASSTEST.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              457.10k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:55:54 AM
+      Step Count                        3  Switch Count  0
+      
+
+40         
+41         proc sort data=classtest out=classtest_sort;                          /*2*/
+42             by Name Subject descending Score;
+43         run;
+
+NOTE: There were 14 observations read from the data set WORK.CLASSTEST.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.CLASSTEST_SORT has 14 observations and 3 variables.
+                                                           The SAS System
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1252.34k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:55:54 AM
+      Step Count                        4  Switch Count  0
+      
+
+44         
+45         proc sort data=classtest_sort dupout=classtest_dups nodupkey;         /*3*/
+46             by Name Subject;
+47         run;
+
+NOTE: There were 14 observations read from the data set WORK.CLASSTEST_SORT.
+NOTE: SAS sort was used.
+NOTE: 2 observations with duplicate key values were deleted.
+NOTE: The data set WORK.CLASSTEST_DUPS has 2 observations and 3 variables.
+NOTE: The data set WORK.CLASSTEST_SORT has 12 observations and 3 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1179.96k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:55:54 AM
+      Step Count                        5  Switch Count  0
+      
+
+48         
+49         title "CLASSTEST_SORT table keeping the high Score for each Name and Subject";
+50         proc print data=classtest_sort;
+51         run;
+
+NOTE: There were 12 observations read from the data set WORK.CLASSTEST_SORT.
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              339.06k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:55:54 AM
+      Step Count                        6  Switch Count  0
+      
+
+52         
+53         title "CLASSTEST_DUPS table with the removed lower test scores";
+54         proc print data=classtest_dups;
+55         run;
+
+NOTE: There were 2 observations read from the data set WORK.CLASSTEST_DUPS.
+NOTE: The PROCEDURE PRINT printed page 3.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              337.65k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 10:55:54 AM
+      Step Count                        7  Switch Count  0
+      
+
+56         title;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.91 seconds
+      user cpu time       0.20 seconds
+      system cpu time     0.46 seconds
+      memory              9580.17k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:55:54 AM
+      Step Count                        7  Switch Count  26
+      

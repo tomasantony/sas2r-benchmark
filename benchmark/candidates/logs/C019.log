@@ -1,0 +1,214 @@
+1                                                          The SAS System                            11:23 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.75 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /******************************************************************
+2          * PROGRAM NAME :  log_list_prep.sas
+3          * DESCRIPTION :   prepare and modify log and list
+4          * AUTHOR:         zeke torres
+5          * LinkedIn:       https://www.linkedin.com/in/zeketorres/
+6          *******************************************************************/
+7          
+8          /* obtain the path and number of sections of that path
+9          ******************************************************/
+10         data _null_;
+11             cpy_sys_var1 ="%sysfunc(getoption(SYSIN))";
+12             call symput('cpy_sys_path'  ,cpy_sys_var1);
+13         run;
+
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1257.50k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:23:08 AM
+      Step Count                        1  Switch Count  0
+                                                           The SAS System
+
+      
+
+14         
+15         /* pick up the sysparm value from the command line this enables the rest of the code to be OFF by default
+16         * and only if a user enters the correct value below will the log/list file be copied to the project folder
+17         ************************************************************/
+18         data _null_;
+19             prod="&sysparm";
+20             prod =lowcase(prod);
+21             prod =compress(prod);
+22             prod_key=0;
+23             /*** we want to create two types of namig conventions - prod and CR (code review)
+24             **** for prod or CR - we simply need the leading values in sysparm to match
+25             **************************************************************************/
+26             if prod in :('yes','live','prod','production','y','1') then do;
+27                prod_key=1;
+28             end;
+29             if prod in :('code','codereview','cr','2') then do;
+30                prod_key=2;
+31             end;
+32             call symput('cpy_sys_prod',prod_key);
+33         run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      32:32   
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              765.84k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:23:08 AM
+      Step Count                        2  Switch Count  0
+      
+
+34         
+35         
+36         /*** we are going to prep and clean up the sas code path and sas code execution .sas ***/
+37         data _null_;
+38         
+39               /** get the file name from the path ***/
+40               length temp_file_name  $700.;
+41               length temp_file_name2 $700.;
+42               length code_name       $250.;
+43               temp_file_name ="&cpy_sys_path";
+44         
+45               /** need to reverse to isolate the actual name ***/
+46               temp_file_name_r=reverse(temp_file_name);
+47               temp_file_name2 =scan(temp_file_name_r,1,'\');  /** you may need to adjust the back/forward slash to your os **/
+48         
+49               /** reversing back to final output name ***/
+50               temp_file_name2=reverse(temp_file_name2);
+51               temp_file_name2=left(temp_file_name2);
+52               temp_file_name2=compress(temp_file_name2);
+53               temp_file_name2=trimn(temp_file_name2);
+54               xlen=length(temp_file_name2);
+55               code_name=substr(temp_file_name2,1,250);
+56               code_name=scan(code_name,1,'.');
+                                                           The SAS System
+
+57         
+58               zalen=(length(temp_file_name)) - xlen;
+59         
+60               fnl_path=substr(temp_file_name,1,zalen);
+61               fnl_path=compress(fnl_path);
+62               fnl_path=compbl(fnl_path);
+63               call symputx('cpy_fnl_path',fnl_path);
+64               call symputx('cpy_code_name_x',code_name);
+65         run;
+
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              765.56k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:23:09 AM
+      Step Count                        3  Switch Count  0
+      
+
+66         
+67         
+68         %macro dnull(job_class=);
+69         
+70         /*** we will bring together the facts we need and append to revised log and list names ***/
+71             data _null_;
+72                  /* get the system date and set format for it as yyyymmdd10
+73                  *************************************/
+74                  length tdate 8.;
+75                  format tdate yymmdd10.;
+76                  tdate="&sysdate9"d;
+77                  length fdate $20.;
+78                  fdate=tdate;
+79                  fdate=put(tdate, yymmdd10.);
+80                  fdate=tranwrd(fdate,"-","_");
+81                  fdate=compress(fdate,"_");
+82         
+83                  /* get the system time and compress
+84                  ***************************/
+85                  length stime $15.;
+86                  stime="&systime";
+87                  stime=compress(stime,":");
+88         
+89                  * prepare the new log and list names using the new prefix code name now
+90                  * add that to the final string of chars to get a useable set of file names
+91                  ******************************************/
+92                  length code_list $3500.;
+93                  length code_log  $3500.;
+94                  cpath="&cpy_fnl_path";
+95                  cfile="&cpy_code_name_x";
+96                  csval="&sysparm";
+97                  code_list ="'" !!  cpath !! fdate !! "_" !! stime !! "_" !! csval  !! "_" !! cfile  !! ".lst" !!   "'";
+98                  code_log  ="'" !!  cpath !! fdate !! "_" !! stime !! "_" !! csval  !! "_" !! cfile  !! ".log" !!   "'";
+99                  code_list =compress(code_list);
+100                 code_log  =compress(code_log);
+101                 call symputx('cpy_sys_list',code_list);
+102                 call symputx('cpy_sys_log' ,code_log);
+103            run;
+                                                           The SAS System
+
+104        
+105        
+106            /* execute the new file names for both log and list */
+107            proc printto print = &cpy_sys_list  new;
+108            run;
+109        
+110            proc printto   log = &cpy_sys_log   new;
+111            run;
+112        %mend;  *** end dnull macro;
+113        
+114        
+115        %macro loopy();
+116            %if &cpy_sys_prod. =1 %then %do;
+117               %dnull(job_class= );
+118            %end;  /** end of the criteria if this is prod or not **/
+119        
+120            %if &cpy_sys_prod. =2 %then %do;
+121               %dnull(job_class=_CR);
+122            %end;  /** end of the criteria if this is prod or not **/
+123        %mend;
+124        
+125        %loopy();
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.88 seconds
+      user cpu time       0.21 seconds
+      system cpu time     0.46 seconds
+      memory              8971.75k
+      OS Memory           10072.00k
+      Timestamp           10/27/2026 11:23:09 AM
+      Step Count                        3  Switch Count  18
+      

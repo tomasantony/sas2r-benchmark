@@ -1,0 +1,335 @@
+1                                                          The SAS System                            11:27 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.49 seconds
+      cpu time            0.53 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R030
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1160,
+      Last Modified=27Oct2026:11:27:17,
+      Create Time=27Oct2026:11:27:17
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:27:57 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R030 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the articles by Rick Wicklin on The DO Loop:
+2             "Cohen's D statistic in SAS" (11AUG2025)
+                                                           The SAS System
+
+3             https://blogs.sas.com/content/iml/2025/08/11/cohens-d-statistic-in-sas.html
+4             and
+5             "Confidence intervals for Cohen's d statistic in SAS" (18AUG2025)
+6             https://blogs.sas.com/content/iml/2025/08/18/cohens-d-ci-in-sas.html
+7          
+8             This program shows how to compute estimates of the effect size for a
+9             standardized mean difference (SMD) in a two-sample independent design.
+10            The estimates are
+11                Cohen's d
+12                Hedges' g
+13            For each statistic, we compute a standard error and a
+14            confidence interval for the SMD.
+15         
+16            The best overview of effect size statistics is
+17              Goulet-Pelletier & Cousineau (2018)Ã¢â‚¬â€¹
+18              https://www.tqmp.org/RegularArticles/vol14-4/p242/p242.pdf
+19            When you read the paper, you will learn:
+20              1. There are many different estimates for the SMD.
+21              2. There are many different formulas for the standard error.
+22              3.  There are several ways to estimate a confidence interval.
+23            In the paper, G-P & C state:
+24              1. "HedgesÃ¢â‚¬â„¢ g should always be preferred over CohenÃ¢â‚¬â„¢s d" (p. 245) and
+25                 "Hedges g is superior to the other estimators" (p. 255).
+26              2. The best estimate of SE is "True SE."
+27              3. CIs obtained from noncentral t distribution are exact for Hedges' g
+28                 if the true noncentrality parameter is known.
+29                 "The noncentral CI is without a doubt the most reliable method especially
+30                  when n is smaller than 20." G-P & C (p. 251).
+31                 "The noncentral method is superior to the central method" (p. 255).
+32            This program shows how to compute both Cohen's d and Hedges' g, as well as the
+33            recommended formulas for SE and CI.It uses only Base SAS procedures:
+34            PROC TTEST and the DATA step.
+35         */
+36         
+37         
+38         /* data from PROC TTEST documentation:
+39            Golf scores for students in a physical education class */
+40         data scores;
+41            input Gender $ Score @@;
+42            datalines;
+
+NOTE: SAS went to a new line when INPUT statement reached past the end of a line.
+NOTE: The data set WORK.SCORES has 16 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              741.50k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:27:57 AM
+      Step Count                        2  Switch Count  0
+      
+
+45         ;
+46         
+47         /* run t test for two independent samples;
+48            save the statistics n1,n2,m1,m2,PooledSD */
+49         %let DSName = scores;
+                                                           The SAS System
+
+50         %let Group = Gender;
+51         %let Y = Score;
+52         
+53         proc ttest data=&DSName plots=none;
+54            class &Group;
+55            var &Y;
+56            ods select Statistics;
+57            ods output Statistics=TTestOut;
+58         run;
+
+WARNING: You must enable ODS graphics before requesting plots.
+NOTE: The data set WORK.TTESTOUT has 3 observations and 14 variables.
+NOTE: The PROCEDURE TTEST printed page 1.
+NOTE: PROCEDURE TTEST used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1511.64k
+      OS Memory           11092.00k
+      Timestamp           10/27/2026 11:27:57 AM
+      Step Count                        3  Switch Count  0
+      
+
+59         
+60         /* read statisitcs n1,n2,m1,m2,PooledSD; use to form Cohen's d and Hedges' g */
+61         data EffectSize;
+62         retain n1 m1 n2 m2 PooledSD;
+63         keep n1 m1 n2 m2 PooledSD d g J;
+64         label d="Cohen's d" g="Hedges' g" J="Hedges' correction factor";
+65         set TTestOut end=EOF;
+66         if _N_=1 then do;
+67            n1 = N; m1 = Mean;
+68         end;
+69         if _N_=2 then do;
+70            n2 = N; m2 = Mean;
+71         end;
+72         if _N_=3 then
+73            PooledSD = StdDev;
+74         if EOF then do;
+75            /* Cohen's d, which is a biased estimator */
+76            d = (m1 - m2) / PooledSD;
+77            /* J is Hedge's correction factor. See Cousineau & Goulet-Pelletier (2020, p. 244) */
+78            df = n1 + n2 - 2;
+79            J =  exp( lgamma(df/2) - lgamma((df-1)/2) - log(sqrt(df/2)) );
+80            g = J * d;                  /* Hedge's g, which is an unbiased estimator */
+81            output;
+82         end;
+83         run;
+
+NOTE: There were 3 observations read from the data set WORK.TTESTOUT.
+NOTE: The data set WORK.EFFECTSIZE has 1 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              931.87k
+      OS Memory           11604.00k
+      Timestamp           10/27/2026 11:27:57 AM
+                                                           The SAS System
+
+      Step Count                        4  Switch Count  0
+      
+
+84         
+85         title "Effect Sizes";
+86         title2 "Two Independent Samples";
+87         proc print label noobs data=EffectSize;
+88         run;
+
+NOTE: There were 1 observations read from the data set WORK.EFFECTSIZE.
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              370.46k
+      OS Memory           11348.00k
+      Timestamp           10/27/2026 11:27:57 AM
+      Step Count                        5  Switch Count  0
+      
+
+89         
+90         /* The formulas for standard errors are in Table 3 (p. 246) of
+91            Goulet-Pelletiera and Cousineau (2018).
+92            https://www.tqmp.org/RegularArticles/vol14-4/p242/p242.pdf
+93         
+94            The formulas depend on whether you use d or g
+95            to estimate the population standardized effect size. The symbol 'delta'
+96            is the population effect size, which we estimate by using d or g.
+97         
+98            Standard error of statistic for standardized effect size:
+99            Var     Label               Reference
+100           SE      "True SE"           Hedges (1981), p. 111, Eqn. 6b
+101           SE_mle  "MLE Approx SE"
+102           SE_h    "Hedges' Approx SE"
+103        
+104           The best estimate of SE is "True SE". */
+105        data SEEffectSize;
+106        length Statistic $10;
+107        keep Statistic Estimate SE SE_mle SE_h delta_lower delta_upper;
+108        label Estimate="Estimate" SE="True SE" SE_mle="MLE Approx SE" SE_h="Hedges' Approx SE"
+109              delta_lower="Lower 95% CL" delta_upper="Upper 95% CL";
+110        set EffectSize;
+111        do i = 1 to 2;
+112           if i=1 then do;
+113              Statistic="Hedges' g"; Estimate = g;    /* g is a better estimate of effect size */
+114           end;
+115           else do;
+116              Statistic="Cohen's d"; Estimate = d;    /* but you can use d, if you want */
+117           end;
+118        
+119           /* the harmonic mean of n1 and n2 is  2*n1*n2/(n1+n2) */
+120           delta = Estimate;          /* use either d or g as the estimate */
+121           w = 2/harmean(n1,n2);      /* 2/H(n1,n2) = (n1+n2)/(n1*n2) */
+122           df = n1 + n2 - 2;          /* degrees of freedom */
+123           /* The best estimate of standard error is the "true formula" */
+124           var = df/(df-2) * (w + delta**2) - (delta/J)**2;
+125           SE = sqrt( var );
+                                                           The SAS System
+
+126        
+127           /* The following formulas are approximations. They are included because some
+128              references use them */
+129              /* Hedges' Approx SE: Hedges (1981, p. 117) approx for N > 50 */
+130              var_h = w + delta**2/(2*df);
+131              SE_h   = sqrt( var_h );
+132              /* MLE Approx SE: Hedges & Olkin (1985), Eqn.11, p.82.
+133                 This is used in the Handbook of Research Synthesis (p. 238)
+134                 https://stats.stackexchange.com/questions/8487/how-do-you-calculate-confidence-intervals-for-cohens-d */
+135              factor = (df+2)/df;       /* MLE correction factor */
+136              SE_mle = sqrt( var_h * factor );
+137          /* END approx formula section */
+138        
+139          /* CIs obtained from noncentral t distribution; this is exact for Hedges' g. */
+140          /* The assumptions for the CI are
+141              1. the data are sampled independently
+142              2. the populations are normal
+143              3. groups have the same variance (eg, homogeneity of variance)
+144           */
+145           lambda = delta / sqrt(w);  /* noncentrality parameter for t distribution (2 indep groups) */
+146           alpha = 0.05;
+147           t_lower = quantile("t",   alpha/2, df, lambda);  /* noncentral t,   alpha/2 quantile */
+148           t_upper = quantile("t", 1-alpha/2, df, lambda);  /* noncentral t, 1-alpha/2 quantile */
+149           /* transform CI for t into CI for delta. Note: This actually reduces to t*sqrt(w) */
+150           delta_lower = t_lower / (lambda/delta);          /* LCL for effect size, delta */
+151           delta_upper = t_upper / (lambda/delta);          /* UCL for effect size, delta */
+152           output;
+153        end;
+154        run;
+
+NOTE: There were 1 observations read from the data set WORK.EFFECTSIZE.
+NOTE: The data set WORK.SEEFFECTSIZE has 2 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              928.03k
+      OS Memory           11604.00k
+      Timestamp           10/27/2026 11:27:57 AM
+      Step Count                        6  Switch Count  0
+      
+
+155        
+156        title "Comparison of Standard Error Estimates";
+157        title2 "Two Independent Samples";
+158        proc print label noobs data=SEEffectSize;
+159           var Statistic Estimate SE SE_mle SE_h;
+160        run;
+
+NOTE: There were 2 observations read from the data set WORK.SEEFFECTSIZE.
+NOTE: The PROCEDURE PRINT printed page 3.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              347.78k
+      OS Memory           11348.00k
+      Timestamp           10/27/2026 11:27:57 AM
+                                                           The SAS System
+
+      Step Count                        7  Switch Count  0
+      
+
+161        
+162        title "Effect Size and Confidence Interval";
+163        title2 "Two Independent Samples";
+164        proc print label noobs data=SEEffectSize;
+165           var Statistic Estimate SE  delta_lower delta_upper;
+166        run;
+
+NOTE: There were 2 observations read from the data set WORK.SEEFFECTSIZE.
+NOTE: The PROCEDURE PRINT printed page 4.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              347.78k
+      OS Memory           11348.00k
+      Timestamp           10/27/2026 11:27:57 AM
+      Step Count                        8  Switch Count  0
+      
+
+167        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.77 seconds
+      user cpu time       0.32 seconds
+      system cpu time     0.39 seconds
+      memory              9721.45k
+      OS Memory           11604.00k
+      Timestamp           10/27/2026 11:27:57 AM
+      Step Count                        8  Switch Count  28
+      

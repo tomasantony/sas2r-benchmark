@@ -1,0 +1,375 @@
+1                                                          The SAS System                            15:47 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.55 seconds
+      cpu time            0.60 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P075
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:47:01 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P075 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    t_vs.sas
+3          * Purpose:    Table 14.3.5 - Summary of Vital Signs by Visit
+4          * Study:      [STUDYID]
+5          * Author:     [Programmer Name]
+6          * Date:       [Date]
+7          * Input:      adam.advs, adam.adsl
+8          * Output:     t_vs.rtf
+9          * Population: Safety Analysis Set (SAFFL='Y')
+10         * Notes:      Displays actual value and change from baseline at each visit
+11         *****************************************************************************/
+12         
+13         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:47:02
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+79         %include "&macpath./m_counts.sas";
+171        %include "&macpath./m_desc_stats.sas";
+333        %include "&macpath./m_report.sas";
+405        %include "&pgmpath./utilities/u_titles.sas";
+567        
+568        /*--- Step 1: Get Big N ---*/
+569        %m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+NOTE: Table WORK._BIGN created, with 3 rows and 2 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5545.06k
+      OS Memory           15192.00k
+      Timestamp           10/27/2026 03:47:01 PM
+      Step Count                        2  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._BIGN.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+                                                           The SAS System
+
+      system cpu time     0.00 seconds
+      memory              888.48k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:47:02 PM
+      Step Count                        3  Switch Count  0
+      
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5398.59k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 03:47:02 PM
+      Step Count                        4  Switch Count  0
+      
+
+NOTE: ============================================
+NOTE: Treatment group counts:
+NOTE:   Drug X High Dose: N=63
+NOTE:   Drug X Low Dose: N=82
+NOTE:   Placebo: N=95
+NOTE:   Total: N=240
+NOTE: ============================================
+570        
+571        /*--- Step 2: Prepare analysis data ---*/
+572        proc sql noprint;
+573            create table vs as
+574            select a.USUBJID, a.TRTA, a.TRTAN,
+575                   a.PARAMCD, a.PARAM, a.PARAMN,
+576                   a.AVISIT, a.AVISITN,
+577                   a.AVAL, a.BASE, a.CHG,
+578                   a.ABLFL, a.ANL01FL
+579            from adam.advs a
+580            inner join adam.adsl b on a.USUBJID = b.USUBJID
+581            where b.SAFFL = 'Y'
+582                  and a.PARAMCD in ('SYSBP', 'DIABP', 'PULSE', 'TEMP', 'RESP', 'WEIGHT')
+583                  and a.ANL01FL = 'Y'  /* Analysis-relevant records */
+584            order by a.PARAMN, a.AVISITN, a.TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.VS created, with 4720 rows and 13 columns.
+
+585        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              16671.15k
+      OS Memory           25500.00k
+      Timestamp           10/27/2026 03:47:02 PM
+      Step Count                        5  Switch Count  0
+      
+
+586        
+587        /*--- Step 3: Descriptive stats by parameter, visit, treatment ---*/
+588        proc means data=vs nway noprint;
+589            class PARAMCD PARAM PARAMN AVISIT AVISITN TRTA TRTAN;
+590            var AVAL;
+                                                           The SAS System
+
+591            output out=_actual(drop=_type_ _freq_)
+592                n=n mean=mean std=std median=median min=min max=max;
+593        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 4720 observations read from the data set WORK.VS.
+NOTE: The data set WORK._ACTUAL has 60 observations and 13 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              7471.53k
+      OS Memory           17004.00k
+      Timestamp           10/27/2026 03:47:02 PM
+      Step Count                        6  Switch Count  0
+      
+
+594        
+595        proc means data=vs(where=(CHG ne . and ABLFL ne 'Y')) nway noprint;
+596            class PARAMCD PARAM PARAMN AVISIT AVISITN TRTA TRTAN;
+597            var CHG;
+598            output out=_change(drop=_type_ _freq_)
+599                n=n_chg mean=mean_chg std=std_chg median=median_chg
+600                min=min_chg max=max_chg;
+601        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 3520 observations read from the data set WORK.VS.
+      WHERE (CHG not = .) and (ABLFL not = 'Y');
+NOTE: The data set WORK._CHANGE has 45 observations and 13 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              7483.03k
+      OS Memory           17004.00k
+      Timestamp           10/27/2026 03:47:02 PM
+      Step Count                        7  Switch Count  0
+      
+
+602        
+603        /*--- Step 4: Merge actual and change ---*/
+604        proc sql noprint;
+605            create table stats as
+606            select a.*,
+607                   b.n_chg, b.mean_chg, b.std_chg, b.median_chg,
+608                   b.min_chg, b.max_chg
+609            from _actual a
+610            left join _change b
+611            on a.PARAMCD = b.PARAMCD and a.AVISITN = b.AVISITN and a.TRTAN = b.TRTAN
+612            order by a.PARAMN, a.AVISITN, a.TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.STATS created, with 60 rows and 19 columns.
+
+613        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+                                                           The SAS System
+
+      system cpu time     0.01 seconds
+      memory              20088.18k
+      OS Memory           30116.00k
+      Timestamp           10/27/2026 03:47:02 PM
+      Step Count                        8  Switch Count  0
+      
+
+614        
+615        /*--- Step 5: Format for display ---*/
+616        data report;
+617            set stats;
+618            length stat1-stat6 $30 chg1-chg6 $30;
+619        
+620            /* Actual value stats */
+621            stat1 = strip(put(n, 8.));
+622            stat2 = strip(put(mean, 8.1));
+623            stat3 = strip(put(std, 8.2));
+624            stat4 = strip(put(median, 8.1));
+625            stat5 = catx(', ', strip(put(min, 8.1)), strip(put(max, 8.1)));
+626        
+627            /* Change from baseline stats */
+628            if n_chg > 0 then do;
+629                chg1 = strip(put(n_chg, 8.));
+630                chg2 = strip(put(mean_chg, 8.2));
+631                chg3 = strip(put(std_chg, 8.2));
+632                chg4 = strip(put(median_chg, 8.2));
+633                chg5 = catx(', ', strip(put(min_chg, 8.1)), strip(put(max_chg, 8.1)));
+634            end;
+635        run;
+
+NOTE: Variable stat6 is uninitialized.
+NOTE: Variable chg6 is uninitialized.
+NOTE: There were 60 observations read from the data set WORK.STATS.
+NOTE: The data set WORK.REPORT has 60 observations and 31 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              924.14k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:47:02 PM
+      Step Count                        9  Switch Count  0
+      
+
+636        
+637        /*--- Step 6: Generate output (one page per parameter) ---*/
+638        %set_titles(output=T_VS, population=Safety Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+639        %ods_on(filename=t_vs);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/t_vs.rtf
+                                                           The SAS System
+
+640        
+641        proc report data=report nowd split='~'
+642            style(report)=[outputwidth=9.5in]
+643            style(header)=[just=center fontweight=bold];
+644        
+645            columns PARAMN PARAM AVISITN AVISIT TRTA
+646                    ('Actual Value' stat1 stat2 stat3 stat4 stat5)
+647                    ('Change from Baseline' chg1 chg2 chg3 chg4 chg5);
+648        
+649            define PARAMN  / order noprint;
+650            define PARAM   / order 'Parameter' style(column)=[width=1.2in fontweight=bold];
+651            define AVISITN / order noprint;
+652            define AVISIT  / order 'Visit' style(column)=[width=1in];
+653            define TRTA    / display 'Treatment' style(column)=[width=1in];
+654            define stat1   / display 'n' style(column)=[width=0.4in just=center];
+655            define stat2   / display 'Mean' style(column)=[width=0.6in just=center];
+656            define stat3   / display 'SD' style(column)=[width=0.6in just=center];
+657            define stat4   / display 'Median' style(column)=[width=0.6in just=center];
+658            define stat5   / display 'Min, Max' style(column)=[width=0.9in just=center];
+659            define chg1    / display 'n' style(column)=[width=0.4in just=center];
+660            define chg2    / display 'Mean' style(column)=[width=0.6in just=center];
+661            define chg3    / display 'SD' style(column)=[width=0.6in just=center];
+662            define chg4    / display 'Median' style(column)=[width=0.6in just=center];
+663            define chg5    / display 'Min, Max' style(column)=[width=0.9in just=center];
+664        
+665            break after PARAM / page;
+666        
+667        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 60 observations read from the data set WORK.REPORT.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.08 seconds
+      user cpu time       0.06 seconds
+      system cpu time     0.01 seconds
+      memory              8368.73k
+      OS Memory           19804.00k
+      Timestamp           10/27/2026 03:47:03 PM
+      Step Count                        10  Switch Count  0
+      
+
+                                                           The SAS System
+
+668        
+669        %ods_off;
+670        %clear_titles;
+671        
+672        proc datasets lib=work nolist;
+673            delete vs _actual _change stats report;
+674        quit;
+
+NOTE: Deleting WORK.VS (memtype=DATA).
+NOTE: Deleting WORK._ACTUAL (memtype=DATA).
+NOTE: Deleting WORK._CHANGE (memtype=DATA).
+NOTE: Deleting WORK.STATS (memtype=DATA).
+NOTE: Deleting WORK.REPORT (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              230.87k
+      OS Memory           13912.00k
+      Timestamp           10/27/2026 03:47:03 PM
+      Step Count                        11  Switch Count  0
+      
+
+675        
+676        %put NOTE: t_vs.sas completed successfully.;
+NOTE: t_vs.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.79 seconds
+      user cpu time       0.43 seconds
+      system cpu time     0.73 seconds
+      memory              27846.43k
+      OS Memory           30116.00k
+      Timestamp           10/27/2026 03:47:03 PM
+      Step Count                        11  Switch Count  34
+      

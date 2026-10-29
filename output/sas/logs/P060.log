@@ -1,0 +1,482 @@
+1                                                          The SAS System                            10:54 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.75 seconds
+      cpu time            0.59 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:54:57 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P060 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          %* modification 2019-12-23 - update path as data has been moved;
+2          
+3          filename source "&rawadam./adsl.xpt";
+4          libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+5          data work.adsl ;
+6          	set source.adsl ;
+7          run ;
+
+NOTE: There were 254 observations read from the data set SOURCE.ADSL.
+NOTE: The data set WORK.ADSL has 254 observations and 48 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              855.21k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:54:57 AM
+      Step Count                        2  Switch Count  0
+      
+
+8          
+9          filename source "&rawadam./adpc.xpt" ;
+10         libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adpc.xpt
+11         data work.adpc ;
+12         	set source.adpc ;
+13         run ;
+
+NOTE: There were 2463 observations read from the data set SOURCE.ADPC.
+NOTE: The data set WORK.ADPC has 2463 observations and 200 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.08 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.03 seconds
+      memory              1273.96k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:54:57 AM
+      Step Count                        3  Switch Count  0
+      
+
+14         
+15         title1 j=center "(page x of x)";
+16         title2 j=center "Figure 16.2.5-x.x Individual concentration-time profiles";
+17         title3 j=center "by compound, matrix, analyte and [actual/randomised][treatments/group]";
+18         title4 j=center "Analysis Set : PK analysis set";
+19         
+20         options nobyline;
+21         PROC SORT
+22         	DATA=WORK.ADPC OUT=WORK.SORTadpc;
+23         	BY USUBJID parcat1 eactm;
+24         RUN;
+                                                           The SAS System
+
+
+NOTE: There were 2463 observations read from the data set WORK.ADPC.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SORTADPC has 2463 observations and 200 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              22955.43k
+      OS Memory           32952.00k
+      Timestamp           10/27/2026 10:54:57 AM
+      Step Count                        4  Switch Count  0
+      
+
+25         SYMBOL1
+26         	INTERPOL=JOIN
+27         	HEIGHT=10pt
+28         	VALUE=NONE
+29         	LINE=1
+30         	WIDTH=2
+31         
+32         	CV = _STYLE_
+33         ;
+34         Axis1
+35         	STYLE=1
+36         	WIDTH=1
+37         	MINOR=NONE
+38         	LABEL=( "Conc (ug/mL)" )
+39         
+40         
+41         ;
+42         Axis2
+43         	STYLE=1
+44         	WIDTH=1
+45         	MINOR=NONE
+46         	LABEL=( "Time (hour)" )
+47         
+48         
+49         ;
+WARNING: Apparent symbolic reference _SASSERVERNAME not resolved.
+WARNING: Apparent symbolic reference _SASSERVERNAME not resolved.
+50         FOOTNOTE;
+51         FOOTNOTE1 "Generated by the SAS System (&_SASSERVERNAME, &SYSSCPL) on %TRIM(%QSYSFUNC(DATE(), NLDATE20.)) at
+51       ! %TRIM(%SYSFUNC(TIME(), TIMEAMPM12.))";
+WARNING: Apparent symbolic reference _SASSERVERNAME not resolved.
+WARNING: Apparent symbolic reference _SASSERVERNAME not resolved.
+WARNING: Apparent symbolic reference _SASSERVERNAME not resolved.
+WARNING: Apparent symbolic reference _SASSERVERNAME not resolved.
+WARNING: Apparent symbolic reference _SASSERVERNAME not resolved.
+52         
+53         
+54         PROC GPLOT DATA = WORK.SORTadpc NOCACHE ;
+55         PLOT AVAL * eactm  /
+56          	VAXIS=AXIS1
+57         	HAXIS=AXIS2
+58             FRAME;
+59         	BY USUBJID parcat1;
+60         RUN;
+                                                           The SAS System
+
+
+NOTE: 1 observation(s) contained a MISSING value for the AVAL * EACTM request.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001004 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 1 observation(s) contained a MISSING value for the AVAL * EACTM request.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001004 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 1 observation(s) contained a MISSING value for the AVAL * EACTM request.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001004 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 42245 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001001 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 44281 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001001 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 48403 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001001 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 38666 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001002 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 47525 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001002 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 44984 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001002 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 35223 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001003 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 39318 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001003 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 40738 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001003 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 37855 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001004 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 52025 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001004 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 46129 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001004 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 42346 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001005 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 53269 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001005 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 46772 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001005 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 49728 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001006 Parameter category 1=DRUG ANAL 1 Plasma
+                                                           The SAS System
+
+NOTE: 49669 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001006 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 46453 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001006 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 38577 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001007 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 50109 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001007 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 45263 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001007 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 38785 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001008 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 51363 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001008 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 43113 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001008 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 35267 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001009 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 40099 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001009 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 39741 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001009 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 39286 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001010 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 51791 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001010 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 45830 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001010 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 40394 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001011 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 53068 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001011 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 47036 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001011 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 39933 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001012 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 52115 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001012 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 46891 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+                                                           The SAS System
+
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001012 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 41720 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001013 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 50234 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001013 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 48889 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001013 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 37990 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001014 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 50883 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001014 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 47366 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001014 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 37951 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001015 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 49234 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001015 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 44553 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001015 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 36091 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001016 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 48307 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001016 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 40389 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001016 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 36738 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001017 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 39979 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001017 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 44205 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001017 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 38212 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001018 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 42986 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001018 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 44137 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001018 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 35911 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+                                                           The SAS System
+
+      Unique subject identifier=Study001_1001019 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 50608 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001019 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 43485 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001019 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 42928 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001020 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 48103 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001020 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 42814 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001020 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 36273 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001021 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 48517 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001021 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 44830 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001021 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 37945 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001022 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 42335 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001022 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 43033 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001022 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 36374 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001023 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 50202 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001023 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 43691 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001023 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 40863 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001024 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 53007 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001024 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 46692 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001024 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 39584 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001025 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 41495 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001025 Parameter category 1=DRUG ANAL 2 Plasma
+                                                           The SAS System
+
+NOTE: 44129 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001025 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 34967 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001026 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 47587 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001026 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 42843 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001026 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 38344 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001027 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 43127 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001027 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 46085 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001027 Parameter category 1=DRUG ANAL 3 Plasma
+NOTE: 38758 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001028 Parameter category 1=DRUG ANAL 1 Plasma
+NOTE: 51788 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001028 Parameter category 1=DRUG ANAL 2 Plasma
+NOTE: 43956 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P060\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      Unique subject identifier=Study001_1001028 Parameter category 1=DRUG ANAL 3 Plasma
+61         
+62         
+63         QUIT;
+
+NOTE: There were 2463 observations read from the data set WORK.SORTADPC.
+NOTE: At least one W.D format was too small for the number to be printed. The decimal may be shifted by the "BEST" format.
+NOTE: PROCEDURE GPLOT used (Total process time):
+      real time           11.96 seconds
+      user cpu time       6.28 seconds
+      system cpu time     2.71 seconds
+      memory              5904.32k
+      OS Memory           15820.00k
+      Timestamp           10/27/2026 10:55:09 AM
+      Step Count                        5  Switch Count  2
+      
+
+64         TITLE; FOOTNOTE;
+65         GOPTIONS RESET = SYMBOL;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           14.04 seconds
+      user cpu time       6.65 seconds
+      system cpu time     3.17 seconds
+      memory              31180.00k
+      OS Memory           32952.00k
+      Timestamp           10/27/2026 10:55:09 AM
+      Step Count                        5  Switch Count  27
+                                                           The SAS System
+
+      

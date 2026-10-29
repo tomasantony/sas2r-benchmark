@@ -1,0 +1,141 @@
+1                                                          The SAS System                            11:25 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.71 seconds
+      cpu time            0.71 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /************************************************************************************************
+2           REMOVE ENTIRELY DUPLICATED ROWS
+3               This program sorts the input table by all columns to ensure fully duplicated rows are
+4                   adjacent. Then duplicate rows are removed from the output table.
+5               Keywords: PROC SORT, remove duplicates
+6               SAS Versions: SAS 9, SAS Viya
+7               Documentation:
+7        ! https://documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=default&docsetId=proc&docsetTarget=p1nd17xr6wof4sn19zkmid81p926
+7        ! .htm
+8               1. Create the WORK.CLASSTEST table and print it.
+9               2. PROC SORT generates a list of unique names by keeping only the Name column from the
+10                 input table and using NODUPKEY to remove duplicate values of Name.
+11         ************************************************************************************************/
+12         
+13         data classtest;                                                       /*1*/
+14            infile datalines dsd;
+15            input
+16               Name :$7.
+17               Subject :$7.
+18               Score;
+19         datalines4;
+
+                                                           The SAS System
+
+NOTE: The data set WORK.CLASSTEST has 14 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1263.50k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:25:12 AM
+      Step Count                        1  Switch Count  0
+      
+
+34         ;;;;
+35         run;
+36         
+37         title "CLASSTEST table before sorting";
+38         proc print data=classtest;
+39         run;
+
+NOTE: There were 14 observations read from the data set WORK.CLASSTEST.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              455.64k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:25:12 AM
+      Step Count                        2  Switch Count  0
+      
+
+40         
+41         proc sort data=classtest(keep=Name) out=classtest_sort nodupkey;      /*2*/
+42             by Name;
+43         run;
+
+NOTE: There were 14 observations read from the data set WORK.CLASSTEST.
+NOTE: SAS sort was used.
+NOTE: 8 observations with duplicate key values were deleted.
+NOTE: The data set WORK.CLASSTEST_SORT has 6 observations and 1 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1627.93k
+      OS Memory           11872.00k
+      Timestamp           10/27/2026 11:25:12 AM
+      Step Count                        3  Switch Count  0
+      
+
+44         
+45         title "CLASSTEST_SORT table keeping only Name and removing duplicates";
+46         proc print data=classtest_sort;
+47         run;
+
+NOTE: There were 6 observations read from the data set WORK.CLASSTEST_SORT.
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              324.00k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 11:25:12 AM
+      Step Count                        4  Switch Count  0
+      
+
+48         title;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.87 seconds
+      user cpu time       0.23 seconds
+      system cpu time     0.62 seconds
+      memory              9956.85k
+      OS Memory           11872.00k
+      Timestamp           10/27/2026 11:25:12 AM
+      Step Count                        4  Switch Count  20
+      

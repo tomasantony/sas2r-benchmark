@@ -1,0 +1,483 @@
+1                                                          The SAS System                            10:52 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.12 seconds
+      cpu time            0.76 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P041
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:52:18 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P041 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          *--------------------------------------------------------------------*;
+2          *  Project: PhUSE Codeathon 2014
+3          *
+4          *  Program name: t-demog.sas
+5          *  Developer/Programmer: artieocollins@gmail.com
+6          *  Date: 14Aug2013
+7          *
+8          *  Purpose: Demography
+9          *
+10         *  Platform:
+11         *  SAS Version:
+12         *
+13         *  Modifications:
+14         *
+15         *--------------------------------------------------------------------*;
+16         
+17         **** Formats ****;
+18         
+19         proc format;
+20         
+21           value sex
+22                 1     =  'Male'
+23                 2     =  'Female'
+24                  ;
+NOTE: Format SEX has been output.
+25         
+26           value age
+27                 1     =  '  18-19'
+28                 2     =  '  20-29'
+29                 3     =  '  30-39'
+30                 4     =  '  40-49'
+31                 5     =  '  50-59'
+32                 6     =  '  >=60 '
+33                 ;
+NOTE: Format AGE has been output.
+34         
+35           value race
+36                 1     =  'Black'
+37                 2     =  'White'
+38                 3     =  'Asian'
+39                 4     =  'Hispanic'
+40                 5     =  'Other'
+41                 ;
+NOTE: Format RACE has been output.
+42         
+43         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              149.93k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:52:18 AM
+      Step Count                        2  Switch Count  0
+      
+                                                           The SAS System
+
+
+44         
+45         **** Bring in data ****;
+46         
+47         filename mcsldata "&rawdir./phuse-mcsl/mcsl.csv" ;
+48         
+49         data mcsl ;
+50           infile mcsldata delimiter="," firstobs=2 missover ;
+51           length studyid $20 usubjid $20 trt01a $20 ageu $10 race $25 sex $1 saffl $1 efffl $1 dcdecod $50 dcreascd $50 ;
+52           length trt01an age racen bmibl heightbl weightbl 8 ;   input studyid $ usubjid $ trt01a $ trt01an age ageu $ race $
+52       ! racen
+53                  sex $ saffl $ efffl $ bmibl heightbl weightbl dcdecod $ dcreascd $ ;
+54           if sex='M' then sexn=1;
+55             else if sex='F' then sexn=2;
+56         run;
+
+NOTE: The infile MCSLDATA is:
+      Filename=D:\meta_hackathon\sas2r-agent\data\raw\phuse-mcsl\mcsl.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=5632,
+      Last Modified=27Oct2026:10:47:28,
+      Create Time=27Oct2026:10:47:28
+
+NOTE: Invalid data for heightbl in line 43 80-100.
+NOTE: Invalid data for weightbl in line 43 102-117.
+RULE:     ----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8----+----9----+----0                      
+43        CDISCPILOT01,01-702-1082,Xanomeline Low Dose,54,84,YEARS,WHITE,1,F,Y,Y,,154.9,,WITHDRAWAL BY SUBJECT
+     101  ,Withdrew Consent 117
+studyid=CDISCPILOT01 usubjid=01-702-1082 trt01a=Xanomeline Low Dose ageu=YEARS race=WHITE sex=F saffl=Y efffl=Y dcdecod=  dcreascd= 
+trt01an=54 age=84 racen=1 bmibl=154.9 heightbl=. weightbl=. sexn=2 _ERROR_=1 _N_=42
+NOTE: 50 records were read from the infile MCSLDATA.
+      The minimum record length was 91.
+      The maximum record length was 151.
+NOTE: The data set WORK.MCSL has 50 observations and 17 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              751.71k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:52:18 AM
+      Step Count                        3  Switch Count  0
+      
+
+57         
+58         /*
+59         proc freq;
+60           tables trt01an*age trt01an*sex / missing list;
+61         endsas;
+62         */
+63         
+64         **** Categorize age ****;
+65         
+66         data age1(keep=trt01an usubjid age agecat);
+67           set mcsl;
+68           if 18 <= age <=19 then agecat=1;
+69             else if 20 <= age <=29 then agecat=2;
+70             else if 30 <= age <=39 then agecat=3;
+71             else if 40 <= age <=49 then agecat=4;
+                                                           The SAS System
+
+72             else if 50 <= age <=59 then agecat=5;
+73             else if age>=60 then agecat=6;
+74             else delete;
+75         run;
+
+NOTE: There were 50 observations read from the data set WORK.MCSL.
+NOTE: The data set WORK.AGE1 has 50 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              917.37k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:52:18 AM
+      Step Count                        4  Switch Count  0
+      
+
+76         
+77         proc sql;
+78           create table agenums as
+79           select 1 as cat, agecat as subcat, trt01an, agecat, count(distinct usubjid) as num from age1
+80           group by cat, subcat, trt01an, agecat;
+NOTE: At least one nonessential grouping column reference has been removed from a GROUP BY's reference list.
+NOTE: Table WORK.AGENUMS created, with 6 rows and 5 columns.
+
+81         
+82           create table agetots as
+83           select 1 as cat, agecat as subcat, agecat, count(distinct usubjid) as num from age1
+84           group by cat, agecat;
+NOTE: At least one nonessential grouping column reference has been removed from a GROUP BY's reference list.
+NOTE: Table WORK.AGETOTS created, with 2 rows and 4 columns.
+
+85         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.09 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.03 seconds
+      memory              5802.43k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        5  Switch Count  0
+      
+
+86         
+87         data agecat;
+88           set agenums agetots(in=x);
+89           if x then trt01an='99';
+90           text='  '||put(agecat, age.);
+91         run;
+
+NOTE: Character values have been converted to numeric values at the places given by: (Line):(Column).
+      89:21   
+NOTE: There were 6 observations read from the data set WORK.AGENUMS.
+NOTE: There were 2 observations read from the data set WORK.AGETOTS.
+NOTE: The data set WORK.AGECAT has 8 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+                                                           The SAS System
+
+      system cpu time     0.01 seconds
+      memory              1050.75k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        6  Switch Count  0
+      
+
+92         
+93         proc sort data=agecat;
+94           by cat subcat descending agecat;
+95         run;
+
+NOTE: There were 8 observations read from the data set WORK.AGECAT.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.AGECAT has 8 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              687.78k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        7  Switch Count  0
+      
+
+96         
+97         proc transpose data=agecat prefix=trt out=age(drop=agecat);
+98           var num;
+99           by cat subcat descending agecat text;
+100          id trt01an;
+101        run;
+
+NOTE: There were 8 observations read from the data set WORK.AGECAT.
+NOTE: The data set WORK.AGE has 2 observations and 8 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2551.40k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        8  Switch Count  0
+      
+
+102        
+103        **** gender ****;
+104        
+105        proc sql;
+106          create table sexg as
+107          select 2 as cat, sexn as subcat, trt01an, sexn, count(distinct usubjid) as num from mcsl
+108          where sex^=' '
+109          group by cat, subcat, trt01an, sexn;
+NOTE: At least one nonessential grouping column reference has been removed from a GROUP BY's reference list.
+NOTE: Table WORK.SEXG created, with 6 rows and 5 columns.
+
+110        
+111          create table sext as
+112          select 2 as cat, sexn as subcat,  sexn, count(distinct usubjid) as num from mcsl
+                                                           The SAS System
+
+113          where sexn^=.
+114          group by cat, subcat, sexn;
+NOTE: At least one nonessential grouping column reference has been removed from a GROUP BY's reference list.
+NOTE: Table WORK.SEXT created, with 2 rows and 4 columns.
+
+115        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              5388.25k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        9  Switch Count  0
+      
+
+116        
+117        data sexcat;
+118          set sexg sext(in=x);
+119          if x then trt01an='99';
+120          text='  '||put(sexn,sex.);
+121        run;
+
+NOTE: Character values have been converted to numeric values at the places given by: (Line):(Column).
+      119:21   
+NOTE: There were 6 observations read from the data set WORK.SEXG.
+NOTE: There were 2 observations read from the data set WORK.SEXT.
+NOTE: The data set WORK.SEXCAT has 8 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1050.71k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        10  Switch Count  0
+      
+
+122        
+123        proc sort data=sexcat;
+124          by cat subcat descending sexn;
+125        run;
+
+NOTE: There were 8 observations read from the data set WORK.SEXCAT.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SEXCAT has 8 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              692.28k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        11  Switch Count  0
+      
+
+126        
+127        proc transpose data=sexcat prefix=trt out=sex(drop=sexn);
+                                                           The SAS System
+
+128          var num;
+129          by cat subcat descending sexn text;
+130          id trt01an;
+131        run;
+
+NOTE: There were 8 observations read from the data set WORK.SEXCAT.
+NOTE: The data set WORK.SEX has 2 observations and 8 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              2547.43k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        12  Switch Count  0
+      
+
+132        
+133        **** Race ****;
+134        
+135        **** Bring the data together *****;
+136        data final;
+137          set age sex;
+138          by cat subcat;
+139          array col (4) $;
+140          col1=put(trt0, 3.);
+141          col2=put(trt54, 3.);
+142          col3=put(trt81, 3.);
+143          col4=put(trt99, 3.);
+144          output;
+145          if first.cat then do;
+146            do i=1 to dim(col);
+147              col(i)='';
+148            end;
+149            subcat=0;
+150            if cat=1 then text='Age';
+151              else if cat=2 then text='Gender';
+152            output;
+153          end;
+154        run;
+
+NOTE: There were 2 observations read from the data set WORK.AGE.
+NOTE: There were 2 observations read from the data set WORK.SEX.
+NOTE: The data set WORK.FINAL has 6 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1072.28k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        13  Switch Count  0
+      
+
+155        
+156        proc sort data=final;
+157          by cat subcat;
+158        run;
+                                                           The SAS System
+
+
+NOTE: There were 6 observations read from the data set WORK.FINAL.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.FINAL has 6 observations and 13 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              682.56k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        14  Switch Count  0
+      
+
+159        
+160        **** Generate report ****;
+161        
+162        proc report data=final nowd headline headskip split='*' missing;
+163          column cat subcat text col1 col2 col3 col4;
+164        
+165          define cat     / order order=internal noprint " ";
+166          define subcat  / order order=internal noprint " ";
+167          define text    / display width=30 left flow " ";
+168          define col1    / display width=12 left "Group 1";
+169          define col2    / display width=12 left "Group 2";
+170          define col3    / display width=12 left "Group 3";
+171          define col4    / display width=12 left "Total";
+172        
+173          break after cat/skip;
+174        
+175          title1 "Demography";
+176          footnote1 "NOTE: Numbers in parentheses are percentages                            ";
+177        
+178        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 6 observations read from the data set WORK.FINAL.
+NOTE: The PROCEDURE REPORT printed page 1.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.11 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              8345.17k
+      OS Memory           18032.00k
+      Timestamp           10/27/2026 10:52:19 AM
+      Step Count                        15  Switch Count  0
+      
+
+179        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.99 seconds
+      user cpu time       0.48 seconds
+      system cpu time     0.73 seconds
+      memory              17062.32k
+      OS Memory           18032.00k
+      Timestamp           10/27/2026 10:52:19 AM
+                                                           The SAS System
+
+      Step Count                        15  Switch Count  42
+      

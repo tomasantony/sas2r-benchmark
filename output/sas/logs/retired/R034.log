@@ -1,0 +1,145 @@
+1                                                          The SAS System                            11:28 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.62 seconds
+      cpu time            0.59 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R034
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1160,
+      Last Modified=27Oct2026:11:27:17,
+      Create Time=27Oct2026:11:27:17
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:28:11 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R034 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          
+2          ****Failure should be missing. It should not be zero in the level*****************************;;;
+                                                           The SAS System
+
+3          %macro exact (ds=_last_,bygrp=,var=,class=,out=1,Pdec=1,Dec=1,keep=N,CI=95);
+4          Options NOQUOTELENMAX ;
+5          *Binomail Variable - var to make it 1 (response) vs missing (non-respose);
+6          data tab;
+7          set &ds;
+8          if &var ne 1 then call missing(&var);*To use Proc Means for n;
+9          Run;
+10         %if (&bygrp NE %str( )) %then %do;
+11         proc sort data=tab out=tab;
+12         by &bygrp;
+13         run;
+14         %END;
+15         *Get Freq for calculation;
+16         ods listing close;
+17         Proc Means data=tab noprint;
+18         %if (&bygrp NE %str( )) %then %do;
+19         by &bygrp;%END;
+20         %if (&CLASS NE %str( )) %then %do;
+21         class &class;;%END;;
+22         var &var;
+23         output out=stat1 n=x ;
+24         run;
+25         
+26         ods listing;
+27         Data stat2;
+28         length var $40. param $40.;
+29         set stat1;
+30         %if (&bygrp NE %str( )) %then %do;   by &bygrp;        %end;
+31         %if (&CLASS NE %str( )) %then %do;
+32         var=vvalue(&class);
+33         if missing(var) then var='TOTAL';
+34         param=vname(&class);%END;
+35         %ELSE %DO;
+36         PARAM='' ; VAR='' ;
+37         %END;
+38         n=_freq_;
+39         keep &bygrp var param x n ;
+40         run;
+41         %*let CI=95;
+42         Data _null;
+43         alpha_u=(100- &CI. )/200;
+44         alpha_l=1-alpha_u;
+45         Call Symputx ("alpha_u" , alpha_u);
+46         Call Symputx ("alpha_l" , alpha_l);
+47         Run;
+48         /*Calulate Exacts 95%CI;*/
+49         data ci_&out;
+50          set STAT2;
+51         if x=0 and n=0 then do;
+52         	CI_LOW=0;
+53         	CI_HIGH=1;
+54         	Put "There is N=0 and X=0 in data." ;
+55         	End;
+56         else if n ne 0 then do;
+57         	p=x/n;
+58         	PERCENT=P*100;
+59         	if p=0 then CI_LOW=0;
+60         	if p=1 then CI_HIGH=1;
+                                                           The SAS System
+
+61         	if p ne 0 then CI_LOW=(1-betainv(&alpha_l,(n-x+1),x));
+62         	if p ne 1 then CI_HIGH=(1-betainv(&alpha_u,(n-x),x+1));
+63         end;
+64         prop=compbl(PUT(x,6.)||'/'||put(n,8.)||' ('||Put(PERCENT,6.&Pdec.)||')');
+65         CI_95=compbl( '('||put(CI_LOW*100,5.&dec.)||', '||put(CI_HIGH*100,5.&dec.)||')');
+66         	format PERCENT CI_LOW CI_HIGH p 5.&dec. ;
+67         %if  (&KEEP ne Y ) %then %do;
+68         Drop n x CI_LOW CI_HIGH PERCENT p;
+69         %end;
+70         run;
+71         
+72         %Mend ;
+73         
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.72 seconds
+      user cpu time       0.25 seconds
+      system cpu time     0.39 seconds
+      memory              8638.12k
+      OS Memory           10072.00k
+      Timestamp           10/27/2026 11:28:11 AM
+      Step Count                        1  Switch Count  14
+      

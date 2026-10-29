@@ -1,0 +1,191 @@
+1                                                          The SAS System                            11:19 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.85 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /************************************************************************************************
+2           USING A FORMAT TO CREATE A FUNCTION
+3               This program creates a format based on other formats for different ranges of data.
+4               Keywords: PROC FORMAT, FORMAT, VALUE, PROC FCMP
+5               SAS Versions: SAS 9, SAS Viya
+6               Documentation:
+6        ! https://documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=default&docsetId=proc&docsetTarget=p1xidhqypi0fnwn1if8opjpqpbmn
+6        ! .htm
+7               1. Create a format to display Australian postal codes as state codes.
+8               2. Use ranges with character values to define the format.
+9               3. In PROC FCMP define a function that will apply the format to Australian codes and uses
+10                 the ZIPSTATE function for US States.
+11              4. Use PROC REPORT to display the results of the new function.
+12         ************************************************************************************************/
+13         
+14         proc format;
+14       !             /*1*/
+15            value $postabb  '1000'-'1999',
+16                            '2000'-'2599',
+17                            '2619'-'2898',
+18                            '2921'-'2999'='NSW'
+19                            '0200'-'0299',
+                                                           The SAS System
+
+20                            '2600'-'2618',
+21                            '2900'-'2920'='ACT'
+22                            '3000'-'3999',
+23                            '8000'-'8999'='VIC'
+24                            '4000'-'4999',
+25                            '9000'-'9999'='QLD'
+26                            '5000'-'5799',
+27                            '5800'-'5999'='SA'
+28                            '6000'-'6797',
+29                            '6800'-'6999'='WA'
+30                            '7000'-'7799',
+31                            '7800'-'7999'='TAS'
+32                            '0800'-'0899',
+33                            '0900'-'0999'='NT';
+NOTE: Format $POSTABB has been output.
+33       !                                       /*2*/
+34         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              189.12k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:19:47 AM
+      Step Count                        1  Switch Count  0
+      
+
+35         
+36         title;
+37         
+38         proc fcmp outlib=work.functions.char; /*3*/
+39            function StateProv(Country $,Code $) $ 5;
+40         	   if upcase(country) ='AU' then stpr=put(code,$postabb.);
+41         	   else if upcase(country)='US' then stpr=zipstate(code);
+42         	   else stpr=' ';
+43               return(stpr);
+44            endsub;
+45         quit;
+
+NOTE: Function StateProv saved to work.functions.char.
+NOTE: PROCEDURE FCMP used (Total process time):
+      real time           0.14 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.06 seconds
+      memory              1822.46k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 11:19:47 AM
+      Step Count                        2  Switch Count  0
+      
+
+46         
+47         options cmplib=work.functions;
+48         
+49         data addresses;
+50            infile cards dlm=',' dsd;
+51            input EmployeeID : $10. EmployeeName : $30. City : $15. PostalCode : $5. Country : $2.;
+52            cards;
+                                                           The SAS System
+
+
+NOTE: The data set WORK.ADDRESSES has 25 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1003.84k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 11:19:47 AM
+      Step Count                        3  Switch Count  0
+      
+
+78         ;
+79         run;
+80         
+81         proc sort data= addresses;
+82            by country;
+83         run;
+
+NOTE: There were 25 observations read from the data set WORK.ADDRESSES.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADDRESSES has 25 observations and 5 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              690.62k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 11:19:47 AM
+      Step Count                        4  Switch Count  0
+      
+
+84         
+85         proc report data=addresses nowd;/*4*/
+86            columns Country City PostalCode State EmployeeID EmployeeName;
+87            by country;
+88            define State / computed 'State/Province';
+89            compute State / char length=5;
+90               State=StateProv(Country,PostalCode);
+91            endcomp;
+92            title 'Employees with State Codes';
+93         run;
+
+NOTE: There were 25 observations read from the data set WORK.ADDRESSES.
+NOTE: The PROCEDURE REPORT printed pages 1-2.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.15 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.06 seconds
+      memory              3821.48k
+      OS Memory           13920.00k
+      Timestamp           10/27/2026 11:19:47 AM
+      Step Count                        5  Switch Count  0
+      
+
+94         
+95         title;
+
+                                                           The SAS System
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.36 seconds
+      user cpu time       0.48 seconds
+      system cpu time     0.48 seconds
+      memory              12342.07k
+      OS Memory           13920.00k
+      Timestamp           10/27/2026 11:19:47 AM
+      Step Count                        5  Switch Count  22
+      

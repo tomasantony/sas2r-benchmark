@@ -1,0 +1,205 @@
+                                                                         The SAS System
+
+                                                                     The COMPARE Procedure
+                                                            Comparison of SHIP1.ADSL with OURS1.ADSL
+                                                        (Method=RELATIVE(0.00000222), Criterion=1.0E-08)
+
+                                                                       Data Set Summary
+
+                             Dataset              Created          Modified  NVar    NObs  Label
+
+                             SHIP1.ADSL  14MAY26:17:35:55  14MAY26:17:35:55    39       .  Demographics
+                             OURS1.ADSL  27OCT26:10:59:54  27OCT26:10:59:54    39     306
+
+
+                                                                       Variables Summary
+
+                                                       Number of Variables in Common: 39.
+                                                       Number of Variables with Differing Attributes: 39.
+                                                       Number of ID Variables: 1.
+
+
+                                                     Listing of Common Variables with Differing Attributes
+
+                                 Variable  Dataset     Type  Length  Format      Informat  Label
+
+                                 STUDYID   SHIP1.ADSL  Char      12  $12.        $12.      Study Identifier
+                                           OURS1.ADSL  Char      12                        Study Identifier
+                                 USUBJID   SHIP1.ADSL  Char      20  $20.        $20.      Unique Subject Identifier
+                                           OURS1.ADSL  Char      11                        Unique Subject Identifier
+                                 SUBJID    SHIP1.ADSL  Char       8  $8.         $8.       Subject Identifier for the Study
+                                           OURS1.ADSL  Char       4                        Subject Identifier for the Study
+                                 SITEID    SHIP1.ADSL  Char       4  $4.         $4.       Study Site Identifier
+                                           OURS1.ADSL  Char       3                        Study Site Identifier
+                                 AGE       SHIP1.ADSL  Num        8  8.          8.        Age
+                                           OURS1.ADSL  Num        8                        Age
+                                 AGEU      SHIP1.ADSL  Char       8  $8.         $8.       Age Units
+                                           OURS1.ADSL  Char       6                        Age Units
+                                 AGEGR1    SHIP1.ADSL  Char       6  $6.         $6.       Pooled Age Group 1
+                                           OURS1.ADSL  Char       6                        Pooled Age Group 1
+                                 AGEGR1N   SHIP1.ADSL  Num        8  8.          8.        Pooled Age Group 1 (N)
+                                           OURS1.ADSL  Num        8                        Pooled Age Group 1 (N)
+                                 SEX       SHIP1.ADSL  Char       1  $1.         $1.       Sex
+                                           OURS1.ADSL  Char       1                        Sex
+                                 SEXN      SHIP1.ADSL  Num        8  8.          8.        Sex (N)
+                                           OURS1.ADSL  Num        8                        Sex (N)
+                                 RACE      SHIP1.ADSL  Char      32  $32.        $32.      Race
+                                           OURS1.ADSL  Char      78                        Race
+                                 RACEN     SHIP1.ADSL  Num        8  8.          8.        Race (N)
+                                           OURS1.ADSL  Num        8                        Race (N)
+                                 ETHNIC    SHIP1.ADSL  Char      32  $32.        $32.      Ethnicity
+                                           OURS1.ADSL  Char      25                        Ethnicity
+                                 COUNTRY   SHIP1.ADSL  Char       3  $3.         $3.       Country
+                                           OURS1.ADSL  Char       3                        Country
+                                 ARM       SHIP1.ADSL  Char      40  $40.        $40.      Description of Planned Arm
+                                           OURS1.ADSL  Char      20                        Description of Planned Arm
+                                 ARMCD     SHIP1.ADSL  Char      20  $20.        $20.      Planned Arm Code
+                                           OURS1.ADSL  Char       8                        Planned Arm Code
+                                 ACTARM    SHIP1.ADSL  Char      40  $40.        $40.      Description of Actual Arm
+                                           OURS1.ADSL  Char      20                        Description of Actual Arm
+                                 ACTARMCD  SHIP1.ADSL  Char      20  $20.        $20.      Actual Arm Code
+                                           OURS1.ADSL  Char       8                        Actual Arm Code
+                                 TRT01P    SHIP1.ADSL  Char      40  $40.        $40.      Planned Treatment for Period 01
+                                           OURS1.ADSL  Char      40                        Planned Treatment for Period 01
+                                 TRT01A    SHIP1.ADSL  Char      40  $40.        $40.      Actual Treatment for Period 01
+                                           OURS1.ADSL  Char      40                        Actual Treatment for Period 01
+                                 RFSTDTC   SHIP1.ADSL  Char      19  $19.        $19.      Subject Reference Start Date/Time
+                                           OURS1.ADSL  Char      10                        Subject Reference Start Date/Time
+                                 RFENDTC   SHIP1.ADSL  Char      19  $19.        $19.      Subject Reference End Date/Time
+                                           OURS1.ADSL  Char      10                        Subject Reference End Date/Time
+                                 RFXSTDTC  SHIP1.ADSL  Char      19  $19.        $19.      Date/Time of First Study Treatment
+                                           OURS1.ADSL  Char      20                        Date/Time of First Study Treatment
+                                 RFXENDTC  SHIP1.ADSL  Char      19  $19.        $19.      Date/Time of Last Study Treatment
+                                           OURS1.ADSL  Char      20                        Date/Time of Last Study Treatment
+                                 TRTSDT    SHIP1.ADSL  Num        8  DATE9.      DATE9.    Date of First Exposure to Treatment
+                                           OURS1.ADSL  Num        8  DATE9.                Date of First Exposure to Treatment
+                                 TRTEDT    SHIP1.ADSL  Num        8  DATE9.      DATE9.    Date of Last Exposure to Treatment
+                                           OURS1.ADSL  Num        8  DATE9.                Date of Last Exposure to Treatment
+                                 TRTSDTM   SHIP1.ADSL  Num        8  E8601DT.    E8601DT.  Datetime of First Exposure
+                                           OURS1.ADSL  Num        8  E8601DT19.            Datetime of First Exposure
+                                 TRTEDTM   SHIP1.ADSL  Num        8  E8601DT.    E8601DT.  Datetime of Last Exposure
+                                           OURS1.ADSL  Num        8  E8601DT19.            Datetime of Last Exposure
+                                 TRTDURD   SHIP1.ADSL  Num        8  8.          8.        Total Treatment Duration (Days)
+                                           OURS1.ADSL  Num        8                        Total Treatment Duration (Days)
+                                 DTHDTC    SHIP1.ADSL  Char      19  $19.        $19.      Date/Time of Death
+                                           OURS1.ADSL  Char      20                        Date/Time of Death
+                                 DTHDT     SHIP1.ADSL  Num        8  DATE9.      DATE9.    Date of Death
+                                           OURS1.ADSL  Num        8  DATE9.                Date of Death
+                                 DTHFL     SHIP1.ADSL  Char       1  $1.         $1.       Subject Death Flag
+                                           OURS1.ADSL  Char       1                        Subject Death Flag
+                                 DCSREAS   SHIP1.ADSL  Char     100  $100.       $100.     Reason for Discontinuation of Study
+                                           OURS1.ADSL  Char     100                        Reason for Discontinuation of Study
+                                 DCSREASP  SHIP1.ADSL  Char     200  $200.       $200.     Reason Specify for Discontinuation
+                                           OURS1.ADSL  Char     200                        Reason Specify for Discontinuation
+                                 EOSSTT    SHIP1.ADSL  Char      12  $12.        $12.      End of Study Status
+                                           OURS1.ADSL  Char      12                        End of Study Status
+                                 EOTSTT    SHIP1.ADSL  Char      12  $12.        $12.      End of Treatment Status
+                                           OURS1.ADSL  Char      12                        End of Treatment Status
+                                 SAFFL     SHIP1.ADSL  Char       1  $1.         $1.       Safety Population Flag
+                                           OURS1.ADSL  Char       1                        Safety Population Flag
+                                 ITTFL     SHIP1.ADSL  Char       1  $1.         $1.       Intent-To-Treat Population Flag
+                                           OURS1.ADSL  Char       1                        Intent-To-Treat Population Flag
+                                 EFFFL     SHIP1.ADSL  Char       1  $1.         $1.       Efficacy Population Flag
+                                           OURS1.ADSL  Char       1                        Efficacy Population Flag
+
+
+                                                                      Observation Summary
+
+                                                         Observation      Base  Compare  ID
+
+                                                         First Obs           1        1  USUBJID=01-701-1015
+                                                         First Unequal       1        1  USUBJID=01-701-1015
+                                                         Last  Unequal     306      306  USUBJID=01-718-1427
+                                                         Last  Obs         306      306  USUBJID=01-718-1427
+
+                                               Number of Observations in Common: 306.
+                                               Total Number of Observations Read from SHIP1.ADSL: 306.
+                                               Total Number of Observations Read from OURS1.ADSL: 306.
+
+                                               Number of Observations with Some Compared Variables Unequal: 254.
+                                               Number of Observations with All Compared Variables Equal: 52.
+
+
+                                                                   Values Comparison Summary
+
+                                                Number of Variables Compared with All Observations Equal: 35.
+                                                Number of Variables Compared with Some Observations Unequal: 3.
+                                                Number of Variables with Missing Value Differences: 2.
+                                                Total Number of Values which Compare Unequal: 508.
+                                                Maximum Difference Criterion Value: 0.
+
+
+                                                                 Variables with Unequal Values
+
+                                        Variable  Type  Len1 Len2   Label                       Ndif  MaxCrit  MissDif
+
+                                        TRTSDTM   NUM      8    8   Datetime of First Exposure   254        0      254
+                                        TRTEDTM   NUM      8    8   Datetime of Last Exposure    252        0      252
+                                        EFFFL     CHAR     1    1   Efficacy Population Flag       2                 0
+
+
+
+                                                             Value Comparison Results for Variables
+
+                                             ______________________________________________________________________
+                                                                    ||  Datetime of First Exposure
+                                                                    ||       Base    Compare
+                                              USUBJID               ||    TRTSDTM    TRTSDTM      Diff.     % Diff
+                                              ____________________  ||  _________  _________  _________  _________
+                                                                    ||
+                                              01-701-1015           ||  *********  *********          .          .
+                                              01-701-1023           ||  *********  *********          .          .
+                                              01-701-1028           ||  *********  *********          .          .
+                                              01-701-1033           ||  *********  *********          .          .
+                                              01-701-1034           ||  *********  *********          .          .
+
+NOTE: The MAXPRINT=5 printing limit has been reached for the variable TRTSDTM. No more values will be printed for this comparison.
+                                             ______________________________________________________________________
+
+
+                                             ______________________________________________________________________
+                                                                    ||  Datetime of Last Exposure
+                                                                    ||       Base    Compare
+                                              USUBJID               ||    TRTEDTM    TRTEDTM      Diff.     % Diff
+                                              ____________________  ||  _________  _________  _________  _________
+                                                                    ||
+                                              01-701-1015           ||  *********  *********          .          .
+                                              01-701-1023           ||  *********  *********          .          .
+                                              01-701-1028           ||  *********  *********          .          .
+                                              01-701-1033           ||  *********  *********          .          .
+                                              01-701-1034           ||  *********  *********          .          .
+
+NOTE: The MAXPRINT=5 printing limit has been reached for the variable TRTEDTM. No more values will be printed for this comparison.
+                                             ______________________________________________________________________
+
+
+                                             ______________________________________________________________________
+                                                                    ||  Efficacy Population Flag
+                                                                    ||  Base Value           Compare Value
+                                              USUBJID               ||  EFFFL                 EFFFL
+                                              ____________________  ||  _                     _
+                                                                    ||
+                                              01-701-1047           ||  N                     Y
+                                              01-704-1025           ||  N                     Y
+                                             ______________________________________________________________________
+                                                  TRTSDTM/TRTEDTM differences in seconds (shipped minus ours)
+
+                                                                       The FREQ Procedure
+
+                                                                                   Cumulative    Cumulative
+                                                    ds    Frequency     Percent     Frequency      Percent
+                                                    ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                                     .         306      100.00           306       100.00  
+
+
+                                                                                   Cumulative    Cumulative
+                                                    de    Frequency     Percent     Frequency      Percent
+                                                    ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                                     .         306      100.00           306       100.00  
+
+
+                                                                                     Cumulative    Cumulative
+                                                   fdiff    Frequency     Percent     Frequency      Percent
+                                                   ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                                       0         304       99.35           304        99.35  
+                                                       1           2        0.65           306       100.00  

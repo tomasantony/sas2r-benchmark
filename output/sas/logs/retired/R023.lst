@@ -1,0 +1,350 @@
+                                                           The SAS System
+
+                                                       The CONTENTS Procedure
+
+                     Data Set Name        SOURCE.ADSL                                 Observations          .  
+                     Member Type          DATA                                        Variables             48 
+                     Engine               XPORT                                       Indexes               0  
+                     Created              10/15/2012 22:56:22                         Observation Length    422
+                     Last Modified        10/15/2012 22:56:22                         Deleted Observations  0  
+                     Protection                                                       Compressed            NO 
+                     Data Set Type                                                    Sorted                NO 
+                     Label                                                                                     
+                     Data Representation  Default                                                              
+                     Encoding             Default                                                              
+
+
+                                            Alphabetic List of Variables and Attributes
+ 
+                         #    Variable    Type    Len    Format    Label
+
+                        16    AGE         Num       8              Age                                     
+                        17    AGEGR1      Char      5              Pooled Age Group 1                      
+                        18    AGEGR1N     Num       8              Pooled Age Group 1 (N)                  
+                        19    AGEU        Char      5              Age Units                               
+                         6    ARM         Char     20              Description of Planned Arm              
+                        14    AVGDD       Num       8              Avg Daily Dose (as planned)             
+                        33    BMIBL       Num       8              Baseline BMI (kg/m^2)                   
+                        34    BMIBLGR1    Char      6              Pooled Baseline BMI Group 1             
+                        28    COMP16FL    Char      1              Completers of Week 16 Population Flag   
+                        29    COMP24FL    Char      1              Completers of Week 24 Population Flag   
+                        27    COMP8FL     Char      1              Completers of Week 8 Population Flag    
+                        15    CUMDOSE     Num       8              Cumulative Dose (as planned)            
+                        46    DCDECOD     Char     27              Standardized Disposition Term           
+                        47    DCREASCD    Char     18              Reason for Discontinuation              
+                        30    DISCONFL    Char      1              Did the Subject Discontinue the Study?  
+                        38    DISONSDT    Num       8    DATE9.    Date of Onset of Disease                
+                        31    DSRAEFL     Char      1              Discontinued due to AE?                 
+                        32    DTHFL       Char      1              Subject Died?                           
+                        39    DURDIS      Num       8              Duration of Disease (Months)            
+                        40    DURDSGR1    Char      4              Pooled Disease Duration Group 1         
+                        37    EDUCLVL     Num       8              Years of Education                      
+                        26    EFFFL       Char      1              Efficacy Population Flag                
+                        23    ETHNIC      Char     22              Ethnicity                               
+                        35    HEIGHTBL    Num       8              Baseline Height (cm)                    
+                        25    ITTFL       Char      1              Intent-To-Treat Population Flag         
+                        48    MMSETOT     Num       8              MMSE Total                              
+                        20    RACE        Char     32              Race                                    
+                        21    RACEN       Num       8              Race (N)                                
+                        45    RFENDT      Num       8    DATE9.    Date of Discontinuation/Completion      
+                        43    RFENDTC     Char     20              Subject Reference End Date/Time         
+                        42    RFSTDTC     Char     20              Subject Reference Start Date/Time       
+                        24    SAFFL       Char      1              Safety Population Flag                  
+                        22    SEX         Char      1              Sex                                     
+                         5    SITEGR1     Char      3              Pooled Site Group 1                     
+                         4    SITEID      Char      3              Study Site Identifier                   
+                         1    STUDYID     Char     12              Study Identifier                        
+                         3    SUBJID      Char      4              Subject Identifier for the Study        
+                         9    TRT01A      Char     20              Actual Treatment for Period 01          
+                        10    TRT01AN     Num       8              Actual Treatment for Period 01 (N)      
+                         7    TRT01P      Char     20              Planned Treatment for Period 01         
+                                                           The SAS System
+
+                                                       The CONTENTS Procedure
+
+                                            Alphabetic List of Variables and Attributes
+ 
+                         #    Variable    Type    Len    Format    Label
+
+                         8    TRT01PN     Num       8              Planned Treatment for Period 01 (N)     
+                        13    TRTDUR      Num       8              Duration of Treatment (days)            
+                        12    TRTEDT      Num       8    DATE9.    Date of Last Exposure to Treatment      
+                        11    TRTSDT      Num       8    DATE9.    Date of First Exposure to Treatment     
+                         2    USUBJID     Char     11              Unique Subject Identifier               
+                        41    VISIT1DT    Num       8    DATE9.    Date of Visit 1                         
+                        44    VISNUMEN    Num       8              End of Trt Visit (Vis 12 or Early Term.)
+                        36    WEIGHTBL    Num       8              Baseline Weight (kg)                    
+                                    A test of accessing datasets from the PhUSE Code Repository
+
+                                                         Obs      USUBJID
+
+                                                           1    01-701-1015
+                                                           2    01-701-1023
+                                                           3    01-701-1028
+                                                           4    01-701-1033
+                                                           5    01-701-1034
+                                                           6    01-701-1047
+                                                           7    01-701-1097
+                                                           8    01-701-1111
+                                                           9    01-701-1115
+                                                          10    01-701-1118
+                                                          11    01-701-1130
+                                                          12    01-701-1133
+                                                          13    01-701-1146
+                                                          14    01-701-1148
+                                                          15    01-701-1153
+                                                          16    01-701-1180
+                                                          17    01-701-1181
+                                                          18    01-701-1188
+                                                          19    01-701-1192
+                                                          20    01-701-1203
+                                                          21    01-701-1211
+                                                          22    01-701-1234
+                                                          23    01-701-1239
+                                                          24    01-701-1275
+                                                          25    01-701-1287
+                                                          26    01-701-1294
+                                                          27    01-701-1302
+                                                          28    01-701-1317
+                                                          29    01-701-1324
+                                                          30    01-701-1341
+                                                          31    01-701-1345
+                                                          32    01-701-1360
+                                                          33    01-701-1363
+                                                          34    01-701-1383
+                                                          35    01-701-1387
+                                                          36    01-701-1392
+                                                          37    01-701-1415
+                                                          38    01-701-1429
+                                                          39    01-701-1440
+                                                          40    01-701-1442
+                                                          41    01-701-1444
+                                                          42    01-702-1082
+                                                          43    01-703-1042
+                                                          44    01-703-1076
+                                                          45    01-703-1086
+                                                          46    01-703-1096
+                                                          47    01-703-1100
+                                                          48    01-703-1119
+                                                          49    01-703-1175
+                                                          50    01-703-1182
+                                                          51    01-703-1197
+                                                          52    01-703-1210
+                                                          53    01-703-1258
+                                                          54    01-703-1279
+                                                          55    01-703-1295
+                                                          56    01-703-1299
+                                    A test of accessing datasets from the PhUSE Code Repository
+
+                                                         Obs      USUBJID
+
+                                                          57    01-703-1335
+                                                          58    01-703-1379
+                                                          59    01-703-1403
+                                                          60    01-703-1439
+                                                          61    01-704-1008
+                                                          62    01-704-1009
+                                                          63    01-704-1010
+                                                          64    01-704-1017
+                                                          65    01-704-1025
+                                                          66    01-704-1065
+                                                          67    01-704-1074
+                                                          68    01-704-1093
+                                                          69    01-704-1114
+                                                          70    01-704-1120
+                                                          71    01-704-1127
+                                                          72    01-704-1135
+                                                          73    01-704-1164
+                                                          74    01-704-1218
+                                                          75    01-704-1233
+                                                          76    01-704-1241
+                                                          77    01-704-1260
+                                                          78    01-704-1266
+                                                          79    01-704-1323
+                                                          80    01-704-1325
+                                                          81    01-704-1332
+                                                          82    01-704-1351
+                                                          83    01-704-1388
+                                                          84    01-704-1435
+                                                          85    01-704-1445
+                                                          86    01-705-1018
+                                                          87    01-705-1031
+                                                          88    01-705-1059
+                                                          89    01-705-1186
+                                                          90    01-705-1199
+                                                          91    01-705-1280
+                                                          92    01-705-1281
+                                                          93    01-705-1282
+                                                          94    01-705-1292
+                                                          95    01-705-1303
+                                                          96    01-705-1310
+                                                          97    01-705-1349
+                                                          98    01-705-1377
+                                                          99    01-705-1382
+                                                         100    01-705-1393
+                                                         101    01-705-1431
+                                                         102    01-706-1041
+                                                         103    01-706-1049
+                                                         104    01-706-1384
+                                                         105    01-707-1037
+                                                         106    01-707-1206
+                                                         107    01-708-1019
+                                                         108    01-708-1032
+                                                         109    01-708-1084
+                                                         110    01-708-1087
+                                                         111    01-708-1158
+                                                         112    01-708-1171
+                                    A test of accessing datasets from the PhUSE Code Repository
+
+                                                         Obs      USUBJID
+
+                                                         113    01-708-1178
+                                                         114    01-708-1213
+                                                         115    01-708-1216
+                                                         116    01-708-1236
+                                                         117    01-708-1253
+                                                         118    01-708-1272
+                                                         119    01-708-1286
+                                                         120    01-708-1296
+                                                         121    01-708-1297
+                                                         122    01-708-1316
+                                                         123    01-708-1336
+                                                         124    01-708-1342
+                                                         125    01-708-1347
+                                                         126    01-708-1348
+                                                         127    01-708-1353
+                                                         128    01-708-1372
+                                                         129    01-708-1378
+                                                         130    01-708-1406
+                                                         131    01-708-1428
+                                                         132    01-709-1001
+                                                         133    01-709-1007
+                                                         134    01-709-1020
+                                                         135    01-709-1029
+                                                         136    01-709-1081
+                                                         137    01-709-1088
+                                                         138    01-709-1099
+                                                         139    01-709-1102
+                                                         140    01-709-1168
+                                                         141    01-709-1217
+                                                         142    01-709-1238
+                                                         143    01-709-1259
+                                                         144    01-709-1285
+                                                         145    01-709-1301
+                                                         146    01-709-1306
+                                                         147    01-709-1309
+                                                         148    01-709-1312
+                                                         149    01-709-1326
+                                                         150    01-709-1329
+                                                         151    01-709-1339
+                                                         152    01-709-1424
+                                                         153    01-710-1002
+                                                         154    01-710-1006
+                                                         155    01-710-1021
+                                                         156    01-710-1027
+                                                         157    01-710-1045
+                                                         158    01-710-1053
+                                                         159    01-710-1060
+                                                         160    01-710-1070
+                                                         161    01-710-1077
+                                                         162    01-710-1078
+                                                         163    01-710-1083
+                                                         164    01-710-1137
+                                                         165    01-710-1142
+                                                         166    01-710-1154
+                                                         167    01-710-1166
+                                                         168    01-710-1183
+                                    A test of accessing datasets from the PhUSE Code Repository
+
+                                                         Obs      USUBJID
+
+                                                         169    01-710-1187
+                                                         170    01-710-1235
+                                                         171    01-710-1249
+                                                         172    01-710-1264
+                                                         173    01-710-1270
+                                                         174    01-710-1271
+                                                         175    01-710-1278
+                                                         176    01-710-1300
+                                                         177    01-710-1314
+                                                         178    01-710-1315
+                                                         179    01-710-1354
+                                                         180    01-710-1358
+                                                         181    01-710-1368
+                                                         182    01-710-1385
+                                                         183    01-710-1408
+                                                         184    01-711-1012
+                                                         185    01-711-1036
+                                                         186    01-711-1143
+                                                         187    01-711-1433
+                                                         188    01-713-1043
+                                                         189    01-713-1073
+                                                         190    01-713-1106
+                                                         191    01-713-1141
+                                                         192    01-713-1179
+                                                         193    01-713-1209
+                                                         194    01-713-1256
+                                                         195    01-713-1269
+                                                         196    01-713-1448
+                                                         197    01-714-1035
+                                                         198    01-714-1068
+                                                         199    01-714-1195
+                                                         200    01-714-1288
+                                                         201    01-714-1375
+                                                         202    01-714-1425
+                                                         203    01-715-1085
+                                                         204    01-715-1107
+                                                         205    01-715-1155
+                                                         206    01-715-1207
+                                                         207    01-715-1319
+                                                         208    01-715-1321
+                                                         209    01-715-1397
+                                                         210    01-715-1405
+                                                         211    01-716-1024
+                                                         212    01-716-1026
+                                                         213    01-716-1030
+                                                         214    01-716-1044
+                                                         215    01-716-1063
+                                                         216    01-716-1071
+                                                         217    01-716-1094
+                                                         218    01-716-1103
+                                                         219    01-716-1108
+                                                         220    01-716-1151
+                                                         221    01-716-1157
+                                                         222    01-716-1160
+                                                         223    01-716-1167
+                                                         224    01-716-1177
+                                    A test of accessing datasets from the PhUSE Code Repository
+
+                                                         Obs      USUBJID
+
+                                                         225    01-716-1189
+                                                         226    01-716-1229
+                                                         227    01-716-1298
+                                                         228    01-716-1308
+                                                         229    01-716-1311
+                                                         230    01-716-1364
+                                                         231    01-716-1373
+                                                         232    01-716-1418
+                                                         233    01-716-1441
+                                                         234    01-716-1447
+                                                         235    01-717-1004
+                                                         236    01-717-1109
+                                                         237    01-717-1174
+                                                         238    01-717-1201
+                                                         239    01-717-1344
+                                                         240    01-717-1357
+                                                         241    01-717-1446
+                                                         242    01-718-1066
+                                                         243    01-718-1079
+                                                         244    01-718-1101
+                                                         245    01-718-1139
+                                                         246    01-718-1150
+                                                         247    01-718-1170
+                                                         248    01-718-1172
+                                                         249    01-718-1250
+                                                         250    01-718-1254
+                                                         251    01-718-1328
+                                                         252    01-718-1355
+                                                         253    01-718-1371
+                                                         254    01-718-1427

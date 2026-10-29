@@ -1,0 +1,149 @@
+/*****************************************************************************
+* Program:    t_exposure.sas
+* Purpose:    Table 14.1.3 - Summary of Study Drug Exposure
+* Study:      [STUDYID]
+* Author:     [Programmer Name]
+* Date:       [Date]
+* Input:      adam.adsl, adam.adex
+* Output:     t_exposure.rtf
+* Population: Safety Analysis Set (SAFFL='Y')
+*****************************************************************************/
+
+%include "&pgmpath./utilities/u_setup.sas";
+%include "&macpath./m_counts.sas";
+%include "&macpath./m_desc_stats.sas";
+%include "&macpath./m_report.sas";
+%include "&pgmpath./utilities/u_titles.sas";
+
+/*--- Step 1: Get Big N ---*/
+%m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+
+/*--- Step 2: Derive exposure data ---*/
+proc sql noprint;
+    create table ex as
+    select a.USUBJID, a.TRTA, a.TRTAN,
+           a.PARAMCD, a.PARAM,
+           a.AVAL  /* e.g., duration in days, total dose, etc. */
+    from adam.adex a
+    inner join adam.adsl b on a.USUBJID = b.USUBJID
+    where b.SAFFL = 'Y'
+    order by a.TRTAN, a.PARAMCD;
+quit;
+
+/*--- Alternative: Derive from ADSL if ADEX not available ---*/
+data ex_adsl;
+    set adam.adsl;
+    where SAFFL = 'Y';
+    
+    /* Duration of treatment (days) */
+    if TRTEDT ne . and TRTSDT ne . then 
+        TRTDUR = TRTEDT - TRTSDT + 1;
+    else TRTDUR = .;
+run;
+
+/*--- Step 3: Duration statistics ---*/
+%m_cont_stats(inds=ex_adsl, anavar=TRTDUR, trtvar=TRTA, outds=_dur_stats, decimals=1);
+
+data _dur_stats;
+    set _dur_stats;
+    length category $60;
+    category = 'Duration of Treatment (days)';
+    block = 1;
+run;
+
+/*--- Step 4: Duration categories ---*/
+data dur_cat;
+    set ex_adsl;
+    length DURCAT $30;
+    
+    if      TRTDUR = . then DURCAT = 'Missing';
+    else if TRTDUR <= 28 then DURCAT = '<=28 days';
+    else if TRTDUR <= 84 then DURCAT = '>28 to <=84 days';
+    else if TRTDUR <= 168 then DURCAT = '>84 to <=168 days';
+    else if TRTDUR <= 336 then DURCAT = '>168 to <=336 days';
+    else DURCAT = '>336 days';
+    
+    /* Order */
+    select(DURCAT);
+        when('<=28 days')           DURCATN = 1;
+        when('>28 to <=84 days')    DURCATN = 2;
+        when('>84 to <=168 days')   DURCATN = 3;
+        when('>168 to <=336 days')  DURCATN = 4;
+        when('>336 days')           DURCATN = 5;
+        when('Missing')             DURCATN = 6;
+        otherwise                   DURCATN = 99;
+    end;
+run;
+
+/*--- Step 5: Duration category counts ---*/
+proc sql noprint;
+    create table _durcat_cnt as
+    select TRTA, DURCAT, DURCATN,
+           count(distinct USUBJID) as cnt
+    from dur_cat
+    group by TRTA, DURCAT, DURCATN
+    order by DURCATN, TRTA;
+quit;
+
+proc sql noprint;
+    create table _durcat_pct as
+    select a.*, b.bign,
+           case when b.bign > 0 then a.cnt / b.bign * 100 else . end as pct
+    from _durcat_cnt a
+    left join work._bign b on a.TRTA = b.TRTA;
+quit;
+
+data _durcat_fmt;
+    set _durcat_pct;
+    length value $30 stat $40 category $60;
+    category = 'Duration Categories';
+    stat = '  ' || strip(DURCAT);
+    ord = 100 + DURCATN;
+    block = 2;
+    if cnt > 0 then 
+        value = cat(strip(put(cnt, 8.)), ' (', strip(put(pct, 5.1)), ')');
+    else value = '0';
+run;
+
+/*--- Step 6: Combine ---*/
+data all_exp;
+    set _dur_stats _durcat_fmt;
+run;
+
+/*--- Step 7: Transpose ---*/
+proc sort data=all_exp; by block ord stat; run;
+
+proc transpose data=all_exp out=final(drop=_name_ rename=(colPlacebo=col1 colDrug_X_Low_Dose=col2 colDrug_X_High_Dose=col3)) prefix=col;  /* test-copy patch: name the transposed columns col1-col3 as the report expects */
+    by block category ord stat;
+    id TRTA;
+    var value;
+run;
+
+/*--- Step 8: Generate output ---*/
+%set_titles(output=T_EXPOSURE, population=Safety Analysis Set);
+%ods_on(filename=t_exposure);
+
+proc report data=final nowd split='~'
+    style(report)=[outputwidth=9.5in]
+    style(header)=[just=center fontweight=bold];
+
+    columns block category ord stat col1 col2 col3;
+
+    define block    / order noprint;
+    define category / order '' style(column)=[width=2in fontweight=bold];
+    define ord      / order noprint;
+    define stat     / display 'Statistic' style(column)=[width=2in];
+    define col1     / display "&col1hdr." style(column)=[width=1.5in just=center];
+    define col2     / display "&col2hdr." style(column)=[width=1.5in just=center];
+    define col3     / display "&col3hdr." style(column)=[width=1.5in just=center];
+
+run;
+
+%ods_off;
+%clear_titles;
+
+proc datasets lib=work nolist;
+    delete ex ex_adsl dur_cat _dur: all_exp final;
+quit;
+
+%put NOTE: t_exposure.sas completed successfully.;

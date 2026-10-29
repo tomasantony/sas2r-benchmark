@@ -1,0 +1,149 @@
+1                                                          The SAS System                            15:46 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.02 seconds
+      cpu time            0.46 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P040
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:46:15 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P040 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*
+2          This is a comment area.
+3          Test editing
+4          Adding some more text for editing.
+5          Testing by adding a comment. Also, tested by doing a Windows CTRL-A/CTRL-C to select all and copy
+6          into buffer. Then, paste into local SAS for execution.
+7          Idea: at the risk of big file sizes - better off using a separate which only generates source data
+8          - good for SAS and R???
+9          */
+10         data one ;
+11           length arm $8 ;
+12           censor = 0 ;
+13           arm = "Arm 1" ;
+14           do day = 143,164,188,188,190,192,206,213,216,220,227.230,
+15                    234,246,265,304 ;
+16             output ;
+17           end ;
+18           censor = 1 ;
+19           day = 216 ; output ;
+20           day = 244 ; output ;
+21           censor = 0 ;
+22           arm = "Arm 2" ;
+23           do day = 142,156,163,198,205,232,232,233,233,233,233,239,
+24                    240, 261, 280, 280, 296, 296, 323 ;
+25             output ;
+26           end ;
+27           censor = 1 ;
+28           day = 204 ; output ;
+29           day = 344 ; output ;
+30           run ;
+
+NOTE: The data set WORK.ONE has 38 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              786.06k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 03:46:15 PM
+      Step Count                        2  Switch Count  0
+      
+
+31         
+32         ods pdf file = "&outtlf.\P040_f_kmplot.pdf" ;
+NOTE: Writing ODS PDF output to DISK destination "D:\meta_hackathon\sas2r-agent\output\sas\tlf\P040_f_kmplot.pdf", printer "PDF".
+33         ods listing close ;
+34         ods graphics on ;
+35         
+36         proc lifetest data=one plots=survival (atrisk=0 to 330 by 30) ;
+37           time day*censor(1) ;
+38           srata arm ;
+             _____
+             1
+WARNING 1-322: Assuming the symbol STRATA was misspelled as srata.
+39           title1 "Example K-M Plot" ;
+40           run ;
+                                                           The SAS System
+
+
+NOTE: The LOGLOG transform is used to compute the confidence limits for the quartiles of the survivor distribution. To suppress 
+      using this transform, specify CONFTYPE=LINEAR in the PROC LIFETEST statement.
+NOTE: PROCEDURE LIFETEST used (Total process time):
+      real time           5.99 seconds
+      user cpu time       0.34 seconds
+      system cpu time     0.60 seconds
+      memory              9785.84k
+      OS Memory           21852.00k
+      Timestamp           10/27/2026 03:46:22 PM
+      Step Count                        3  Switch Count  0
+      
+
+41         
+42         ods graphics off ;
+43         ods pdf close ;
+NOTE: ODS PDF printed 5 pages to D:\meta_hackathon\sas2r-agent\output\sas\tlf\P040_f_kmplot.pdf.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           7.32 seconds
+      user cpu time       0.57 seconds
+      system cpu time     0.98 seconds
+      memory              20640.71k
+      OS Memory           21852.00k
+      Timestamp           10/27/2026 03:46:22 PM
+      Step Count                        3  Switch Count  19
+      

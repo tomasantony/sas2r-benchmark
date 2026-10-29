@@ -1,0 +1,557 @@
+1                                                          The SAS System                            15:46 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.55 seconds
+      cpu time            0.48 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P069
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P069 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    t_ae_sum.sas
+3          * Purpose:    Table 14.3.1 - Overall Summary of Treatment-Emergent
+4          *             Adverse Events
+5          * Study:      [STUDYID]
+6          * Author:     [Programmer Name]
+7          * Date:       [Date]
+8          * Input:      adam.adsl, adam.adae
+9          * Output:     t_ae_sum.rtf
+10         * Population: Safety Analysis Set (SAFFL='Y')
+11         *****************************************************************************/
+12         
+13         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:46:40
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+79         %include "&macpath./m_counts.sas";
+171        %include "&macpath./m_report.sas";
+243        %include "&pgmpath./utilities/u_titles.sas";
+405        
+406        /*--- Step 1: Get Big N ---*/
+407        %m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+NOTE: Table WORK._BIGN created, with 3 rows and 2 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5545.06k
+      OS Memory           15192.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        2  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._BIGN.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              888.48k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        3  Switch Count  0
+      
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5398.59k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        4  Switch Count  0
+      
+
+NOTE: ============================================
+NOTE: Treatment group counts:
+NOTE:   Drug X High Dose: N=63
+NOTE:   Drug X Low Dose: N=82
+NOTE:   Placebo: N=95
+NOTE:   Total: N=240
+NOTE: ============================================
+408        
+409        /*--- Step 2: AE Categories ---*/
+410        /* Each row represents a category; count distinct subjects */
+411        
+412        %macro ae_category(where_clause=, label=, ord=);
+413            proc sql noprint;
+414                create table _ae&ord. as
+415                select a.TRTA,
+416                       count(distinct a.USUBJID) as cnt,
+417                       "&label." as category length=80,
+418                       &ord. as ord
+419                from adam.adae a
+420                inner join adam.adsl b on a.USUBJID = b.USUBJID
+421                where b.SAFFL = 'Y'
+422                      and a.TRTEMFL = 'Y'
+423                      &where_clause.
+424                group by a.TRTA;
+425            quit;
+426        %mend ae_category;
+427        
+428        /* Any TEAE */
+429        %ae_category(where_clause=,
+430                     label=Subjects with at least one TEAE, ord=1);
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._AE1 created, with 3 rows and 4 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              14671.40k
+      OS Memory           23452.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        5  Switch Count  0
+      
+                                                           The SAS System
+
+
+431        
+432        /* Related TEAE */
+433        %ae_category(where_clause=%str(and a.AEREL in ('POSSIBLE', 'PROBABLE', 'DEFINITE', 'RELATED')),
+434                     label=%str(  Related TEAE), ord=2);
+NOTE: Table WORK._AE2 created, with 0 rows and 4 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5667.71k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        6  Switch Count  0
+      
+
+435        
+436        /* Grade 3+ TEAE */
+437        %ae_category(where_clause=%str(and input(a.AETOXGR, best.) >= 3),
+438                     label=%str(  Grade >=3 TEAE), ord=3);
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._AE3 created, with 3 rows and 4 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              14637.28k
+      OS Memory           23452.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        7  Switch Count  0
+      
+
+439        
+440        /* Serious AE */
+441        %ae_category(where_clause=%str(and a.AESER = 'Y'),
+442                     label=%str(  Serious Adverse Event), ord=4);
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._AE4 created, with 3 rows and 4 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              14290.40k
+      OS Memory           23452.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        8  Switch Count  0
+      
+
+443        
+444        /* Related SAE */
+445        %ae_category(where_clause=%str(and a.AESER = 'Y' and a.AEREL in ('POSSIBLE', 'PROBABLE', 'DEFINITE', 'RELATED')),
+446                     label=%str(  Related Serious Adverse Event), ord=5);
+NOTE: Table WORK._AE5 created, with 0 rows and 4 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+                                                           The SAS System
+
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5669.46k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        9  Switch Count  0
+      
+
+447        
+448        /* AE leading to discontinuation */
+449        %ae_category(where_clause=%str(and a.AEACN = 'DRUG WITHDRAWN'),
+450                     label=%str(  TEAE Leading to Study Drug Discontinuation), ord=6);
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._AE6 created, with 3 rows and 4 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              14289.43k
+      OS Memory           23452.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        10  Switch Count  0
+      
+
+451        
+452        /* AE leading to dose modification */
+453        %ae_category(where_clause=%str(and a.AEACN in ('DOSE REDUCED', 'DRUG INTERRUPTED', 'DOSE INCREASED')),
+454                     label=%str(  TEAE Leading to Dose Modification), ord=7);
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._AE7 created, with 3 rows and 4 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              14392.62k
+      OS Memory           23452.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        11  Switch Count  0
+      
+
+455        
+456        /* AE leading to death */
+457        %ae_category(where_clause=%str(and a.AEOUT = 'FATAL'),
+458                     label=%str(  TEAE with Outcome of Death), ord=8);
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._AE8 created, with 0 rows and 4 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              14200.12k
+      OS Memory           23452.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        12  Switch Count  0
+                                                           The SAS System
+
+      
+
+459        
+460        /*--- Step 3: Subjects with no TEAE ---*/
+461        proc sql noprint;
+462            create table _ae0 as
+463            select b.TRTA,
+464                   count(distinct b.USUBJID) as cnt,
+465                   'Subjects with no TEAE' as category length=80,
+466                   0 as ord
+467            from adam.adsl b
+468            left join (select distinct USUBJID from adam.adae
+469                       where TRTEMFL = 'Y') a
+470            on b.USUBJID = a.USUBJID
+471            where b.SAFFL = 'Y' and a.USUBJID is null
+472            group by b.TRTA;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._AE0 created, with 3 rows and 4 columns.
+
+473        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              9606.81k
+      OS Memory           18852.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        13  Switch Count  0
+      
+
+474        
+475        /*--- Step 4: Combine all categories ---*/
+476        data all_ae;
+477            set _ae0 _ae1 _ae2 _ae3 _ae4 _ae5 _ae6 _ae7 _ae8;
+478        run;
+
+NOTE: There were 3 observations read from the data set WORK._AE0.
+NOTE: There were 3 observations read from the data set WORK._AE1.
+NOTE: There were 0 observations read from the data set WORK._AE2.
+NOTE: There were 3 observations read from the data set WORK._AE3.
+NOTE: There were 3 observations read from the data set WORK._AE4.
+NOTE: There were 0 observations read from the data set WORK._AE5.
+NOTE: There were 3 observations read from the data set WORK._AE6.
+NOTE: There were 3 observations read from the data set WORK._AE7.
+NOTE: There were 0 observations read from the data set WORK._AE8.
+NOTE: The data set WORK.ALL_AE has 18 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              2100.04k
+      OS Memory           12888.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        14  Switch Count  0
+      
+
+479        
+480        /*--- Step 5: Calculate percentages ---*/
+                                                           The SAS System
+
+481        proc sql noprint;
+482            create table all_ae2 as
+483            select a.*,
+484                   b.bign,
+485                   case when b.bign > 0
+486                        then a.cnt / b.bign * 100
+487                        else .
+488                   end as pct
+489            from all_ae a
+490            left join work._bign b
+491            on a.TRTA = b.TRTA
+492            order by ord, TRTA;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.ALL_AE2 created, with 18 rows and 6 columns.
+
+493        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              13584.65k
+      OS Memory           23508.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        15  Switch Count  0
+      
+
+494        
+495        data all_ae3;
+496            set all_ae2;
+497            length value $30;
+498            if cnt > 0 then
+499                value = cat(strip(put(cnt, 8.)), ' (', strip(put(pct, 5.1)), ')');
+500            else value = '0';
+501        run;
+
+NOTE: There were 18 observations read from the data set WORK.ALL_AE2.
+NOTE: The data set WORK.ALL_AE3 has 18 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              913.98k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        16  Switch Count  0
+      
+
+502        
+503        /*--- Step 6: Transpose ---*/
+504        proc sort data=all_ae3; by ord category; run;
+
+NOTE: There were 18 observations read from the data set WORK.ALL_AE3.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ALL_AE3 has 18 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              671.96k
+      OS Memory           11100.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        17  Switch Count  0
+      
+
+505        
+506        proc transpose data=all_ae3 out=final(drop=_name_ rename=(colPlacebo=col1 colDrug_X_Low_Dose=col2
+506      ! colDrug_X_High_Dose=col3)) prefix=col;  /* test-copy patch: name the transposed columns col1-col3 as the report expects
+506      ! */
+507            by ord category;
+508            id TRTA;
+509            var value;
+510        run;
+
+NOTE: There were 18 observations read from the data set WORK.ALL_AE3.
+NOTE: The data set WORK.FINAL has 6 observations and 5 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2540.59k
+      OS Memory           12892.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        18  Switch Count  0
+      
+
+511        
+512        /*--- Step 7: Ensure zero rows display ---*/
+513        data report;
+514            set final;
+515            array cols{*} col:;
+516            do i = 1 to dim(cols);
+517                if cols{i} = '' then cols{i} = '0';
+518            end;
+519            drop i;
+520        run;
+
+NOTE: There were 6 observations read from the data set WORK.FINAL.
+NOTE: The data set WORK.REPORT has 6 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              917.85k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 03:46:40 PM
+      Step Count                        19  Switch Count  0
+      
+
+521        
+522        /*--- Step 8: Generate output ---*/
+523        %set_titles(output=T_AE_SUM, population=Safety Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+524        %ods_on(filename=t_ae_sum);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/t_ae_sum.rtf
+                                                           The SAS System
+
+525        
+526        proc report data=report nowd split='~'
+527            style(report)=[outputwidth=9.5in]
+528            style(header)=[just=center fontweight=bold];
+529        
+530            columns ord category col1 col2 col3;
+531        
+532            define ord      / order noprint;
+533            define category / display '' style(column)=[width=3.5in];
+534            define col1     / display "&col1hdr." style(column)=[width=1.5in just=center];
+535            define col2     / display "&col2hdr." style(column)=[width=1.5in just=center];
+536            define col3     / display "&col3hdr." style(column)=[width=1.5in just=center];
+537        
+538        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 6 observations read from the data set WORK.REPORT.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.06 seconds
+      memory              7788.21k
+      OS Memory           19304.00k
+      Timestamp           10/27/2026 03:46:41 PM
+      Step Count                        20  Switch Count  0
+      
+
+539        
+540        footnote4 j=l "TEAE = Treatment-Emergent Adverse Event; SAE = Serious Adverse Event";
+541        footnote5 j=l "Subjects are counted once per category.";
+542        
+543        %ods_off;
+544        %clear_titles;
+545        
+546        proc datasets lib=work nolist; delete all_ae: final report _ae:; quit;
+
+NOTE: Deleting WORK.ALL_AE (memtype=DATA).
+NOTE: Deleting WORK.ALL_AE2 (memtype=DATA).
+NOTE: Deleting WORK.ALL_AE3 (memtype=DATA).
+NOTE: Deleting WORK.FINAL (memtype=DATA).
+NOTE: Deleting WORK.REPORT (memtype=DATA).
+                                                           The SAS System
+
+NOTE: Deleting WORK._AE0 (memtype=DATA).
+NOTE: Deleting WORK._AE1 (memtype=DATA).
+NOTE: Deleting WORK._AE2 (memtype=DATA).
+NOTE: Deleting WORK._AE3 (memtype=DATA).
+NOTE: Deleting WORK._AE4 (memtype=DATA).
+NOTE: Deleting WORK._AE5 (memtype=DATA).
+NOTE: Deleting WORK._AE6 (memtype=DATA).
+NOTE: Deleting WORK._AE7 (memtype=DATA).
+NOTE: Deleting WORK._AE8 (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              231.32k
+      OS Memory           12888.00k
+      Timestamp           10/27/2026 03:46:41 PM
+      Step Count                        21  Switch Count  0
+      
+
+547        
+548        %put NOTE: t_ae_sum.sas completed successfully.;
+NOTE: t_ae_sum.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.38 seconds
+      user cpu time       0.56 seconds
+      system cpu time     0.62 seconds
+      memory              22398.06k
+      OS Memory           23508.00k
+      Timestamp           10/27/2026 03:46:41 PM
+      Step Count                        21  Switch Count  54
+      

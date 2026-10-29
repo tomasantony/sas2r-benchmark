@@ -1,0 +1,705 @@
+1                                                          The SAS System                            10:56 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.84 seconds
+      cpu time            0.53 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R026
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R026 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the articles
+2             "Calibration plots in SAS"
+                                                           The SAS System
+
+3             by Rick Wicklin, published 14MAY2018 on The DO Loop blog:
+4             https://blogs.sas.com/content/iml/2018/05/14/calibration-plots-in-sas.html
+5          
+6          AND
+7             "Decile calibration plots in SAS"
+8             by Rick Wicklin, published 16MAY2018 on The DO Loop blog:
+9             https://blogs.sas.com/content/iml/2018/05/16/decile-calibration-plots-sas.html
+10         
+11         AND
+12            "An easier way to create a calibration plot in SAS"
+13            by Rick Wicklin, published 20FEB2019 on The DO Loop blog:
+14            https://blogs.sas.com/content/iml/2019/02/20/easier-calibration-plot-sas.html
+15         
+16            This program shows how to
+17            - Manually create a calibration plot (with a loess fit) for a
+18              logistic model with a binary response.
+19            - Manually create a decile calibration plot for a logistic model
+20              with a binary response.
+21            - Automatically generate a calibration plot by using the PLOTS=CALIBRATION
+22              option on the PROC LOGISTIC statement.
+23         
+24            The data are simulated according to a paper by
+25            Hosmer, Hosmer, Le Cessie, and Lemeshow (1997)
+26         
+27         REFERENCES:
+28            Graphical methods of assessing calibration, based on
+29            Hosmer, Hosmer, Le Cessie, and Lemeshow (1997)
+30            "A comparison of goodness-of-fit tests for the logistic regression model,"
+31            https://www2.stat.duke.edu/~zo2/dropbox/goflogistic.pdf
+32            and referenced in
+33            Austin and Steyerberg (2013)
+34            "Graphical assessment of internal and external calibration of logistic regression
+35             models by using loess smoothers"
+36            https://doi.org/10.1002/sim.5941
+37         
+38            Get quadratic coefficients from
+39            https://www2.stat.duke.edu/~zo2/dropbox/goflogistic.pdf
+40            as implemented in My SAS Files/blog/CalibrationParams.sas
+41         */
+42         
+43         /* Step 1: Simulate data for a quadratic logistic regression model */
+44         /* simulate sample of size N=500 that follows a quadratic model from Hosmer et al. (1997) */
+45         %let N = 500;                              /* sample size */
+46         data LogiSim(keep= Y x);
+47         call streaminit(1234);              /* set the random number seed */
+48         do i = 1 to &N;                      /* for each observation in the sample  */
+49            /* Hosmer et al. chose x ~ U(-3,3). Use rand("Uniform",-3,3) for modern versions of SAS */
+50            x = -3 + 6*rand("Uniform");
+51            eta = -2.337 + 0.8569*x + 0.3011*x**2;  /* quadratic model used by Hosmer et al. */
+52            mu = logistic(eta);
+53            Y = rand("Bernoulli", mu);
+54            output;
+55         end;
+56         run;
+
+NOTE: The data set WORK.LOGISIM has 500 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.04 seconds
+                                                           The SAS System
+
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              918.59k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        2  Switch Count  0
+      
+
+57         
+58         /******************************************************/
+59         /* Third blog post:
+60            "An easier way to create a calibration plot in SAS"
+61            https://blogs.sas.com/content/iml/2019/02/20/easier-calibration-plot-sas.html
+62         
+63            This section requires SAS/STAT 15.1 (SAS 9.4M6).
+64         */
+65         /******************************************************/
+66         
+67         /*----------------------------------------------------*/
+68         /* NEW in SAS/STAT 15.1 (SAS 9.4M6):                  */
+69         /* Create calibration plot by using the               */
+70         /* PLOTS=CALIBRATION option in PROC LOGISTIC          */
+71         /*----------------------------------------------------*/
+72         
+73         
+74         /* NEW in SAS/STAT 15.1 (SAS 9.4M6): PLOTS=CALIBRATION option in PROC LOGISTIC */
+75         ods graphics / width=600px height=600px;
+76         ods select CalibrationPlot;
+77         title "Calibration Plot for a Quadratic Model";
+78         title2 "Created by PROC LOGISTIC";
+NOTE: PROCEDURE LOGISTIC used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              187.68k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        3  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: Output 'CalibrationPlot' was not created.  Make sure that the output object name, label, or path is spelled correctly.  
+         Also, verify that the appropriate procedure options are used to produce the requested output object.  For example, verify 
+         that the NOPRINT option is not used.
+79         proc logistic data=LogiSim plots=calibration(CLM ShowObs);
+                                            ___________
+                                            22
+                                            202
+ERROR 22-322: Syntax error, expecting one of the following: (, ALL, DFBETAS, DPC, EFFECT, EFFECTPLOT, INFLUENCE, LEVERAGE, NONE, 
+              ODDSRATIO, ODDSRATIOS, PHAT, ROC.  
+ERROR 202-322: The option or parameter is not recognized and will be ignored.
+80            model y(Event='1') = x x*x / GOF;      /* New in 15.1: More goodness-of-fit statistics */
+81            output out=LogiOut predicted=PredProb; /* optional: output predicted probability */
+82         run;
+83         
+84         /*----------------------------------------------------*/
+85         /* Traditional method: Use output from PROC LOGIST    */
+86         /* and PROC SGPLOT to create calibration plot with    */
+87         /* a loess smoother.                                  */
+                                                           The SAS System
+
+88         /*----------------------------------------------------*/
+89         
+
+
+90         proc sort data=LogiOut;  by PredProb;  run;
+ERROR: File WORK.LOGIOUT.DATA does not exist.
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              22.71k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        4  Switch Count  0
+      
+90       !                                              /* Then sort */
+91         
+92         /* Then create the calibration plot */
+93         ods graphics / reset;
+94         title "Calibration Plot for a Correct Model";
+
+
+95         proc sgplot data=LogiOut noautolegend aspect=1;
+ERROR: File WORK.LOGIOUT.DATA does not exist.
+96            loess x=PredProb y=y / interpolation=cubic clm nomarkers; /* optional: SMOOTH=0.75 */
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+97            lineparm x=0 y=0 slope=1 / lineattrs=(color=grey pattern=dash);
+98            yaxis grid; xaxis grid;
+99         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              69.06k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        5  Switch Count  0
+      
+100        
+101        /* calibration plots for polytomous response */
+102        
+103        /* Derr (2013) "Ordinal Response Modeling with the LOGISTIC Procedure"
+104           https://support.sas.com/resources/papers/proceedings13/446-2013.pdf
+105           The following data, from McCullagh and Nelder (1989, p. 179), contain a
+106           measure of the severity of pneumoconiosis (black lung disease) in coal miners
+107           and the number of years of exposure.
+108        */
+
+
+109        data Coal;
+110        input Severity $ @@;
+111        do i=1 to 8;
+                                                           The SAS System
+
+112           input Exposure freq @@;
+113           log10Exposure=log10(Exposure);
+114           output;
+115        end;
+116        datalines;
+
+NOTE: The data set WORK.COAL has 0 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              642.09k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        6  Switch Count  0
+      
+
+120        ;
+121        
+122        title 'Severity of Black Lung vs Log10(Years Exposure)';
+NOTE: PROCEDURE LOGISTIC used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              185.15k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        7  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+123        proc logistic data=Coal rorder=data plots=Calibration(CLM);
+                                                     ___________
+                                                     22
+                                                     202
+ERROR 22-322: Syntax error, expecting one of the following: (, ALL, DFBETAS, DPC, EFFECT, EFFECTPLOT, INFLUENCE, LEVERAGE, NONE, 
+              ODDSRATIO, ODDSRATIOS, PHAT, ROC.  
+ERROR 202-322: The option or parameter is not recognized and will be ignored.
+124           freq freq;
+125           model Severity(descending)=log10Exposure;
+126           effectplot / noobs individual;
+127        run;
+128        
+129        
+130        /******************************************************/
+131        /* First blog post:
+132           "Calibration plots in SAS"
+133           https://blogs.sas.com/content/iml/2018/05/14/calibration-plots-in-sas.html
+134        */
+135        /******************************************************/
+136        
+137        /*----------------------------------------------------*/
+138        /* A calibration curve for a misspecified model       */
+139        /*----------------------------------------------------*/
+140        
+141        /* Use PROC LOGISTIC and output the predicted probabilities.
+142           Intentionally MISSPECIFY the model as linear. */
+
+
+                                                           The SAS System
+
+NOTE: PROCEDURE LOGISTIC used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              182.15k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        8  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+143        proc logistic data=LogiSim plots=effect;
+144           model Y(event='1') = x;
+145           output out=LogiOut predicted=PredProb; /* save predicted probabilities in data set */
+146           ods exclude InfluencePlots;
+147        run;
+148        
+
+
+149        proc sort data=LogiOut;  by PredProb;  run;
+ERROR: File WORK.LOGIOUT.DATA does not exist.
+ERROR: No data set open to look up variables.
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              21.68k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        9  Switch Count  0
+      
+150        
+151        /* let the data choose the smoothing parameter */
+152        title "Calibration Plot for Misspecified Model";
+153        title2 "True Model Is Quadratic; Fit Is Linear";
+
+
+154        proc sgplot data=LogiOut noautolegend aspect=1;
+ERROR: File WORK.LOGIOUT.DATA does not exist.
+155           loess x=PredProb y=y / interpolation=cubic clm;   /* smoothing value by AICC (0.657) */
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+156           lineparm x=0 y=0 slope=1 / lineattrs=(color=grey pattern=dash);
+157        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              69.06k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        10  Switch Count  0
+      
+158        
+159        /* 0.75 = smoothing value used by Austin and Steyerberg */
+                                                           The SAS System
+
+
+
+160        proc sgplot data=LogiOut noautolegend;
+ERROR: File WORK.LOGIOUT.DATA does not exist.
+161           loess x=PredProb y=y / smooth=0.75 interpolation=cubic clm; /* or use NOMARKERS */
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+162           lineparm x=0 y=0 slope=1 / lineattrs=(color=grey pattern=dash);
+163        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              69.06k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        11  Switch Count  0
+      
+164        
+165        /*----------------------------------------------------*/
+166        /* A calibration plot for a correctly specified model */
+167        /*----------------------------------------------------*/
+168        
+
+
+NOTE: PROCEDURE LOGISTIC used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              182.15k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        12  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+169        proc logistic data=LogiSim noprint;
+170           model Y(event='1') = x x*x;  /* fit a quadratic model */
+171           output out=LogiOut2 predicted=PredProb;
+172        run;
+173        
+
+
+174        proc sort data=LogiOut2;  by PredProb;  run;
+ERROR: File WORK.LOGIOUT2.DATA does not exist.
+ERROR: No data set open to look up variables.
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              21.68k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        13  Switch Count  0
+      
+                                                           The SAS System
+
+175        
+176        /* let the data choose the smoothing parameter */
+177        title "Calibration Plot for a Correct Model";
+
+
+178        proc sgplot data=LogiOut2 noautolegend aspect=1;
+ERROR: File WORK.LOGIOUT2.DATA does not exist.
+179           loess x=PredProb y=y / interpolation=cubic clm nomarkers;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+180           lineparm x=0 y=0 slope=1 / lineattrs=(color=grey pattern=dash);
+181           yaxis grid; xaxis grid;
+182        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              69.06k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        14  Switch Count  0
+      
+183        
+
+
+184        proc loess data=LogiOut2 plots=fit;
+ERROR: File WORK.LOGIOUT2.DATA does not exist.
+185        model y = PredProb / interp=cubic clm;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+186        run;
+
+NOTE: PROCEDURE LOESS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              87.12k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        15  Switch Count  0
+      
+
+187        
+188        
+189        /******************************************************/
+190        /* Second blog post:
+191           "Decile calibration plots in SAS"
+192           https://blogs.sas.com/content/iml/2018/05/16/decile-calibration-plots-sas.html
+193        */
+194        /******************************************************/
+195        
+196        /*----------------------------------------------------*/
+197        /* A decile calibration curve for a misspecified model*/
+198        /*----------------------------------------------------*/
+199        
+200        /* Use PROC LOGISTIC and output the predicted probabilities.
+                                                           The SAS System
+
+201           Intentionally MISSPECIFY the model as linear. */
+NOTE: PROCEDURE LOGISTIC used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              182.15k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        16  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+202        proc logistic data=LogiSim noprint;
+203           model Y(event='1') = x;
+204           output out=LogiOut predicted=PredProb; /* save predicted probabilities in data set */
+205        run;
+206        
+207        /* Now use decile method from Hosmer et al. First identify deciles of the predicted prob. */
+
+
+208        proc rank data=LogiOut out=LogiDecile groups=10;
+ERROR: File WORK.LOGIOUT.DATA does not exist.
+209           var PredProb;
+ERROR: No data set open to look up variables.
+210           ranks Decile;
+211        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.LOGIDECILE may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+NOTE: PROCEDURE RANK used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              172.15k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        17  Switch Count  0
+      
+212        
+213        /* Then compute the mean predicted prob and the empirical proportions (and CI) for each decile */
+
+
+214        proc means data=LogiDecile noprint;
+215           class Decile;
+ERROR: Variable DECILE not found.
+216           types Decile;
+ERROR: Variable DECILE not found.
+217           var y PredProb;
+ERROR: Variable Y not found.
+ERROR: Variable PREDPROB not found.
+218           output out=LogiDecileOut mean=yMean PredProbMean
+219                  lclm=yLower uclm=yUpper;
+220        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.LOGIDECILEOUT may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+                                                           The SAS System
+
+      system cpu time     0.00 seconds
+      memory              266.53k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        18  Switch Count  0
+      
+221        
+
+
+222        proc  print data=LogiDecileOut; run;
+
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              204.28k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        19  Switch Count  0
+      
+
+223        
+224        title "Calibration Plot for Misspecified Model";
+225        title2 "True Model Is Quadratic; Fit Is Linear";
+226        proc sgplot data=LogiDecileOut noautolegend aspect=1;
+227           lineparm x=0 y=0 slope=1 / lineattrs=(color=grey pattern=dash);
+228           *loess x=PredProbMean y=yMean;  /* if you want a smoother based on deciles */
+229           series x=PredProbMean y=yMean; /* if you to connect the deciles */
+ERROR: Variable PREDPROBMEAN not found.
+ERROR: Variable YMEAN not found.
+230           scatter x=PredProbMean y=yMean / yerrorlower=yLower yerrorupper=yUpper;
+ERROR: Variable PREDPROBMEAN not found.
+ERROR: Variable YMEAN not found.
+ERROR: Variable YLOWER not found.
+ERROR: Variable YUPPER not found.
+231           yaxis label="Observed Probability of Outcome";
+232           xaxis label="Predicted Probability of Outcome";
+233        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              223.12k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        20  Switch Count  0
+      
+234        
+235        /*----------------------------------------------------*/
+236        /* A decile calibration curve for a correctly specified model */
+237        /*----------------------------------------------------*/
+238        
+
+
+NOTE: PROCEDURE LOGISTIC used (Total process time):
+      real time           0.00 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              182.15k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        21  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+239        proc logistic data=LogiSim noprint;
+240           model Y(event='1') = x x*x;  /* fit a quadratic model */
+241           output out=LogiOut2 predicted=PredProb;
+242        run;
+243        
+244        /* Now use decile method from Hosmer et al. */
+
+
+245        proc rank data=LogiOut2 out=LogiDecile2 groups=10;
+ERROR: File WORK.LOGIOUT2.DATA does not exist.
+246           var PredProb;
+ERROR: No data set open to look up variables.
+247           ranks Decile;
+248        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.LOGIDECILE2 may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+NOTE: PROCEDURE RANK used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              172.15k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        22  Switch Count  0
+      
+249        
+
+
+250        proc means data=LogiDecile2 noprint;
+251           class Decile;
+ERROR: Variable DECILE not found.
+252           types Decile;
+ERROR: Variable DECILE not found.
+253           var y PredProb;
+ERROR: Variable Y not found.
+ERROR: Variable PREDPROB not found.
+254           output out=LogiDecileOut2 mean=yMean PredProbMean
+255                  lclm=yLower uclm=yUpper;
+256        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.LOGIDECILEOUT2 may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              230.00k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:56:06 AM
+                                                           The SAS System
+
+      Step Count                        23  Switch Count  0
+      
+257        
+258        /* let the data choose the smoothing parameter */
+259        title "Calibration Plot for a Correct Model";
+
+
+260        proc sgplot data=LogiDecileOut2 noautolegend aspect=1;
+261           lineparm x=0 y=0 slope=1 / lineattrs=(color=grey pattern=dash);
+262           series x=PredProbMean y=yMean; /* if you want to connect the deciles */
+ERROR: Variable PREDPROBMEAN not found.
+ERROR: Variable YMEAN not found.
+263           scatter x=PredProbMean y=yMean / yerrorlower=yLower yerrorupper=yUpper;
+ERROR: Variable PREDPROBMEAN not found.
+ERROR: Variable YMEAN not found.
+ERROR: Variable YLOWER not found.
+ERROR: Variable YUPPER not found.
+264           yaxis label="Observed Probability of Outcome";
+265           xaxis label="Predicted Probability of Outcome";
+266        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              223.12k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        24  Switch Count  0
+      
+
+ERROR: Errors printed on pages 3,4,5,6,7,8,9,10,11,12.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.32 seconds
+      user cpu time       0.39 seconds
+      system cpu time     0.40 seconds
+      memory              9268.71k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:56:06 AM
+      Step Count                        24  Switch Count  60
+      

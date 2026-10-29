@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "description": "Deterministic synthetic EDC cohort generated with the pinned seeds in scripts/.",
+  "files": {
+    "raw_ae.csv": {"rows": 54, "sha256": "4315c9eb13eee89808bc72fe4a3b59f764750e0d83c9facf4e4ee131d1214d83"},
+    "raw_conmeds.csv": {"rows": 86, "sha256": "cda90c7f3e3d00b7ba391650220d300e70bd7036aa3f2b1b33647fdaeb403812"},
+    "raw_demog.csv": {"rows": 50, "sha256": "d4cc9ef31b0255ceb177e226f1a8c8801491533b0c624d81860143a5351e426e"},
+    "raw_ecg.csv": {"rows": 141, "sha256": "714ec8eec87f30d76bda965b6994cb8de5a49508d4353ac42f1688eb03685526"},
+    "raw_exposure.csv": {"rows": 47, "sha256": "11d2e9c263c850594f247ec651795b7f417f965ee4c4b56854b3aacf6811fa89"},
+    "raw_lab.csv": {"rows": 516, "sha256": "4195ad54c826beeb642e187ba10384e196798741193a59bb5b7c30a93f02e786"},
+    "raw_mh.csv": {"rows": 53, "sha256": "3962d9cdd4d31259e1251ab5feb1f7ad737a6fe66e858ec56c99bbeae5214f86"},
+    "raw_vitals.csv": {"rows": 132, "sha256": "3e510afc5f39a9c6d176ff661ec612fa9c6453e3062a2dadc1f6198f43ac6e4b"}
+  }
+}

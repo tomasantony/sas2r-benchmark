@@ -1,0 +1,308 @@
+             Boxchart with Summary Statistics - Laboratory Analysis
+                         Change from Base - Lab Test 1
+
+------------------ label=Last bse to last pst point=2.1 trt=0 ------------------
+
+                              The MEANS Procedure
+
+                          Analysis Variable : change 
+ 
+        N            Mean         Std Dev         Minimum         Maximum
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+       73      -0.0944247       0.7538090      -1.6832107       1.5952746
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+
+
+------------------ label=Last bse to last pst point=3.1 trt=1 ------------------
+
+                          Analysis Variable : change 
+ 
+        N            Mean         Std Dev         Minimum         Maximum
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+       73       0.0634122       0.7474939      -1.7444098       1.9737902
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+
+
+------------------- label=Max bse to max pst point=8.1 trt=0 -------------------
+
+                          Analysis Variable : change 
+ 
+        N            Mean         Std Dev         Minimum         Maximum
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+       73       0.4763589       0.7327765      -0.8868773       1.9413701
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+
+
+------------------- label=Max bse to max pst point=9.1 trt=1 -------------------
+
+                          Analysis Variable : change 
+ 
+        N            Mean         Std Dev         Minimum         Maximum
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+       73       0.5704226       0.7730185      -1.0070879       2.4411831
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+
+
+------------------- label=Min bse to min pst point=5.1 trt=0 -------------------
+
+                          Analysis Variable : change 
+ 
+        N            Mean         Std Dev         Minimum         Maximum
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+       73      -0.6520541       0.6886736      -2.8949366       1.1122219
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+
+
+             Boxchart with Summary Statistics - Laboratory Analysis
+                         Change from Base - Lab Test 1
+
+------------------- label=Min bse to min pst point=6.1 trt=1 -------------------
+
+                              The MEANS Procedure
+
+                          Analysis Variable : change 
+ 
+        N            Mean         Std Dev         Minimum         Maximum
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+       73      -0.5869637       0.6790380      -2.3507391       0.8872693
+      ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+             Boxchart with Summary Statistics - Laboratory Analysis
+                         Change from Base - Lab Test 1
+
+-------------------------- label=Last bse to last pst --------------------------
+
+                              The Mixed Procedure
+
+                               Model Information
+
+             Data Set                     WORK.CHANGE              
+             Dependent Variable           change                   
+             Covariance Structure         Diagonal                 
+             Estimation Method            REML                     
+             Residual Variance Method     Profile                  
+             Fixed Effects SE Method      Model-Based              
+             Degrees of Freedom Method    Residual                 
+
+
+                            Class Level Information
+ 
+               Class    Levels    Values
+
+               trt           2    0 1                           
+
+
+                                  Dimensions
+
+                      Covariance Parameters             1
+                      Columns in X                      4
+                      Columns in Z                      0
+                      Subjects                          1
+                      Max Obs per Subject             146
+
+
+                            Number of Observations
+
+                  Number of Observations Read             146
+                  Number of Observations Used             146
+                  Number of Observations Not Used           0
+
+
+                             Covariance Parameter
+                                   Estimates
+ 
+                             Cov Parm     Estimate
+
+                             Residual       0.1796
+
+
+                                Fit Statistics
+
+                     -2 Res Log Likelihood           172.8
+                     AIC (Smaller is Better)         174.8
+                     AICC (Smaller is Better)        174.8
+                     BIC (Smaller is Better)         177.8
+
+
+             Boxchart with Summary Statistics - Laboratory Analysis
+                         Change from Base - Lab Test 1
+
+-------------------------- label=Last bse to last pst --------------------------
+
+                              The Mixed Procedure
+
+                         Type 3 Tests of Fixed Effects
+ 
+                               Num     Den
+                 Effect         DF      DF    F Value    Pr > F
+
+                 bse             1     143     308.72    <.0001
+                 trt             1     143       0.05    0.8276
+
+
+                              Least Squares Means
+ 
+                                   Standard
+      Effect    trt    Estimate       Error      DF    t Value    Pr > |t|
+
+      trt       0      -0.00778     0.04985     143      -0.16      0.8763
+      trt       1      -0.02324     0.04985     143      -0.47      0.6418
+             Boxchart with Summary Statistics - Laboratory Analysis
+                         Change from Base - Lab Test 1
+
+--------------------------- label=Max bse to max pst ---------------------------
+
+                              The Mixed Procedure
+
+                               Model Information
+
+             Data Set                     WORK.CHANGE              
+             Dependent Variable           change                   
+             Covariance Structure         Diagonal                 
+             Estimation Method            REML                     
+             Residual Variance Method     Profile                  
+             Fixed Effects SE Method      Model-Based              
+             Degrees of Freedom Method    Residual                 
+
+
+                            Class Level Information
+ 
+               Class    Levels    Values
+
+               trt           2    0 1                           
+
+
+                                  Dimensions
+
+                      Covariance Parameters             1
+                      Columns in X                      4
+                      Columns in Z                      0
+                      Subjects                          1
+                      Max Obs per Subject             146
+
+
+                            Number of Observations
+
+                  Number of Observations Read             146
+                  Number of Observations Used             146
+                  Number of Observations Not Used           0
+
+
+                             Covariance Parameter
+                                   Estimates
+ 
+                             Cov Parm     Estimate
+
+                             Residual       0.2757
+
+
+                                Fit Statistics
+
+                     -2 Res Log Likelihood           233.7
+                     AIC (Smaller is Better)         235.7
+                     AICC (Smaller is Better)        235.7
+                     BIC (Smaller is Better)         238.6
+
+
+             Boxchart with Summary Statistics - Laboratory Analysis
+                         Change from Base - Lab Test 1
+
+--------------------------- label=Max bse to max pst ---------------------------
+
+                              The Mixed Procedure
+
+                         Type 3 Tests of Fixed Effects
+ 
+                               Num     Den
+                 Effect         DF      DF    F Value    Pr > F
+
+                 bse             1     143     153.28    <.0001
+                 trt             1     143       0.07    0.7975
+
+
+                              Least Squares Means
+ 
+                                   Standard
+      Effect    trt    Estimate       Error      DF    t Value    Pr > |t|
+
+      trt       0        0.5346     0.06164     143       8.67      <.0001
+      trt       1        0.5122     0.06164     143       8.31      <.0001
+             Boxchart with Summary Statistics - Laboratory Analysis
+                         Change from Base - Lab Test 1
+
+--------------------------- label=Min bse to min pst ---------------------------
+
+                              The Mixed Procedure
+
+                               Model Information
+
+             Data Set                     WORK.CHANGE              
+             Dependent Variable           change                   
+             Covariance Structure         Diagonal                 
+             Estimation Method            REML                     
+             Residual Variance Method     Profile                  
+             Fixed Effects SE Method      Model-Based              
+             Degrees of Freedom Method    Residual                 
+
+
+                            Class Level Information
+ 
+               Class    Levels    Values
+
+               trt           2    0 1                           
+
+
+                                  Dimensions
+
+                      Covariance Parameters             1
+                      Columns in X                      4
+                      Columns in Z                      0
+                      Subjects                          1
+                      Max Obs per Subject             146
+
+
+                            Number of Observations
+
+                  Number of Observations Read             146
+                  Number of Observations Used             146
+                  Number of Observations Not Used           0
+
+
+                             Covariance Parameter
+                                   Estimates
+ 
+                             Cov Parm     Estimate
+
+                             Residual       0.1415
+
+
+                                Fit Statistics
+
+                     -2 Res Log Likelihood           138.6
+                     AIC (Smaller is Better)         140.6
+                     AICC (Smaller is Better)        140.6
+                     BIC (Smaller is Better)         143.5
+
+
+             Boxchart with Summary Statistics - Laboratory Analysis
+                         Change from Base - Lab Test 1
+
+--------------------------- label=Min bse to min pst ---------------------------
+
+                              The Mixed Procedure
+
+                         Type 3 Tests of Fixed Effects
+ 
+                               Num     Den
+                 Effect         DF      DF    F Value    Pr > F
+
+                 bse             1     143     332.87    <.0001
+                 trt             1     143       0.06    0.8045
+
+
+                              Least Squares Means
+ 
+                                   Standard
+      Effect    trt    Estimate       Error      DF    t Value    Pr > |t|
+
+      trt       0       -0.6272     0.04405     143     -14.24      <.0001
+      trt       1       -0.6118     0.04405     143     -13.89      <.0001

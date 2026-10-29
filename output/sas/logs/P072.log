@@ -1,0 +1,951 @@
+1                                                          The SAS System                            15:46 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.72 seconds
+      cpu time            0.74 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P072
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P072 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    t_dm.sas
+3          * Purpose:    Table 14.1.1 - Summary of Demographics and Baseline
+4          *             Characteristics
+5          * Study:      [STUDYID]
+6          * Author:     [Programmer Name]
+7          * Date:       [Date]
+8          * Input:      adam.adsl
+9          * Output:     t_dm.rtf
+10         * Population: Safety Analysis Set (SAFFL='Y')
+11         * Macros:     m_counts, m_desc_stats, m_report, u_titles
+12         * Validation: Independent programming / double programming
+13         *****************************************************************************/
+14         
+15         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:46:51
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+81         %include "&macpath./m_counts.sas";
+173        %include "&macpath./m_desc_stats.sas";
+335        %include "&macpath./m_report.sas";
+407        %include "&pgmpath./utilities/u_titles.sas";
+569        
+570        /*--- Step 1: Get population counts ---*/
+571        %m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+NOTE: Table WORK._BIGN created, with 3 rows and 2 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5545.06k
+      OS Memory           15192.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        2  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._BIGN.
+NOTE: DATA statement used (Total process time):
+                                                           The SAS System
+
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              888.48k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        3  Switch Count  0
+      
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5398.59k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        4  Switch Count  0
+      
+
+NOTE: ============================================
+NOTE: Treatment group counts:
+NOTE:   Drug X High Dose: N=63
+NOTE:   Drug X Low Dose: N=82
+NOTE:   Placebo: N=95
+NOTE:   Total: N=240
+NOTE: ============================================
+572        
+573        /*--- Step 2: Prepare analysis dataset ---*/
+574        data dm;
+575            set adam.adsl;
+576            where SAFFL = 'Y';
+577        
+578            /* Derive age groups */
+579            length AGEGR1 $20;
+WARNING: Length of character variable AGEGR1 has already been set. 
+         Use the LENGTH statement as the very first statement in the DATA STEP to declare the length of a character variable.
+580            if      AGE < 18 then AGEGR1 = '<18';
+581            else if AGE < 65 then AGEGR1 = '18 to <65';
+582            else if AGE >= 65 then AGEGR1 = '>=65';
+583        
+584            /* Ensure consistent ordering */
+585            if SEX = 'M' then SEXN = 1;
+586            else if SEX = 'F' then SEXN = 2;
+587        
+588            if RACE = 'WHITE' then RACEN = 1;
+589            else if RACE = 'BLACK OR AFRICAN AMERICAN' then RACEN = 2;
+590            else if RACE = 'ASIAN' then RACEN = 3;
+591            else RACEN = 4;
+592        
+593            if ETHNIC = 'HISPANIC OR LATINO' then ETHNICN = 1;
+594            else if ETHNIC = 'NOT HISPANIC OR LATINO' then ETHNICN = 2;
+595            else ETHNICN = 3;
+596        run;
+
+NOTE: There were 240 observations read from the data set ADAM.ADSL.
+      WHERE SAFFL='Y';
+NOTE: The data set WORK.DM has 240 observations and 45 variables.
+NOTE: DATA statement used (Total process time):
+                                                           The SAS System
+
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1002.42k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        5  Switch Count  0
+      
+
+597        
+598        /*--- Step 3: Continuous variables (Age, Weight, Height, BMI) ---*/
+599        %macro cont_block(var=, label=, ord=, decimals=1);
+600        
+601            %m_cont_stats(inds=dm, anavar=&var., trtvar=TRTA, outds=_c_&var.,
+602                          decimals=&decimals.);
+603        
+604            data _c_&var.;
+605                set _c_&var.;
+606                length category $60;
+607                category = "&label.";
+608                block = &ord.;
+609            run;
+610        
+611        %mend cont_block;
+612        
+613        %cont_block(var=AGE, label=Age (years), ord=1);
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 240 observations read from the data set WORK.DM.
+NOTE: The data set WORK._STATS has 3 observations and 9 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              7812.03k
+      OS Memory           17008.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        6  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._STATS.
+NOTE: The data set WORK._C_AGE has 18 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              925.60k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        7  Switch Count  0
+      
+
+
+NOTE: There were 18 observations read from the data set WORK._C_AGE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK._C_AGE has 18 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+                                                           The SAS System
+
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              672.03k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        8  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._STATS (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              261.62k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        9  Switch Count  0
+      
+
+
+NOTE: There were 18 observations read from the data set WORK._C_AGE.
+NOTE: The data set WORK._C_AGE has 18 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              892.37k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        10  Switch Count  0
+      
+
+614        %cont_block(var=WEIGHTBL, label=Weight (kg), ord=5);
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 240 observations read from the data set WORK.DM.
+NOTE: The data set WORK._STATS has 3 observations and 9 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              7802.25k
+      OS Memory           17008.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        11  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._STATS.
+NOTE: The data set WORK._C_WEIGHTBL has 18 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              925.43k
+      OS Memory           11608.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        12  Switch Count  0
+      
+
+
+NOTE: There were 18 observations read from the data set WORK._C_WEIGHTBL.
+NOTE: SAS sort was used.
+NOTE: The data set WORK._C_WEIGHTBL has 18 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              672.03k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        13  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._STATS (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.84k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        14  Switch Count  0
+      
+
+
+NOTE: There were 18 observations read from the data set WORK._C_WEIGHTBL.
+NOTE: The data set WORK._C_WEIGHTBL has 18 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              892.34k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        15  Switch Count  0
+      
+
+615        %cont_block(var=HEIGHTBL, label=Height (cm), ord=6);
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 240 observations read from the data set WORK.DM.
+NOTE: The data set WORK._STATS has 3 observations and 9 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              7803.25k
+      OS Memory           17008.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        16  Switch Count  0
+      
+
+                                                           The SAS System
+
+
+NOTE: There were 3 observations read from the data set WORK._STATS.
+NOTE: The data set WORK._C_HEIGHTBL has 18 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              925.46k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        17  Switch Count  0
+      
+
+
+NOTE: There were 18 observations read from the data set WORK._C_HEIGHTBL.
+NOTE: SAS sort was used.
+NOTE: The data set WORK._C_HEIGHTBL has 18 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              672.03k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        18  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._STATS (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.84k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        19  Switch Count  0
+      
+
+
+NOTE: There were 18 observations read from the data set WORK._C_HEIGHTBL.
+NOTE: The data set WORK._C_HEIGHTBL has 18 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              892.37k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        20  Switch Count  0
+      
+
+616        %cont_block(var=BMIBL, label=BMI (kg/m^{super 2}), ord=7);
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 240 observations read from the data set WORK.DM.
+NOTE: The data set WORK._STATS has 3 observations and 9 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+                                                           The SAS System
+
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              7802.25k
+      OS Memory           17008.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        21  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._STATS.
+NOTE: The data set WORK._C_BMIBL has 18 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              925.43k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        22  Switch Count  0
+      
+
+
+NOTE: There were 18 observations read from the data set WORK._C_BMIBL.
+NOTE: SAS sort was used.
+NOTE: The data set WORK._C_BMIBL has 18 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              672.03k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        23  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._STATS (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.84k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        24  Switch Count  0
+      
+
+
+NOTE: There were 18 observations read from the data set WORK._C_BMIBL.
+NOTE: The data set WORK._C_BMIBL has 18 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              892.34k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:50 PM
+                                                           The SAS System
+
+      Step Count                        25  Switch Count  0
+      
+
+617        
+618        /*--- Step 4: Categorical variables (Sex, Race, Ethnicity, Age Group) ---*/
+619        %macro cat_block(var=, label=, ord=);
+620        
+621            %m_cat_stats(inds=dm, catvar=&var., trtvar=TRTA, outds=_f_&var.);
+622        
+623            data _f_&var.;
+624                set _f_&var.;
+625                length category $60 stat $40;
+626                category = "&label.";
+627                stat = &var.;
+628                block = &ord.;
+629            run;
+630        
+631        %mend cat_block;
+632        
+633        %cat_block(var=SEX, label=Sex, ord=2);
+NOTE: Table WORK._CATCNT created, with 6 rows and 3 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5397.59k
+      OS Memory           16220.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        26  Switch Count  0
+      
+
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._F_SEX created, with 6 rows and 5 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              8903.87k
+      OS Memory           18588.00k
+      Timestamp           10/27/2026 03:46:50 PM
+      Step Count                        27  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK._F_SEX.
+NOTE: The data set WORK._F_SEX has 6 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              949.78k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        28  Switch Count  0
+      
+
+                                                           The SAS System
+
+
+NOTE: Deleting WORK._CATCNT (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.84k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        29  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK._F_SEX.
+NOTE: The data set WORK._F_SEX has 6 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              927.71k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        30  Switch Count  0
+      
+
+634        %cat_block(var=RACE, label=Race, ord=3);
+NOTE: Table WORK._CATCNT created, with 12 rows and 3 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5397.65k
+      OS Memory           16484.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        31  Switch Count  0
+      
+
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._F_RACE created, with 12 rows and 5 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.03 seconds
+      memory              8329.18k
+      OS Memory           18076.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        32  Switch Count  0
+      
+
+
+NOTE: There were 12 observations read from the data set WORK._F_RACE.
+NOTE: The data set WORK._F_RACE has 12 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              949.78k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        33  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._CATCNT (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.84k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        34  Switch Count  0
+      
+
+
+NOTE: There were 12 observations read from the data set WORK._F_RACE.
+NOTE: The data set WORK._F_RACE has 12 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              928.71k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        35  Switch Count  0
+      
+
+635        %cat_block(var=ETHNIC, label=Ethnicity, ord=4);
+NOTE: Table WORK._CATCNT created, with 6 rows and 3 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5397.65k
+      OS Memory           16484.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        36  Switch Count  0
+      
+
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._F_ETHNIC created, with 6 rows and 5 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              8400.18k
+      OS Memory           18148.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        37  Switch Count  0
+      
+
+
+                                                           The SAS System
+
+NOTE: There were 6 observations read from the data set WORK._F_ETHNIC.
+NOTE: The data set WORK._F_ETHNIC has 6 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              949.78k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        38  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._CATCNT (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.84k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        39  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK._F_ETHNIC.
+NOTE: The data set WORK._F_ETHNIC has 6 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              928.71k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        40  Switch Count  0
+      
+
+636        %cat_block(var=AGEGR1, label=Age Group, ord=8);
+NOTE: Table WORK._CATCNT created, with 6 rows and 3 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5397.65k
+      OS Memory           16484.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        41  Switch Count  0
+      
+
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._F_AGEGR1 created, with 6 rows and 5 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              8676.65k
+                                                           The SAS System
+
+      OS Memory           18380.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        42  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK._F_AGEGR1.
+NOTE: The data set WORK._F_AGEGR1 has 6 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              949.78k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        43  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._CATCNT (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.84k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        44  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK._F_AGEGR1.
+NOTE: The data set WORK._F_AGEGR1 has 6 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              927.71k
+      OS Memory           11360.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        45  Switch Count  0
+      
+
+637        
+638        /*--- Step 5: Combine all results ---*/
+639        data all_stats;
+640            set _c_age _f_sex _f_race _f_ethnic
+641                _c_weightbl _c_heightbl _c_bmibl _f_agegr1;
+642        run;
+
+NOTE: There were 18 observations read from the data set WORK._C_AGE.
+NOTE: There were 6 observations read from the data set WORK._F_SEX.
+NOTE: There were 12 observations read from the data set WORK._F_RACE.
+NOTE: There were 6 observations read from the data set WORK._F_ETHNIC.
+NOTE: There were 18 observations read from the data set WORK._C_WEIGHTBL.
+NOTE: There were 18 observations read from the data set WORK._C_HEIGHTBL.
+NOTE: There were 18 observations read from the data set WORK._C_BMIBL.
+NOTE: There were 6 observations read from the data set WORK._F_AGEGR1.
+                                                           The SAS System
+
+NOTE: The data set WORK.ALL_STATS has 102 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              2116.81k
+      OS Memory           13152.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        46  Switch Count  0
+      
+
+643        
+644        /*--- Step 6: Transpose by treatment for columnar display ---*/
+645        proc sort data=all_stats; by block ord stat; run;
+
+NOTE: There were 102 observations read from the data set WORK.ALL_STATS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ALL_STATS has 102 observations and 13 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              673.62k
+      OS Memory           12132.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        47  Switch Count  0
+      
+
+646        
+647        proc transpose data=all_stats out=final(drop=_name_ rename=(colPlacebo=col1 colDrug_X_Low_Dose=col2
+647      ! colDrug_X_High_Dose=col3)) prefix=col;  /* test-copy patch: name the transposed columns col1-col3 as the report expects
+647      ! */
+648            by block category ord stat;
+649            id TRTA;
+650            var value;
+651        run;
+
+NOTE: There were 102 observations read from the data set WORK.ALL_STATS.
+NOTE: The data set WORK.FINAL has 34 observations and 7 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2545.43k
+      OS Memory           13412.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        48  Switch Count  0
+      
+
+652        
+653        /*--- Step 7: Create report dataset ---*/
+654        data report;
+655            retain block category stat col1 col2 col3;
+656            set final;
+657            by block category;
+658        
+659            /* Display category label only on first row of block */
+660            length display_cat $60;
+                                                           The SAS System
+
+661            if first.category then display_cat = category;
+662            else display_cat = ' ';
+663        
+664            /* Indent statistic labels */
+665            stat = '  ' || strip(stat);
+666        run;
+
+NOTE: There were 34 observations read from the data set WORK.FINAL.
+NOTE: The data set WORK.REPORT has 34 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              916.65k
+      OS Memory           10844.00k
+      Timestamp           10/27/2026 03:46:51 PM
+      Step Count                        49  Switch Count  0
+      
+
+667        
+668        /*--- Step 8: Generate output ---*/
+669        %set_titles(output=T_DM, population=Safety Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+670        %ods_on(filename=t_dm);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/t_dm.rtf
+671        
+672        proc report data=report nowd split='~'
+673            style(report)=[outputwidth=9.5in]
+674            style(header)=[just=center fontweight=bold];
+675        
+676            columns block display_cat stat col1 col2 col3;
+677        
+678            define block       / order noprint;
+679            define display_cat / display "Parameter" style(column)=[width=2.5in fontweight=bold];
+680            define stat        / display "Statistic" style(column)=[width=1.5in];
+681            define col1        / display "&col1hdr." style(column)=[width=1.5in just=center];
+682            define col2        / display "&col2hdr." style(column)=[width=1.5in just=center];
+683            define col3        / display "&col3hdr." style(column)=[width=1.5in just=center];
+684        
+                                                           The SAS System
+
+685            compute after block;
+686                line ' ';
+687            endcomp;
+688        
+689        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 34 observations read from the data set WORK.REPORT.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.03 seconds
+      memory              7917.71k
+      OS Memory           19312.00k
+      Timestamp           10/27/2026 03:46:52 PM
+      Step Count                        50  Switch Count  0
+      
+
+690        
+691        %ods_off;
+692        %clear_titles;
+693        
+694        /*--- Cleanup ---*/
+695        proc datasets lib=work nolist;
+696            delete dm all_stats final report _c_: _f_: _bign _smalln;
+697        quit;
+
+NOTE: The file WORK._SMALLN (memtype=DATA) was not found, but appears on a DELETE statement.
+NOTE: Deleting WORK.DM (memtype=DATA).
+NOTE: Deleting WORK.ALL_STATS (memtype=DATA).
+NOTE: Deleting WORK.FINAL (memtype=DATA).
+NOTE: Deleting WORK.REPORT (memtype=DATA).
+NOTE: Deleting WORK._C_AGE (memtype=DATA).
+NOTE: Deleting WORK._C_BMIBL (memtype=DATA).
+NOTE: Deleting WORK._C_HEIGHTBL (memtype=DATA).
+NOTE: Deleting WORK._C_WEIGHTBL (memtype=DATA).
+NOTE: Deleting WORK._F_AGEGR1 (memtype=DATA).
+NOTE: Deleting WORK._F_ETHNIC (memtype=DATA).
+NOTE: Deleting WORK._F_RACE (memtype=DATA).
+NOTE: Deleting WORK._F_SEX (memtype=DATA).
+NOTE: Deleting WORK._BIGN (memtype=DATA).
+                                                           The SAS System
+
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              231.31k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 03:46:52 PM
+      Step Count                        51  Switch Count  0
+      
+
+698        
+699        %put NOTE: t_dm.sas completed successfully.;
+NOTE: t_dm.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.67 seconds
+      user cpu time       0.95 seconds
+      system cpu time     0.93 seconds
+      memory              17873.87k
+      OS Memory           19312.00k
+      Timestamp           10/27/2026 03:46:52 PM
+      Step Count                        51  Switch Count  114
+      

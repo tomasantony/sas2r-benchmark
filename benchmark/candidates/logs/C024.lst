@@ -1,0 +1,29 @@
+                                                           The SAS System
+
+                       Obs      ID      linecolor    markercolor    fillcolor    value                 show
+
+                        1     status     darkred       darkred       gray        Complete response    ATTRMAP
+                        2     status     blue          blue          gray        Partial response     ATTRMAP
+                        3     stage      darkred       darkred       green       Stage 1              ATTRMAP
+                        4     stage      black         black         yellow      Stage 2              ATTRMAP
+                        5     stage      black         black         orange      Stage 3              ATTRMAP
+                        6     stage      black         black         red         Stage 4              ATTRMAP
+                                                  Subject Response Stage by Month
+
+ Obs   id   item    stage    low   high     highcap          status         start    end   durable   response   startline   endline
+
+   1    1     9    Stage 4    0     8.3   FilledArrow   Partial response      6.0     .        .         20         6.0        8.0 
+   2    2     6    Stage 2    0    12.6   FilledArrow   Partial response      2.5    7.0       .         10         2.5        7.0 
+   3    2     6               0    12.6   FilledArrow   Partial response      9.5     .        .         10         9.5       12.3 
+   4    3     5    Stage 1    0    12.5   FilledArrow   Complete response     3.5    4.5     -0.5       -15         3.5        4.5 
+   5    3     5               0    12.5   FilledArrow   Complete response     6.5    8.5       .        -15         6.5        8.5 
+   6    3     5               0    12.5   FilledArrow   Partial response     10.5     .        .        -15        10.5       12.2 
+   7    4     4    Stage 4    0    13.5   FilledArrow   Partial response      7.0   10.0       .        -20         7.0       10.0 
+   8    4     4               0    13.5   FilledArrow   Partial response     11.5     .        .        -20        11.5       13.2 
+   9    5     3    Stage 3    0    14.0   FilledArrow   Partial response      2.5    3.5     -0.5       -22         2.5        3.5 
+  10    5     3               0    14.0   FilledArrow   Partial response      6.0     .        .        -22         6.0       13.7 
+  11    6     8    Stage 1    0     9.5                 Complete response     1.0    9.5     -0.5       -25         1.0        9.5 
+  12    7     7    Stage 3    0    11.5                 Complete response     4.5   11.5     -0.5       -30         4.5       11.5 
+  13    8    10    Stage 2    0     7.2   FilledArrow   Complete response     1.2     .        .        -42         1.2        6.9 
+  14    9     2    Stage 2    0    17.0                 Complete response    10.5   17.0     -0.5       -45        10.5       17.0 
+  15   10     1    Stage 1    0    18.5   FilledArrow   Complete response     6.5   13.5     -0.5       -50         6.5       13.5 

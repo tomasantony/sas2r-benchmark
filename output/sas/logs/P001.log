@@ -1,0 +1,686 @@
+1                                                          The SAS System                            10:59 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.93 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:59:53 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P001 family=pilotrep
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2           * adsl.sas - Parallel ADSL build in SAS 9.4 to prove dual-implementation.
+                                                           The SAS System
+
+3           *
+4           * Source SDTM (XPT v5 in &sdtm. and &qsraw.):
+5           *   dm.xpt, ex.xpt, ds.xpt, ae.xpt   (from R/export_sdtm_for_sas.R)
+6           *   qs.xpt                            (from data/raw/, original CDISC Pilot)
+7           *
+8           * Output:
+9           *   &adam.adsl.sas7bdat
+10          *   &out.adsl.xpt        (XPT v5 for PROC COMPARE against R)
+11          *
+12          * Mirrors the derivation logic in R/01_adsl.R + R/05_adqsadas.R (EFFFL part).
+13          * Section numbers below match R/01_adsl.R headers.
+14          *
+15          * SAS ODA workflow:
+16          *   1. Upload data/xpt/sdtm/ + data/raw/qs.xpt to your ODA home.
+17          *   2. Update &sdtm., &qsraw., &adam., &out. macro paths below.
+18          *   3. Run this program.
+19          *****************************************************************************/
+20         
+21         /* ---------------------------------------------------------- libraries -- */
+22         %let sdtm  = D:/meta_hackathon/sas2r-agent/data/raw/cdisc-pilot/sdtm;     /* dm.xpt, ex.xpt, ds.xpt, ae.xpt    */
+23         %let qsraw = D:/meta_hackathon/sas2r-agent/data/raw/cdisc-pilot/sdtm;      /* qs.xpt                            */
+24         %let adam  = &outds.;     /* sas7bdat output                   */
+25         %let out   = &outds.;      /* xpt output                        */
+26         
+27         libname sdtmin xport "&sdtm./dm.xpt" access=readonly;
+NOTE: Libref SDTMIN was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\dm.xpt
+28         libname exin   xport "&sdtm./ex.xpt" access=readonly;
+NOTE: Libref EXIN was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ex.xpt
+29         libname dsin   xport "&sdtm./ds.xpt" access=readonly;
+NOTE: Libref DSIN was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ds.xpt
+30         libname aein   xport "&sdtm./ae.xpt" access=readonly;
+NOTE: Libref AEIN was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ae.xpt
+31         libname qsin   xport "&qsraw./qs.xpt" access=readonly;
+NOTE: Libref QSIN was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\qs.xpt
+32         libname adam   "&adam.";
+NOTE: Libref ADAM refers to the same physical library as OUTDS.
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001
+33         
+34         /* Copy XPT contents into WORK so we can manipulate freely. */
+35         proc copy in=sdtmin out=work; select dm; run;
+
+NOTE: Input library SDTMIN is sequential.
+NOTE: Copying SDTMIN.DM to WORK.DM (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+                                                           The SAS System
+
+NOTE: There were 306 observations read from the data set SDTMIN.DM.
+NOTE: The data set WORK.DM has 306 observations and 25 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              623.12k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:59:53 AM
+      Step Count                        2  Switch Count  0
+      
+
+36         proc copy in=exin   out=work; select ex; run;
+
+NOTE: Input library EXIN is sequential.
+NOTE: Copying EXIN.EX to WORK.EX (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+NOTE: There were 591 observations read from the data set EXIN.EX.
+NOTE: The data set WORK.EX has 591 observations and 17 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              572.40k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:59:53 AM
+      Step Count                        3  Switch Count  0
+      
+
+37         proc copy in=dsin   out=work; select ds; run;
+
+NOTE: Input library DSIN is sequential.
+NOTE: Copying DSIN.DS to WORK.DS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+NOTE: There were 596 observations read from the data set DSIN.DS.
+NOTE: The data set WORK.DS has 596 observations and 13 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              563.59k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:59:53 AM
+      Step Count                        4  Switch Count  0
+      
+
+38         proc copy in=aein   out=work; select ae; run;
+
+NOTE: Input library AEIN is sequential.
+NOTE: Copying AEIN.AE to WORK.AE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+NOTE: There were 1191 observations read from the data set AEIN.AE.
+                                                           The SAS System
+
+NOTE: The data set WORK.AE has 1191 observations and 35 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              716.03k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 10:59:53 AM
+      Step Count                        5  Switch Count  0
+      
+
+39         proc copy in=qsin   out=work; select qs; run;
+
+NOTE: Input library QSIN is sequential.
+NOTE: Copying QSIN.QS to WORK.QS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+NOTE: There were 121749 observations read from the data set QSIN.QS.
+NOTE: The data set WORK.QS has 121749 observations and 20 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.16 seconds
+      user cpu time       0.07 seconds
+      system cpu time     0.04 seconds
+      memory              573.21k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        6  Switch Count  0
+      
+
+40         
+41         
+42         /* -------------------------------------- 2. Base subject record from DM */
+43         data adsl_base;
+44           set dm;
+45           keep STUDYID USUBJID SUBJID SITEID AGE AGEU SEX RACE ETHNIC COUNTRY
+46                ARM ARMCD ACTARM ACTARMCD RFSTDTC RFENDTC RFXSTDTC RFXENDTC
+47                DTHDTC DTHFL;
+48         run;
+
+NOTE: There were 306 observations read from the data set WORK.DM.
+NOTE: The data set WORK.ADSL_BASE has 306 observations and 20 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              979.90k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        7  Switch Count  0
+      
+
+49         
+50         
+51         /* ------------------------------------------ 3. Treatment dates ------- */
+52         data adsl_trt;
+53           set adsl_base;
+54           length _dt 8;
+                                                           The SAS System
+
+55           format TRTSDT TRTEDT DTHDT date9.
+56                  TRTSDTM TRTEDTM e8601dt19.;
+57         
+58           if not missing(RFXSTDTC) then do;
+59             TRTSDT  = input(substr(RFXSTDTC, 1, 10), yymmdd10.);
+60             TRTSDTM = input(RFXSTDTC, ?? e8601dt19.);
+61           end;
+62           if not missing(RFXENDTC) then do;
+63             TRTEDT  = input(substr(RFXENDTC, 1, 10), yymmdd10.);
+64             TRTEDTM = input(RFXENDTC, ?? e8601dt19.);
+65           end;
+66           if not missing(DTHDTC) then DTHDT = input(substr(DTHDTC, 1, 10), yymmdd10.);
+67         
+68           if not missing(TRTSDT) and not missing(TRTEDT) then
+69             TRTDURD = TRTEDT - TRTSDT + 1;
+70           drop _dt;
+71         run;
+
+NOTE: Variable _dt is uninitialized.
+NOTE: There were 306 observations read from the data set WORK.ADSL_BASE.
+NOTE: The data set WORK.ADSL_TRT has 306 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1000.68k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        8  Switch Count  0
+      
+
+72         
+73         
+74         /* ------------------------------ 4. Population flags ------------------ */
+75         /* SAFFL = Y if subject has >=1 EX record with non-missing EXTRT
+76          * (Placebo has EXDOSE=0 in pharmaversesdtm, so use EXTRT not EXDOSE). */
+77         proc sql;
+78           create table _saf as
+79             select distinct STUDYID, USUBJID, "Y" as SAFFL length=1
+80             from ex
+81             where not missing(EXTRT);
+NOTE: Table WORK._SAF created, with 254 rows and 3 columns.
+
+82         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5495.37k
+      OS Memory           15448.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        9  Switch Count  0
+      
+
+83         
+84         data adsl_pop;
+85           merge adsl_trt(in=a) _saf(in=b);
+86           by STUDYID USUBJID;
+                                                           The SAS System
+
+87           if a;
+88           length ITTFL $1;
+89           if missing(SAFFL) then SAFFL = "N";
+90           if ARM in ("Placebo", "Xanomeline High Dose", "Xanomeline Low Dose")
+91             then ITTFL = "Y";
+92             else ITTFL = "N";
+93         run;
+
+NOTE: There were 306 observations read from the data set WORK.ADSL_TRT.
+NOTE: There were 254 observations read from the data set WORK._SAF.
+NOTE: The data set WORK.ADSL_POP has 306 observations and 28 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1149.12k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        10  Switch Count  0
+      
+
+94         
+95         
+96         /* ------------------------------ 5. Disposition from DS --------------- */
+97         proc sort data=ds; by USUBJID DSDTC; run;
+
+NOTE: There were 596 observations read from the data set WORK.DS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.DS has 596 observations and 13 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              745.78k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        11  Switch Count  0
+      
+
+98         
+99         data _disp;
+100          set ds;
+101          by USUBJID DSDTC;
+102          where DSCAT = "DISPOSITION EVENT" and DSDECOD ne "SCREEN FAILURE";
+103          if last.USUBJID;            /* latest disposition record per subject */
+104          length EOSSTT $12 DCSREAS $100 DCSREASP $200;
+105          if DSDECOD = "COMPLETED" then do;
+106            EOSSTT = "COMPLETED";
+107            DCSREAS = "";
+108            DCSREASP = "";
+109          end;
+110          else do;
+111            EOSSTT = "DISCONTINUED";
+112            DCSREAS = DSDECOD;
+113            if DSDECOD = "OTHER" then DCSREASP = DSTERM; else DCSREASP = "";
+114          end;
+115          keep USUBJID EOSSTT DCSREAS DCSREASP;
+116        run;
+                                                           The SAS System
+
+
+NOTE: There were 254 observations read from the data set WORK.DS.
+      WHERE (DSCAT='DISPOSITION EVENT') and (DSDECOD not = 'SCREEN FAILURE');
+NOTE: The data set WORK._DISP has 254 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1006.37k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        12  Switch Count  0
+      
+
+117        
+118        data adsl_disp;
+119          merge adsl_pop(in=a) _disp;
+120          by USUBJID;
+121          if a;
+122          if missing(EOSSTT) then EOSSTT = "DISCONTINUED";
+123          EOTSTT = EOSSTT;
+124        run;
+
+NOTE: There were 306 observations read from the data set WORK.ADSL_POP.
+NOTE: There were 254 observations read from the data set WORK._DISP.
+NOTE: The data set WORK.ADSL_DISP has 306 observations and 32 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1221.28k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        13  Switch Count  0
+      
+
+125        
+126        
+127        /* ------------------------------ 6. Age groups + numeric codes -------- */
+128        data adsl_age;
+129          set adsl_disp;
+130          length AGEGR1 $6;
+131          if AGE < 65 then do;
+132            AGEGR1 = "<65";  AGEGR1N = 1;
+133          end;
+134          else if AGE >= 65 and AGE <= 80 then do;
+135            AGEGR1 = "65-80"; AGEGR1N = 2;
+136          end;
+137          else if AGE > 80 then do;
+138            AGEGR1 = ">80";   AGEGR1N = 3;
+139          end;
+140        
+141          if SEX = "M" then SEXN = 1;
+142          else if SEX = "F" then SEXN = 2;
+143        
+144          if RACE = "WHITE"                                    then RACEN = 1;
+145          else if RACE = "BLACK OR AFRICAN AMERICAN"           then RACEN = 2;
+146          else if RACE = "ASIAN"                               then RACEN = 3;
+                                                           The SAS System
+
+147          else if RACE = "AMERICAN INDIAN OR ALASKA NATIVE"    then RACEN = 4;
+148          else if RACE = "NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER"
+149                                                               then RACEN = 5;
+150          else if RACE = "MULTIPLE"                            then RACEN = 6;
+151        run;
+
+NOTE: There were 306 observations read from the data set WORK.ADSL_DISP.
+NOTE: The data set WORK.ADSL_AGE has 306 observations and 36 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              988.93k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        14  Switch Count  0
+      
+
+152        
+153        
+154        /* ------------------------------ 7. TRT01P / TRT01A ------------------- */
+155        data adsl_trt01;
+156          set adsl_age;
+157          length TRT01P TRT01A $40;
+158          TRT01P = ARM;
+159          TRT01A = ACTARM;
+160        run;
+
+NOTE: There were 306 observations read from the data set WORK.ADSL_AGE.
+NOTE: The data set WORK.ADSL_TRT01 has 306 observations and 38 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              974.15k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        15  Switch Count  0
+      
+
+161        
+162        
+163        /* ------------------------------ 8. Efficacy flag from QS ------------- */
+164        /* EFFFL = Y if SAFFL=Y AND >=1 post-baseline ACTOT score in QS. */
+165        proc sql;
+166          create table _eff as
+167            select distinct USUBJID, "Y" as EFFFL length=1
+168            from qs
+169            where QSTESTCD = "ACTOT"
+170              and QSCAT    = "ALZHEIMER'S DISEASE ASSESSMENT SCALE"
+171              and not missing(QSSTRESN)
+172              and upcase(VISIT) ne "BASELINE"
+173              and not index(upcase(VISIT), "SCREENING");
+NOTE: Table WORK._EFF created, with 235 rows and 2 columns.
+
+174        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.04 seconds
+                                                           The SAS System
+
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              5430.50k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        16  Switch Count  0
+      
+
+175        
+176        data adsl_eff;
+177          merge adsl_trt01(in=a) _eff;
+178          by USUBJID;
+179          if a;
+180          if SAFFL = "Y" and EFFFL = "Y" then EFFFL = "Y";
+181                                          else EFFFL = "N";
+182        run;
+
+NOTE: There were 306 observations read from the data set WORK.ADSL_TRT01.
+NOTE: There were 235 observations read from the data set WORK._EFF.
+NOTE: The data set WORK.ADSL_EFF has 306 observations and 39 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1146.15k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        17  Switch Count  0
+      
+
+183        
+184        
+185        /* ------------------------------ 9. Labels, formats, lengths ---------- */
+186        data adam.adsl;
+187          retain
+188            STUDYID USUBJID SUBJID SITEID AGE AGEU AGEGR1 AGEGR1N SEX SEXN
+189            RACE RACEN ETHNIC COUNTRY ARM ARMCD ACTARM ACTARMCD TRT01P TRT01A
+190            RFSTDTC RFENDTC RFXSTDTC RFXENDTC TRTSDT TRTEDT TRTSDTM TRTEDTM
+191            TRTDURD DTHDTC DTHDT DTHFL DCSREAS DCSREASP EOSSTT EOTSTT
+192            SAFFL ITTFL EFFFL;
+193          set adsl_eff;
+194        
+195          /* Labels (must match metadata/adsl_spec.xlsx) */
+196          label
+197            STUDYID  = "Study Identifier"
+198            USUBJID  = "Unique Subject Identifier"
+199            SUBJID   = "Subject Identifier for the Study"
+200            SITEID   = "Study Site Identifier"
+201            AGE      = "Age"
+202            AGEU     = "Age Units"
+203            AGEGR1   = "Pooled Age Group 1"
+204            AGEGR1N  = "Pooled Age Group 1 (N)"
+205            SEX      = "Sex"
+206            SEXN     = "Sex (N)"
+207            RACE     = "Race"
+208            RACEN    = "Race (N)"
+209            ETHNIC   = "Ethnicity"
+210            COUNTRY  = "Country"
+                                                           The SAS System
+
+211            ARM      = "Description of Planned Arm"
+212            ARMCD    = "Planned Arm Code"
+213            ACTARM   = "Description of Actual Arm"
+214            ACTARMCD = "Actual Arm Code"
+215            TRT01P   = "Planned Treatment for Period 01"
+216            TRT01A   = "Actual Treatment for Period 01"
+217            RFSTDTC  = "Subject Reference Start Date/Time"
+218            RFENDTC  = "Subject Reference End Date/Time"
+219            RFXSTDTC = "Date/Time of First Study Treatment"
+220            RFXENDTC = "Date/Time of Last Study Treatment"
+221            TRTSDT   = "Date of First Exposure to Treatment"
+222            TRTEDT   = "Date of Last Exposure to Treatment"
+223            TRTSDTM  = "Datetime of First Exposure"
+224            TRTEDTM  = "Datetime of Last Exposure"
+225            TRTDURD  = "Total Treatment Duration (Days)"
+226            DTHDTC   = "Date/Time of Death"
+227            DTHDT    = "Date of Death"
+228            DTHFL    = "Subject Death Flag"
+229            DCSREAS  = "Reason for Discontinuation of Study"
+230            DCSREASP = "Reason Specify for Discontinuation"
+231            EOSSTT   = "End of Study Status"
+232            EOTSTT   = "End of Treatment Status"
+233            SAFFL    = "Safety Population Flag"
+234            ITTFL    = "Intent-To-Treat Population Flag"
+235            EFFFL    = "Efficacy Population Flag";
+236        
+237          format TRTSDT TRTEDT DTHDT date9.
+238                 TRTSDTM TRTEDTM e8601dt19.;
+239        run;
+
+NOTE: There were 306 observations read from the data set WORK.ADSL_EFF.
+NOTE: The data set ADAM.ADSL has 306 observations and 39 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1001.43k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        18  Switch Count  0
+      
+
+240        
+241        proc sort data=adam.adsl; by USUBJID; run;
+
+NOTE: There were 306 observations read from the data set ADAM.ADSL.
+NOTE: SAS sort was used.
+NOTE: The data set ADAM.ADSL has 306 observations and 39 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              802.81k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        19  Switch Count  0
+      
+
+                                                           The SAS System
+
+242        
+243        
+244        /* ------------------------------ 10. Write XPT v5 --------------------- */
+245        libname adslout xport "&out./sas_adsl.xpt";
+NOTE: Libref ADSLOUT was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001\sas_adsl.xpt
+246        proc copy in=adam out=adslout memtype=data;
+247          select adsl;
+248        run;
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying ADAM.ADSL to ADSLOUT.ADSL (memtype=DATA).
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+WARNING: Engine XPORT does not support SORTEDBY operations.  SORTEDBY information cannot be copied.
+NOTE: There were 306 observations read from the data set ADAM.ADSL.
+NOTE: The data set ADSLOUT.ADSL has 306 observations and 39 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              648.65k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        20  Switch Count  0
+      
+
+249        libname adslout clear;
+NOTE: Libref ADSLOUT has been deassigned.
+250        
+251        /* Quick log: row + variable counts */
+252        proc sql noprint;
+253          select count(*) into :n_rows from adam.adsl;
+254        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5396.56k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        21  Switch Count  0
+      
+
+255        proc contents data=adam.adsl noprint out=_c; run;
+
+NOTE: The data set WORK._C has 39 observations and 41 variables.
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              766.43k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        22  Switch Count  0
+      
+
+                                                           The SAS System
+
+256        proc sql noprint;
+257          select count(*) into :n_vars from _c;
+258        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5353.90k
+      OS Memory           16220.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        23  Switch Count  0
+      
+
+259        %put NOTE: SAS ADSL built: &n_rows. subjects, &n_vars. variables;
+NOTE: SAS ADSL built:      306 subjects,       39 variables
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.71 seconds
+      user cpu time       0.59 seconds
+      system cpu time     0.56 seconds
+      memory              14101.03k
+      OS Memory           16220.00k
+      Timestamp           10/27/2026 10:59:54 AM
+      Step Count                        23  Switch Count  58
+      

@@ -1,0 +1,40 @@
+                                                     The SAS System
+
+                             Library
+                             Name      Library Member Name                  nvars      nobs
+                             ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                             C2C       AE                                      12        54
+                             C2C       CM                                      12        86
+                             C2C       DM                                      14        50
+                             C2C       DS                                      10        50
+                             C2C       EG                                      14       141
+                             C2C       EX                                       9        47
+                             C2C       LB                                      15       516
+                             C2C       MH                                       6        53
+                             C2C       SV                                       8       132
+                             C2C       VS                                      13       528
+                             PSDTM     AE                                      35      1191
+                             PSDTM     CM                                      21      7510
+                             PSDTM     DM                                      25       306
+                             PSDTM     DS                                      13       596
+                             PSDTM     EX                                      17       591
+                             PSDTM     LB                                      23     59580
+                             PSDTM     MH                                      19      1818
+                             PSDTM     QS                                      20    121749
+                             PSDTM     RELREC                                   7       234
+                             PSDTM     SC                                      14       254
+                             PSDTM     SE                                       9       752
+                             PSDTM     SUPPAE                                  10      1191
+                             PSDTM     SUPPDM                                  10      1197
+                             PSDTM     SUPPDS                                  10         3
+                             PSDTM     SUPPLB                                  10     64403
+                             PSDTM     SV                                       8      3559
+                             PSDTM     TA                                      10         8
+                             PSDTM     TE                                       7         7
+                             PSDTM     TI                                       6        31
+                             PSDTM     TS                                       6        33
+                             PSDTM     TV                                       9        21
+                             PSDTM     VS                                      24     29643
+                             WX        AE                                      10         4
+                             WX        DM                                       8         4
+                             WX        LB                                       7        14

@@ -1,0 +1,30 @@
+                                            The SAS System         10:57 Tuesday, October 27, 2026   1
+
+                                        The CONTENTS Procedure
+
+                                              Directory
+
+              Libref         B                                                          
+              Engine         V9                                                         
+              Physical Name  D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+              Filename       D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+
+                                 Member
+                    #  Name      Type       File Size  Last Modified
+
+                    1  ADAE      DATA           768KB  10/27/2026 10:50:03        
+                    2  ADCM      DATA             5MB  10/27/2026 10:27:31        
+                    3  ADLBC     DATA            33MB  10/27/2026 10:27:31        
+                    4  ADLBH     DATA            22MB  10/27/2026 10:27:31        
+                    5  ADLBHY    DATA             5MB  10/27/2026 10:27:31        
+                    6  ADPC      DATA            19MB  10/27/2026 10:27:31        
+                    7  ADPP      DATA            29MB  10/27/2026 10:27:31        
+                    8  ADQSADAS  DATA             5MB  10/27/2026 10:27:31        
+                    9  ADQSCIBC  DATA           384KB  10/27/2026 10:27:31        
+                   10  ADQSNPIX  DATA            13MB  10/27/2026 10:27:32        
+                   11  ADSL      DATA           192KB  10/27/2026 10:50:03        
+                   12  ADTTE     DATA           192KB  10/27/2026 10:27:32        
+                   13  ADVS      DATA            17MB  10/27/2026 10:27:32        
+                   14  ADVSMAX   DATA            17MB  10/27/2026 10:27:32        
+                   15  ADVSMIN   DATA            17MB  10/27/2026 10:27:32        

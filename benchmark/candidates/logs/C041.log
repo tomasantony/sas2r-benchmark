@@ -1,0 +1,589 @@
+1                                                          The SAS System                            11:25 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.57 seconds
+      cpu time            0.56 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*--------------------------------------------------------------------------------------------
+2            Please be aware that as a matter of policy, R&D is not able to provide programming services
+3            or consulting services for SAS customers.  However, there are times when a coding example can
+4            be of general use to customers and we can justify writing an example to demonstrate the type
+5            of method or logic needed.  This program is for demonstration purpose only, and may work ONLY
+6            for the combination of variables and data provided.  We cannot directly write a customer
+7            program nor can we support or maintain the example program.  If there are further data changes
+8            or requirements it will be up to you to make the necessary changes to the program to best
+9            fit your data.
+10         ---------------------------------------------------------------------------------------------*/
+11         
+12         options cmplib=sasuser.funcs;
+13         
+14         %macro WaterFall_3D_Macro (
+15                Data=, 		/*--Required - Data set name--*/
+16                Duration=,	/*--Required - Treatment Duration variable--*/
+17                Response=, 	/*--Required - Tumor Response variable--*/
+18                Dropped=, 	/*--Required - Subjects dropped--*/
+19                Group=,		/*--Required - Treatment Drug--*/
+20                Code=, 		/*--Required - RECIST Code--*/
+21                AttrMap=,	/*--Required - Attribute Map--*/
+22                Lblx=X, 		/*--X-Axis (Front) Label--*/
+                                                           The SAS System
+
+23                Lbly=Y,		/*--Y-Axis (Horizontal plane) Label--*/
+24                Lblz=Z,		/*--Z-Axis (Vertical) Label--*/
+25                xFac=1,		/*--X-Axis scale factor--*/
+26                Tilt=65,		/*--View Tilt 60 to 80--*/
+27                Rotate=-55,	/*--View Rotation -15 to -75--*/
+28                Title=		/*--Graph Title--*/
+29         );
+30         
+31         /*--Check for Required Parameters   --*/
+32         /*--Terminate if these required parameters are not supplied--*/
+33         %if %length(&Data) eq 0 %then %do;
+34         %put The parameter 'Data' is required - WaterFall 3D Macro Terminated.;
+35         %goto finished;
+36         %end;
+37         
+38         %if %length(&Duration) eq 0 %then %do;
+39         %put The parameter 'Duration' is required - WaterFall 3D Macro Terminated.;
+40         %goto finished;
+41         %end;
+42         
+43         %if %length(&Response) eq 0 %then %do;
+44         %put The parameter 'Response' is required - WaterFall 3D Macro Terminated.;
+45         %goto finished;
+46         %end;
+47         
+48         %if %length(&Dropped) eq 0 %then %do;
+49         %put The parameter 'Dropped' is required - WaterFall 3D Macro Terminated.;
+50         %goto finished;
+51         %end;
+52         
+53         %if %length(&Group) eq 0 %then %do;
+54         %put The parameter 'Group' is required - WaterFall 3D Macro Terminated.;
+55         %goto finished;
+56         %end;
+57         
+58         %if %length(&Code) eq 0 %then %do;
+59         %put The parameter 'Code' is required - WaterFall 3D Macro Terminated.;
+60         %goto finished;
+61         %end;
+62         
+63         %if &xFac > 4 %then %let xFac=4;
+64         %if &xFac < 0.5 %then %let xFac=0.5;
+65         
+66         %let A=&Tilt;
+67         %if &Tilt > 80 %then %let A=80;
+68         %if &Tilt < 60 %then %let A=60;
+69         
+70         %let B=0;
+71         
+72         %let C=&Rotate;
+73         %if &Rotate > -15 %then %let C=-15;
+74         %if &Rotate < -75 %then %let C=-75;
+75         
+76         /*--Define walls and axes in the unit space including xFac for stretching the x-axis--*/
+77         data Wall_Axes;
+78           length id $8 wgroup $1;
+79           dx=&xFac;
+80           id='X1-Axis'; wgroup='D'; xw=-dx; yw=-1; zw=-1; xw2= dx; yw2=-1; zw2=-1; xl=0; yl=-1; zl=-1.1; label=1; output;
+                                                           The SAS System
+
+81           id='X3-Axis'; wgroup='L'; xw=-dx; yw=-1; zw= 1; xw2= dx; yw2=-1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+82           id='X4-Axis'; wgroup='D'; xw=-dx; yw= 1; zw= 1; xw2= dx; yw2= 1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+83           id='Y2-Axis'; wgroup='D'; xw=-dx; yw=-1; zw= 1; xw2=-dx; yw2= 1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+84           id='Y3-Axis'; wgroup='D'; xw= dx; yw=-1; zw=-1; xw2= dx; yw2= 1; zw2=-1; xl=dx+0.1; yl= 0; zl=-0.1; label=2; output;
+85           id='Y4-Axis'; wgroup='L'; xw= dx; yw=-1; zw= 1; xw2= dx; yw2= 1; zw2= 1; xl=.; yl=.; zl=.;   label=.; output;
+86           id='Z1-Axis'; wgroup='D'; xw=-dx; yw=-1; zw=-1; xw2=-dx; yw2=-1; zw2= 1; xl=-dx; yl=-1.2; zl=0;  label=3; output;
+87           id='Z2-Axis'; wgroup='L'; xw= dx; yw=-1; zw=-1; xw2= dx; yw2=-1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+88           id='Z4-Axis'; wgroup='D'; xw= dx; yw= 1; zw=-1; xw2= dx; yw2= 1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+89           call missing(xw2, yw2, zw2, xl, yl, zl, label);
+90           id='Back';   wgroup='D'; xw=-dx; yw=-1; zw=-1; output;
+91           id='Back';   wgroup='D'; xw=-dx; yw= 1; zw=-1; output;
+92           id='Back';   wgroup='D'; xw=-dx; yw= 1; zw= 1; output;
+93           id='Back';   wgroup='D'; xw=-dx; yw=-1; zw= 1; output;
+94           id='Right';  wgroup='D'; xw=-dx; yw= 1; zw=-1; output;
+95           id='Right';  wgroup='D'; xw= dx; yw= 1; zw=-1; output;
+96           id='Right';  wgroup='D'; xw= dx; yw= 1; zw= 1; output;
+97           id='Right';  wgroup='D'; xw=-dx; yw= 1; zw= 1; output;
+98           id='Bottom'; wgroup='D'; xw=-dx; yw=-1; zw=-1; output;
+99           id='Bottom'; wgroup='D'; xw= dx; yw=-1; zw=-1; output;
+100          id='Bottom'; wgroup='D'; xw= dx; yw= 1; zw=-1; output;
+101          id='Bottom'; wgroup='D'; xw=-dx; yw= 1; zw=-1; output;
+102          id='Center'; wgroup='D'; xw=-dx; yw=-1; zw=-0; output;
+103          id='Center'; wgroup='D'; xw= dx; yw=-1; zw=-0; output;
+104          id='Center'; wgroup='D'; xw= dx; yw= 1; zw=-0; output;
+105          id='Center'; wgroup='D'; xw=-dx; yw= 1; zw=-0; output;
+106        run;
+107        
+108        /*--Project the walls and axes--*/
+109        data projected_walls;
+110          keep id wgroup xw yw zw xw2 yw2 zw2 xl yl zl lbx lby lbz label;
+111          array u[4,4]  _temporary_;  /*--Intermediate Matrix--*/
+112          array v[4,4]  _temporary_;  /*--Intermediate Matrix--*/
+113          array w[4,4]  _temporary_;  /*--Final View Matrix--*/
+114          array m[4,4]  _temporary_;  /*--Projection Matrix--*/
+115          array rx[4,4] _temporary_;  /*--X rotation Matrix--*/
+116          array ry[4,4] _temporary_;  /*--Y rotation Matrix--*/
+117          array rz[4,4] _temporary_;  /*--Z rotation Matrix--*/
+118          array d[4,1]  _temporary_;  /*--World Data Array --*/
+119          array p[4,1]  _temporary_;  /*--Projected Data Array --*/
+120          retain r t f n;
+121          r=1; t=1; f=1; n=-1;
+122          pi=constant("PI");
+123          fac=pi/180;
+124          A=&A*fac; B=&B*fac; C=&C*fac;
+125        
+126          /*--Set up projection matrix--*/
+127          m[1,1]=1/r;   m[1,2]=0.0;  m[1,3]=0.0;      m[1,4]=0.0;
+128          m[2,1]=0.0;   m[2,2]=1/t;  m[2,3]=0.0;      m[2,4]=0.0;
+129          m[3,1]=0.0;   m[3,2]=0.0;  m[3,3]=-2/(f-n); m[3,4]=-(f+n)/(f-n);
+130          m[4,1]=0.0;   m[4,2]=0.0;  m[4,3]=0.0;      m[4,4]=1.0;
+131        
+132          /*--Set up X rotation matrix--*/
+133          rx[1,1]=1;     rx[1,2]=0.0;     rx[1,3]=0.0;      rx[1,4]=0.0;
+134          rx[2,1]=0.0;   rx[2,2]=cos(A);  rx[2,3]=-sin(A);  rx[2,4]=0.0;
+135          rx[3,1]=0.0;   rx[3,2]=sin(A);  rx[3,3]=cos(A);   rx[3,4]=0.0;
+136          rx[4,1]=0.0;   rx[4,2]=0.0;     rx[4,3]=0.0;      rx[4,4]=1.0;
+137        
+138          /*--Set up Y rotation matrix--*/
+                                                           The SAS System
+
+139          ry[1,1]=cos(B);  ry[1,2]=0.0;  ry[1,3]=sin(B);  ry[1,4]=0.0;
+140          ry[2,1]=0.0;     ry[2,2]=1.0;  ry[2,3]=0.0;     ry[2,4]=0.0;
+141          ry[3,1]=-sin(B); ry[3,2]=0.0;  ry[3,3]=cos(B);  ry[3,4]=0.0;
+142          ry[4,1]=0.0;     ry[4,2]=0.0;  ry[4,3]=0.0;     ry[4,4]=1.0;
+143        
+144          /*--Set up Z rotation matrix--*/
+145          rz[1,1]=cos(C);  rz[1,2]=-sin(C); rz[1,3]=0.0;  rz[1,4]=0.0;
+146          rz[2,1]=sin(C);  rz[2,2]=cos(C);  rz[2,3]=0.0;  rz[2,4]=0.0;
+147          rz[3,1]=0.0;     rz[3,2]=0.0;     rz[3,3]=1.0;  rz[3,4]=0.0;
+148          rz[4,1]=0.0;     rz[4,2]=0.0;     rz[4,3]=0.0;  rz[4,4]=1.0;
+149        
+150          /*--Build transform matris--*/
+151          call MatMult(rz, m, u);
+152          call MatMult(ry, u, v);
+153          call MatMult(rx, v, w);
+154        
+155          set Wall_Axes;
+156        
+157          /*--Set axis labels--*/
+158          if label eq 1 then lbx="&Lblx";
+159          if label eq 2 then lby="&Lbly";
+160          if label eq 3 then lbz="&Lblz";
+161        
+162          /*--Transform walls--*/
+163          d[1,1]=xw; d[2,1]=yw; d[3,1]=zw; d[4,1]=1;
+164          call MatMult(w, d, p);
+165          xw=p[1,1]; yw=p[2,1]; zw=p[3,1];
+166        
+167          /*--Transform axes--*/
+168          d[1,1]=xw2; d[2,1]=yw2; d[3,1]=zw2; d[4,1]=1;
+169          call MatMult(w, d, p);
+170          xw2=p[1,1]; yw2=p[2,1]; zw2=p[3,1];
+171        
+172          /*--Transform labels--*/
+173          d[1,1]=xl; d[2,1]=yl; d[3,1]=zl; d[4,1]=1;
+174          call MatMult(w, d, p);
+175          xl=p[1,1]; yl=p[2,1]; zl=p[3,1];
+176        run;
+177        
+178        /*--Compute slope of X & Y axes after transformation for label angle--*/
+179        data _null_;
+180          fac=sqrt(&xFac);
+181          set projected_walls;
+182          dx=xw2-xw;
+183          if id='X1-Axis' then do;
+184        	if abs(dx) > 0.001 then xaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+185        	else xaxisRot=90;
+186        	call symput ("xaxisRot", xaxisRot);
+187          end;
+188          if id='Y3-Axis' then do;
+189        	if abs(dx) > 0.001 then yaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+190        	else yaxisRot=90;
+191        	 call symput ("yaxisRot", yaxisRot);
+192          end;
+193        run;
+194        
+195        /*--Find min & max for Duration and Response--*/
+196        data _null_;
+                                                           The SAS System
+
+197          retain durmin 1e6 durmax -1e6 resmin 1e6 resmax -1e6;
+198          set &Data end=last;
+199        
+200          durmin=min(durmin, &Duration);
+201          durmax=max(durmax, &Duration);
+202        
+203          resmin=min(resmin, &Response);
+204          resmax=max(resmax, &Response);
+205        
+206          if last then do;
+207            call symput ("DurMin", durmin);
+208        	call symput ("DurMax", durmax);
+209            call symput ("ResMin", resmin);
+210        	call symput ("ResMax", resmax);
+211          end;
+212        run;
+213        
+214        /*--Create all data from input waterfall data (not in unit coordinates)--*/
+215        data polygons;
+216          retain pid 0 maxy -1e6 miny 1e6 maxz -1e6 minz 1e6;
+217          set &Data end=last;
+218        
+219          durfac=1.05;
+220          resfac=1.05;
+221          dx=&xFac;
+222          i=_n_-1;
+223        
+224          /*--Max range for Duration and Response--*/
+225          aResMax=resfac*max(abs(&ResMax), abs(&ResMin));
+226          aDurMax=durfac*max(abs(&DurMax), abs(&DurMin));
+227        
+228          /*--Create bars in z=0 plane for Duration--*/
+229          Lid=.;
+230        
+231          type='Duration';
+232          pid+1;
+233          z=0;
+234        
+235          x=dx*(i-0.5-0.4); y=0; output;
+236          x=x;              y=&Duration; output;
+237          x=dx*(i-0.5+0.4); y=y; output;
+238          x=x;              y=0; output;
+239        
+240          /*--Create bars in y=0 plane for Response--*/
+241          type='Response';
+242          pid+1;
+243          y=0;
+244        
+245          x=dx*(i-0.5-0.4); z=0; output;
+246          x=x;              z=&Response; output;
+247          x=dx*(i-0.5+0.4); z=z; output;
+248          x=x;              z=0; output;
+249        
+250          /*--Create diamond polygons for dropped subjects--*/
+251          if Dropped then do;
+252            pid+1;
+253            z=0;
+254        
+                                                           The SAS System
+
+255            type='Dropped';
+256            x=dx*(i-0.5-0.3); y=&Duration-0.03*&DurMax; output;
+257            x=dx*(i-0.5);     y=&Duration; output;
+258            x=dx*(i-0.5+0.3); y=&Duration-0.03*&DurMax; output;
+259            x=dx*(i-0.5);     y=&Duration-0.06*&DurMax; output;
+260          end;
+261        
+262          /*--Save XMax value for bars--*/
+263          xMax=dx*(i);
+264        
+265          /*--Create code locations--*/
+266          type='Code';
+267          x=dx*(i-0.5);
+268          z=ifn(&Response < 0, &Response, 0);
+269          y=0;
+270          output;
+271        
+272          /*--Create two more polygons to set aspect--*/
+273          if last then do;
+274            call missing (&duration, &response, &Code);
+275        	type='Response';
+276            pid+1;
+277            x=-dx; y=0; z=-aResMax; output;
+278            x=-dx; y=0; z= aResMax; output;
+279        
+280            pid+1;
+281        	type='Duration';
+282            x=-dx; y=0;       z=aResMax; output;
+283            x=-dx; y=aDurMax; z=aResMax; output;
+284        
+285            /*--Create Y axis (Duration) grid--*/
+286        	pid=.;
+287            type='Y-Axis';
+288        	Lid=1;
+289        	z=0;
+290            do y=0 to aDurMax by 10;
+291        	  x=-dx; output;
+292              x=xMax; output;
+293        	  Lid+1;
+294        	end;
+295        
+296            /*--Create Y axis (Duration) tick values--*/
+297            type='Y-Values';
+298        	Lid=.;
+299        	z=0;
+300            do y=0 to aDurMax by 10;
+301              x=xMax;
+302        	  yTickVal=y;
+303        	  output;
+304        	end;
+305        
+306            /*--Create Z axis (Vertical Response) tick values--*/
+307            type='Z-Values';
+308        	yTickVal=.;
+309        	Lid=.;
+310        	y=0;
+311        	x=dx*(-1);
+312            do z=-10 to -aResMax by -10;
+                                                           The SAS System
+
+313        	  zTickVal=z;
+314        	  output;
+315        	end;
+316            do z=0 to aResMax by 10;
+317        	  zTickVal=z;
+318        	  output;
+319        	end;
+320          end;
+321        run;
+322        
+323        /*ods html;*/
+324        /*proc print data=polygons;*/
+325        /*var type pid x y z code Lid yTickVal zTickVal;*/
+326        /*run;*/
+327        /*ods html close;*/
+328        
+329        /*--Compute data ranges--*/
+330        data _null_;
+331          retain xmin 1e10 xmax -1e10 ymin 1e10 ymax -1e10 zmin 1e10 zmax -1e10;
+332          set polygons end=last;
+333          xmin=min(xmin, x);
+334          xmax=max(xmax, x);
+335          ymin=min(ymin, y);
+336          ymax=max(ymax, y);
+337          zmin=min(zmin, z);
+338          zmax=max(zmax, z);
+339          if last then do;
+340            call symput("xmin", xmin); call symput("xmax", xmax);
+341        	call symput("ymin", ymin); call symput("ymax", ymax);
+342        	call symput("zmin", zmin); call symput("zmax", zmax);
+343          end;
+344        run;
+345        
+346        /*%put "xmin=&xmin xmax=&xmax ymin=&ymin ymax=&ymax zmin=&zmin zmax=&zmax";*/
+347        
+348        
+349        /*--Normalize the data to -1 to +1 ranges with xFac for stretching in x direction--*/
+350        data normalized;
+351          keep &Group pid type x y z code Lid YTickVal zTickVal;
+352          xrange=&xmax-&xmin;
+353          yrange=&ymax-&ymin;
+354          zrange=&zmax-&zmin;
+355          set polygons;
+356        
+357          /*--data points--*/
+358          x=2*&xFac *(x-&xmin)/xrange -&xFac;
+359          y=2*(y-&ymin)/yrange -1;
+360          z=2*(z-&zmin)/zrange -1;
+361        run;
+362        
+363        /*ods html;*/
+364        /*proc print data=normalized;run;*/
+365        /*ods html close;*/
+366        
+367        /*--Project the data--*/
+368        data projected_data;
+369          keep  &Group pid type xd yd zd xr yr zr xc yc zc code xcode ycode zcode
+370                Lid xAy yAy zAy xAz yAz zAz xYv yYv yTickVal xZv yZv zTickVal;
+                                                           The SAS System
+
+371          array u[4,4] _temporary_;  /*--Intermediate Matrix--*/
+372          array v[4,4] _temporary_;  /*--Intermediate Matrix--*/
+373          array w[4,4] _temporary_;  /*--Final View Matrix--*/
+374          array m[4,4] _temporary_;  /*--Projection Matrix--*/
+375          array rx[4,4] _temporary_; /*--X rotation Matrix--*/
+376          array ry[4,4] _temporary_; /*--Y rotation Matrix--*/
+377          array rz[4,4] _temporary_; /*--Z rotation Matrix--*/
+378          array d[4,1] _temporary_;  /*--World Data Array --*/
+379          array p[4,1] _temporary_;  /*--Projected Data Array --*/
+380          retain r t f n;
+381          r=1; t=1; f=1; n=-1;
+382          pi=constant("PI");
+383          fac=pi/180;
+384        
+385          A=&A*fac; B=&B*fac; C=&C*fac;
+386        
+387          /*--Set up projection matrix--*/
+388          m[1,1]=1/r;   m[1,2]=0.0;  m[1,3]=0.0;      m[1,4]=0.0;
+389          m[2,1]=0.0;   m[2,2]=1/t;  m[2,3]=0.0;      m[2,4]=0.0;
+390          m[3,1]=0.0;   m[3,2]=0.0;  m[3,3]=-2/(f-n); m[3,4]=-(f+n)/(f-n);
+391          m[4,1]=0.0;   m[4,2]=0.0;  m[4,3]=0.0;      m[4,4]=1.0;
+392        
+393          /*--Set up X rotation matrix--*/
+394          rx[1,1]=1;     rx[1,2]=0.0;     rx[1,3]=0.0;      rx[1,4]=0.0;
+395          rx[2,1]=0.0;   rx[2,2]=cos(A);  rx[2,3]=-sin(A);  rx[2,4]=0.0;
+396          rx[3,1]=0.0;   rx[3,2]=sin(A);  rx[3,3]=cos(A);   rx[3,4]=0.0;
+397          rx[4,1]=0.0;   rx[4,2]=0.0;     rx[4,3]=0.0;      rx[4,4]=1.0;
+398        
+399          /*--Set up Y rotation matrix--*/
+400          ry[1,1]=cos(B);  ry[1,2]=0.0;  ry[1,3]=sin(B);  ry[1,4]=0.0;
+401          ry[2,1]=0.0;     ry[2,2]=1.0;  ry[2,3]=0.0;     ry[2,4]=0.0;
+402          ry[3,1]=-sin(B); ry[3,2]=0.0;  ry[3,3]=cos(B);  ry[3,4]=0.0;
+403          ry[4,1]=0.0;     ry[4,2]=0.0;  ry[4,3]=0.0;     ry[4,4]=1.0;
+404        
+405          /*--Set up Z rotation matrix--*/
+406          rz[1,1]=cos(C);  rz[1,2]=-sin(C); rz[1,3]=0.0;  rz[1,4]=0.0;
+407          rz[2,1]=sin(C);  rz[2,2]=cos(C);  rz[2,3]=0.0;  rz[2,4]=0.0;
+408          rz[3,1]=0.0;     rz[3,2]=0.0;     rz[3,3]=1.0;  rz[3,4]=0.0;
+409          rz[4,1]=0.0;     rz[4,2]=0.0;     rz[4,3]=0.0;  rz[4,4]=1.0;
+410        
+411          /*--Build transform matris--*/
+412          call MatMult(rz, m, u);
+413          call MatMult(ry, u, v);
+414          call MatMult(rx, v, w);
+415        
+416          set normalized;
+417        
+418          /*--Transform coordinates--*/
+419          d[1,1]=x; d[2,1]=y; d[3,1]=z; d[4,1]=1;
+420          call MatMult(w, d, p);
+421        
+422          /*--extract data for Duration polygons--*/
+423          if type='Duration' then do;
+424            xd=p[1,1]; yd=p[2,1]; zd=p[3,1]; wd=p[4,1];
+425          end;
+426        
+427          /*--extract data for Response polygons--*/
+428          else if type='Response' then do;
+                                                           The SAS System
+
+429            xr=p[1,1]; yr=p[2,1]; zr=p[3,1]; wr=p[4,1];
+430          end;
+431        
+432          /*--extract data for Dropped polygons--*/
+433          else if type='Dropped' then do;
+434            xc=p[1,1]; yc=p[2,1]; zc=p[3,1]; wc=p[4,1];
+435          end;
+436        
+437          /*--extract data for Code position--*/
+438          else if type='Code' then do;
+439            xcode=p[1,1]; ycode=p[2,1]; zcode=p[3,1]; wcode=p[4,1];
+440          end;
+441        
+442          /*--extract data for y-axis grid lines--*/
+443          else if type='Y-Axis' then do;
+444            xAy=p[1,1]; yAy=p[2,1]; zAy=p[3,1]; wAy=p[4,1];
+445          end;
+446        
+447          /*--extract data for y-axis tick values--*/
+448          else if type='Y-Values' then do;
+449            xYv=p[1,1]; yYv=p[2,1]; zYv=p[3,1]; wYv=p[4,1];
+450          end;
+451        
+452          /*--extract data for z-axis tick values--*/
+453          else if type='Z-Values' then do;
+454            xZv=p[1,1]; yZv=p[2,1]; zZv=p[3,1]; wZv=p[4,1];
+455          end;
+456        run;
+457        /**/
+458        /*proc print data=projected_data;run;*/
+459        
+460        /*--Combine data with walls--*/
+461        data combined;
+462          merge projected_walls projected_data;
+463        run;
+464        
+465        /*proc print data=combined;*/
+466        /*var type pid Lid xAy yAy zAy xZv yZv zTickVal;*/
+467        /*run;*/
+468        title;
+469        /*--Draw the graph--*/
+470        %if %length(&Title) > 0 %then %do;
+471        title h=12pt "&Title";
+472        %end;
+473        footnote j=l  h=5pt italic "X-Rotation=&A  Y-Rotation=&B  Z-Rotation=&C";
+474        proc sgplot data=combined nowall  noborder aspect=1 noautolegend dattrmap=&attrmap;
+475          /*--Walls and axis lines--*/
+476          polygon id=id x=xw y=yw / fill lineattrs=(color=lightgray) group=id transparency=0 attrid=walls;
+477        
+478          /*--Y-Axis gridlines--*/
+479          series x=xAy y=yAy / group=lid lineattrs=(color=cxb0b0b0 pattern=solid);
+480        
+481          /*--Duration Bars--*/
+482          polygon id=pid x=xd y=yd / fill outline dataskin=sheen fillattrs=graphdata1 name='D' legendlabel='Duration'
+483                  lineattrs=(color=black);
+484        
+485          /*--Drop Markers--*/
+486          polygon id=pid x=xc y=yc / fill  dataskin=none fillattrs=(color=gold)  name='C' legendlabel='Drop';
+                                                           The SAS System
+
+487        
+488          /*--Response Bars--*/
+489          polygon id=pid x=xr y=yr / fill outline  dataskin=none name='R' legendlabel='Response'
+490                  group=&Group lineattrs=(color=black) attrid=Resp dataskin=sheen;
+491        
+492          /*--Solid and dashed Axis Lines--*/
+493          vector x=xw2 y=yw2 / xorigin=xw yorigin=yw group=wgroup noarrowheads attrid=Axes;
+494        
+495          /*--Axis Labels--*/
+496          text x=xl y=yl text=lbx / position=bottomleft rotate=&xaxisRot textattrs=(size=5);
+497          text x=xl y=yl text=lby / position=bottom rotate=&yaxisRot textattrs=(size=5);
+498          text x=xl y=yl text=lbz / position=left rotate=90 position=top textattrs=(size=5);
+499        
+500          /*--Y-Axis tick values--*/
+501          text x=xYv y=yYv text=yTickVal / position=bottomright textattrs=(size=4);
+502        
+503          /*--Z-Axis tick values--*/
+504          text x=xZv y=yZv text=zTickVal / position=left textattrs=(size=4);
+505          scatter x=xZv y=yZv / markerattrs=(size=2 symbol=dot);
+506        
+507          /*--Code Labels--*/
+508          text x=xcode y=ycode text=code / position=left rotate=90 textattrs=(size=4);
+509        /*  scatter x=xcode y=ycode / markerattrs=(size=3);*/
+510        
+511          keylegend 'R' 'C' / type=fillcolor title='CC-122' across=1 location=inside position=bottomright
+512                     fillheight=5px fillaspect=1.5 titleattrs=(size=5) valueattrs=(size=5) opaque;
+513        
+514          xaxis display=none offsetmin=0.05 offsetmax=0.05;
+515          yaxis display=none offsetmin=0.05 offsetmax=0.05;
+516        
+517          run;
+518        footnote;
+519        
+520        %finished:
+521        %mend WaterFall_3D_Macro;
+522        
+523        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.63 seconds
+      user cpu time       0.26 seconds
+      system cpu time     0.34 seconds
+      memory              7837.43k
+      OS Memory           9036.00k
+      Timestamp           10/27/2026 11:25:28 AM
+      Step Count                        0  Switch Count  12
+      

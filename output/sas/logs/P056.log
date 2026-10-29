@@ -1,0 +1,607 @@
+1                                                          The SAS System                            10:54 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.93 seconds
+      cpu time            0.70 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P056
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P056 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /***
+2          Annotations
+3          (assuming table of diastolic blood pressure after lying down for 5 minutes over time for subjects in safety population)
+4          Dataset: ADVS
+5          Variables: USUBJID, TRTPN, PARAM, PARAMCD, AVAL, CRIT1, CRIT1FL, , CRIT2, CRIT2FL
+6          Record Selection: WHERE PARAMCD=Ã¯Â¿Â½DIABPÃ¯Â¿Â½ and ATPTN=815 and ADY > 1 and SAFFL=Ã¯Â¿Â½YÃ¯Â¿Â½ and (not missing(CRIT1FL) or not
+6        ! missing(CRIT2FL))
+7          Abnormality Direction: Low
+8          N = number of subjects with at least 1 record with non-missing CRIT2FL.
+9          n = number of subjects with CRIT2FL='Y'.
+10         Abnormality Direction: High
+11         N = number of subjects with at least 1 record with non-missing CRIT1FL.
+12         n = number of subjects with CRIT1FL='Y'.
+13         Percentage = 100 * n / N.
+14         **/
+15         
+16         %* modification 2019-12-23 - update path as data has been moved;
+17         
+18         filename source "&rawadam./advs.xpt";
+19         libname source xport;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advs.xpt
+20         data advs;
+21         	set inlib.advs;
+22         	WHERE PARAMCD="DIABP" and ATPTN=815 and ADY > 1 and SAFFL="Y" and (not missing(CRIT1FL) or not missing(CRIT2FL));
+23         	keep USUBJID TRTPN PARAM PARAMCD AVAL CRIT1 CRIT1FL CRIT2 CRIT2FL;
+24         run;
+
+NOTE: There were 2194 observations read from the data set INLIB.ADVS.
+      WHERE (PARAMCD='DIABP') and (ATPTN=815) and (ADY>1) and (SAFFL='Y') and ((not MISSING(CRIT1FL)) or (not MISSING(CRIT2FL)));
+NOTE: The data set WORK.ADVS has 2194 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1037.40k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        2  Switch Count  0
+      
+
+25         
+26         proc sql;
+27         	* Count total subjects for TE low N;
+28         	create table totn_low as
+29         		select distinct trtpn,
+30         				param,
+31         				count(unique(usubjid)) as totn,
+32         				"Low" as tefl length=4
+33         		from advs
+34         		where not missing(crit1fl)
+35         		group by trtpn, param;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.TOTN_LOW created, with 3 rows and 4 columns.
+
+                                                           The SAS System
+
+36         
+37         	* Count number of TE low subjects;
+38         	create table n_low as
+39         		select distinct trtpn,
+40         				param,
+41         				count(unique(usubjid)) as n,
+42         				"Low" as tefl length=4
+43         		from advs
+44         		where crit1fl="Y"
+45         		group by trtpn, param;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.N_LOW created, with 3 rows and 4 columns.
+
+46         
+47         	* Count total subjects for TE high N;
+48         	create table totn_high as
+49         		select distinct trtpn,
+50         				param,
+51         				count(unique(usubjid)) as totn,
+52         				"High" as tefl length=4
+53         		from advs
+54         		where not missing(crit2fl)
+55         		group by trtpn, param;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.TOTN_HIGH created, with 3 rows and 4 columns.
+
+56         
+57         	* Count number of TE low subjects;
+58         	create table n_high as
+59         		select distinct trtpn,
+60         				param,
+61         				count(unique(usubjid)) as n,
+62         				"High" as tefl length=4
+63         		from advs
+64         		where crit2fl="Y"
+65         		group by trtpn, param;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.N_HIGH created, with 3 rows and 4 columns.
+
+66         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.09 seconds
+      user cpu time       0.06 seconds
+      system cpu time     0.01 seconds
+      memory              8245.53k
+      OS Memory           17888.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        3  Switch Count  0
+      
+
+67         
+68         data totn;
+69         	set totn_high totn_low;
+70         run;
+
+NOTE: There were 3 observations read from the data set WORK.TOTN_HIGH.
+NOTE: There were 3 observations read from the data set WORK.TOTN_LOW.
+NOTE: The data set WORK.TOTN has 6 observations and 4 variables.
+                                                           The SAS System
+
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1035.43k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        4  Switch Count  0
+      
+
+71         
+72         data te_n;
+73         	set n_high n_low;
+74         run;
+
+NOTE: There were 3 observations read from the data set WORK.N_HIGH.
+NOTE: There were 3 observations read from the data set WORK.N_LOW.
+NOTE: The data set WORK.TE_N has 6 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1035.18k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        5  Switch Count  0
+      
+
+75         
+76         proc sort data=totn;
+77         	by trtpn param;
+78         run;
+
+NOTE: There were 6 observations read from the data set WORK.TOTN.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TOTN has 6 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              668.46k
+      OS Memory           12132.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        6  Switch Count  0
+      
+
+79         
+80         proc sort data=te_n;
+81         	by trtpn param;
+82         run;
+
+NOTE: There were 6 observations read from the data set WORK.TE_N.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TE_N has 6 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              668.46k
+      OS Memory           12132.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        7  Switch Count  0
+      
+
+83         
+84         * Combine N and n datasets, calculate percent of TE high and low subjects;
+85         data all_n;
+86         	merge totn te_n;
+87         	by trtpn param;
+88         	pct=n/totn*100;
+89         run;
+
+INFO: The variable tefl on data set WORK.TOTN will be overwritten by data set WORK.TE_N.
+NOTE: MERGE statement has more than one data set with repeats of BY values.
+NOTE: There were 6 observations read from the data set WORK.TOTN.
+NOTE: There were 6 observations read from the data set WORK.TE_N.
+NOTE: The data set WORK.ALL_N has 6 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1050.71k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        8  Switch Count  0
+      
+
+90         
+91         
+92         * Compute Fisher Exact p-value;
+93         %macro fisherpval(flg=, tefl=);
+94         proc sort data=advs;
+95         	by usubjid &flg;
+96         run;
+97         
+98         data &flg;
+99         	set advs;
+100        	by usubjid &flg;
+101        	if last.usubjid;
+102        run;
+103        
+104        ods output FishersExact=fisher_&flg;
+105        proc freq data = &flg;
+106        	tables param*trtpn*&flg/fisher;
+107        run;
+108        
+109        data fisher_&flg;
+110        	set fisher_&flg;
+111        	length tefl $4.;
+112        	tefl="&tefl";
+113        	where name1="XP2_FISH";
+114        	keep tefl nvalue1;
+115        run;
+116        %mend;
+117        
+118        %fisherpval(flg=crit1fl, tefl=Low);
+                                                           The SAS System
+
+
+NOTE: There were 2194 observations read from the data set WORK.ADVS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADVS has 2194 observations and 9 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1796.56k
+      OS Memory           13164.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        9  Switch Count  0
+      
+
+
+NOTE: There were 2194 observations read from the data set WORK.ADVS.
+NOTE: The data set WORK.CRIT1FL has 249 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              969.09k
+      OS Memory           11872.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        10  Switch Count  0
+      
+
+
+NOTE: The data set WORK.FISHER_CRIT1FL has 2 observations and 5 variables.
+NOTE: There were 249 observations read from the data set WORK.CRIT1FL.
+NOTE: The PROCEDURE FREQ printed page 1.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.07 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              1455.65k
+      OS Memory           12384.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        11  Switch Count  0
+      
+
+
+NOTE: There were 1 observations read from the data set WORK.FISHER_CRIT1FL.
+      WHERE name1='XP2_FISH';
+NOTE: The data set WORK.FISHER_CRIT1FL has 1 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              911.06k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        12  Switch Count  0
+      
+
+119        %fisherpval(flg=crit2fl, tefl=High);
+
+NOTE: There were 2194 observations read from the data set WORK.ADVS.
+                                                           The SAS System
+
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADVS has 2194 observations and 9 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1803.96k
+      OS Memory           13420.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        13  Switch Count  0
+      
+
+
+NOTE: There were 2194 observations read from the data set WORK.ADVS.
+NOTE: The data set WORK.CRIT2FL has 249 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              976.31k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        14  Switch Count  0
+      
+
+
+NOTE: The data set WORK.FISHER_CRIT2FL has 2 observations and 5 variables.
+NOTE: There were 249 observations read from the data set WORK.CRIT2FL.
+NOTE: The PROCEDURE FREQ printed page 2.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1072.17k
+      OS Memory           12640.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        15  Switch Count  0
+      
+
+
+NOTE: There were 1 observations read from the data set WORK.FISHER_CRIT2FL.
+      WHERE name1='XP2_FISH';
+NOTE: The data set WORK.FISHER_CRIT2FL has 1 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              911.96k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        16  Switch Count  0
+      
+
+120        
+121        data all_fisher;
+122        	set fisher_crit1fl fisher_crit2fl;
+123        run;
+
+                                                           The SAS System
+
+NOTE: There were 1 observations read from the data set WORK.FISHER_CRIT1FL.
+NOTE: There were 1 observations read from the data set WORK.FISHER_CRIT2FL.
+NOTE: The data set WORK.ALL_FISHER has 2 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1051.40k
+      OS Memory           12384.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        17  Switch Count  0
+      
+
+124        
+125        proc sort data=all_fisher;
+126        	by tefl;
+127        run;
+
+NOTE: There were 2 observations read from the data set WORK.ALL_FISHER.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ALL_FISHER has 2 observations and 2 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              739.53k
+      OS Memory           12388.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        18  Switch Count  0
+      
+
+128        
+129        proc sort data=all_n;
+130        	by tefl trtpn;
+131        run;
+
+NOTE: There were 6 observations read from the data set WORK.ALL_N.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ALL_N has 6 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              684.93k
+      OS Memory           12388.00k
+      Timestamp           10/27/2026 10:54:26 AM
+      Step Count                        19  Switch Count  0
+      
+
+132        
+133        * Merge Fisher Exact p-value with N and n values;
+134        * Create the variable "n (%)" for the reporting table;
+135        data table_vals;
+136        	merge all_n all_fisher;
+137        	by tefl;
+138        	pctc="("||strip(put(pct, 5.1))||")";
+139        	nc=strip(put(n, best.));
+140        run;
+                                                           The SAS System
+
+
+NOTE: There were 6 observations read from the data set WORK.ALL_N.
+NOTE: There were 2 observations read from the data set WORK.ALL_FISHER.
+NOTE: The data set WORK.TABLE_VALS has 6 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1086.75k
+      OS Memory           12384.00k
+      Timestamp           10/27/2026 10:54:27 AM
+      Step Count                        20  Switch Count  0
+      
+
+141        
+142        proc sort data=table_vals;
+143        	by param descending tefl nvalue1;
+144        run;
+
+NOTE: There were 6 observations read from the data set WORK.TABLE_VALS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TABLE_VALS has 6 observations and 9 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              678.93k
+      OS Memory           12388.00k
+      Timestamp           10/27/2026 10:54:27 AM
+      Step Count                        21  Switch Count  0
+      
+
+145        
+146        * Only want to display first p-value in final table;
+147        data table_vals;
+148        	set table_vals;
+149        	by param descending tefl nvalue1;
+150        	if first.nvalue1 then nvalue1c=put(nvalue1, pvalue5.3);
+151        		else nvalue1c="";
+152        run;
+
+NOTE: There were 6 observations read from the data set WORK.TABLE_VALS.
+NOTE: The data set WORK.TABLE_VALS has 6 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              925.59k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 10:54:27 AM
+      Step Count                        22  Switch Count  0
+      
+
+153        
+154        options pageno=1 nonumber nocenter mprint ps=44 ls=132 nodate orientation=landscape
+The SAS System
+
+155        		bottommargin = 1.0in
+156                Topmargin=1.0in
+157                leftmargin=1.0in
+158                rightmargin=1.0in;
+159        title1 font="Courier New" height=8pt "Vital Signs";
+160        title2 font="Courier New" height=8pt "Treatment-Emergent Abnormal High or Low at Any Time";
+161        proc report data=table_vals nowd split="|" headline headskip missing formchar(2)="_" nocenter
+162        		style(report)=[fontsize=8pt background=white]
+163        		style(column)=[font=("Courier New", 8pt) background=white]
+164        		style(header)=[font=("Courier New", 8pt) background=white];
+165        	columns param tefl trtpn totn nc pctc nvalue1c;
+166        	define param/"Vital Sign|(unit)" group order=data
+167        				style(column)=[cellwidth=2.75in just=left] style(header)=[just=left];
+168        	define tefl/"Abnormality|Direction" group order=data
+169        				style(column)=[cellwidth=1.25in just=left] style(header)=[just=left];
+170        	define trtpn/"Treatment" order=data group
+171        				style(column)=[cellwidth=1.75in just=left] style(header)=[just=left];
+172        	define totn/"N" order=data group
+173        				style(column)=[cellwidth=0.75in just=left] style(header)=[just=left];
+174        	define nc/"n" order=data group
+175        				style(column)=[cellwidth=.6in just=left] style(header)=[just=left];
+176        	define pctc/"(%)" order=data group
+177        				style(column)=[cellwidth=.6in just=left] style(header)=[just=left];
+178        	define nvalue1c/"P value*" order=data group
+179        				style(column)=[cellwidth=1in just=left] style(header)=[just=left];
+180        
+181        	compute after _page_;
+182        		line @2 "Abbreviations:  N = number of patients with a normal (i.e., not low if calculating
+182      ! `low` and not high if calculating `high`)";
+183        		line @2 "baseline and at least one post-baseline measure, n = number of patients wtih an
+183      ! abnormal post-baseline result in the";
+The SAS System
+
+184        		line @2 "specified category.";
+185        		line @2 "*P values are from Fisher's Exact test.";
+186        	endcomp;
+187        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+WARNING: The length of at least one LINE statement exceeds the LINESIZE. The text will be truncated to fit.
+NOTE: There were 6 observations read from the data set WORK.TABLE_VALS.
+NOTE: The PROCEDURE REPORT printed pages 1-2.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              7983.00k
+      OS Memory           18296.00k
+      Timestamp           10/27/2026 10:54:29 AM
+      Step Count                        23  Switch Count  0
+      
+
+188        
+189        
+190        
+191        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           5.12 seconds
+      user cpu time       0.84 seconds
+      system cpu time     1.01 seconds
+      memory              17046.40k
+      OS Memory           18296.00k
+The SAS System
+
+      Timestamp           10/27/2026 10:54:29 AM
+      Step Count                        23  Switch Count  58
+      

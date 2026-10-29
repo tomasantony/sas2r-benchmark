@@ -1,0 +1,124 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              211.53k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        28  Switch Count  0
+      
+
+172        %let pid = P067; %let outds = &root./output/sas/datasets/P067; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P067
+173        %put NOTE: ===== pipeline wxzhai: P067 P067_ae.sas =====;
+NOTE: ===== pipeline wxzhai: P067 P067_ae.sas =====
+174        %let _bench_t0 = %sysfunc(datetime());
+175        %include "&root./programs/sas_run/P067_ae.sas";
+
+NOTE: There were 4 observations read from the data set RAW.RAW_AE.
+NOTE: SAS sort was used.
+NOTE: The data set RAW.RAW_AE has 4 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              695.18k
+      OS Memory           11868.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        29  Switch Count  0
+      
+
+INFO: Data file SDTM.DM.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+
+NOTE: Input data set is already sorted, no sorting done.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              700.09k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        30  Switch Count  0
+      
+
+INFO: Data file SDTM.DM.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+
+NOTE: There were 4 observations read from the data set RAW.RAW_AE.
+NOTE: There were 4 observations read from the data set SDTM.DM.
+NOTE: The data set SDTM.AE has 4 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1518.09k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        31  Switch Count  0
+      
+
+220        %_bench_capture;
+INFO: Data file ADAM.ADAE.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file ADAM.ADAE_QC.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file ADAM.ADSL.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file SDTM.DM.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file SDTM.LB.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5192.93k
+      OS Memory           16732.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        32  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying RAW.RAW_AE to OUTDS.RAW_AE (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 4 observations read from the data set RAW.RAW_AE.
+NOTE: The data set OUTDS.RAW_AE has 4 observations and 6 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              604.68k
+      OS Memory           11864.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        33  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying SDTM.AE to OUTDS.AE (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 4 observations read from the data set SDTM.AE.
+NOTE: The data set OUTDS.AE has 4 observations and 10 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              606.68k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        34  Switch Count  0
+      
+
+NOTE: benchmark capture: 2 permanent dataset(s) copied to outds (RAW RAW_AE|SDTM AE)
+221        proc printto; run;
+

@@ -1,0 +1,27 @@
+id|pattern|replacement|why
+P002|%include "..\setup.sas";|%include "&root.\programs\sas\macros\cdisc-pilot\setup.sas";|pilot package ships no setup.sas
+P002|ods rtf file="C:\Documents and Settings\kam39347\My Documents\CDISC Pilot\SDTM\ADAE.rtf";|ods rtf file="&outtlf.\P002_t_adae.rtf";|author output path
+P003|libname adam "C:\Documents and Settings\kam39347\My Documents\CDISC Pilot\SDTM";|libname adam "&root.\data\derived\cdisc-pilot\adam";|author data path
+P031|ODS RTF FILE="C:\Documents and Settings\rm95227\Desktop\PLSR static Plots\Output\plsr_box_plot.rtf";|ODS RTF FILE="&outtlf.\P031_f_plsr_box_plot.rtf";|author output path
+P061|libname Cancer "/home/u64214007" ;|libname Cancer "&outds.";|author home dir
+P061|proc import datafile="/home/u64214007/sasuser.v94/u64214007/Breast Cancer METABRIC.csv"|proc import datafile="&rawdir.\sumit-oncology\Breast Cancer METABRIC.csv"|author data path
+P061|ods pdf file="/home/u64214007/oncology_report.pdf";|ods pdf file="&outtlf.\P061_t_oncology_report.pdf";|author output path
+P061|ods pdf file="/home/u64214007/oncology_graphs.pdf";|ods pdf file="&outtlf.\P061_f_oncology_graphs.pdf";|author output path
+R025|ods pdf file="c:\temp\test24.pdf" style=self.border;|ods pdf file="&outtlf.\R025_t_life_tables.pdf" style=self.border;|author output path
+P043|libname adam "\quintiles.net\enterprise\Apps\sasdata\StatOpB\CSV\9_GB_PhUSE\phuse-scripts\data\adam\cdisc-split\";|libname adam "&root.\data\derived\cdisc-pilot\adam-split";|author data path
+P040|ods pdf file = "/bdm/myfolder/mcarniel/kmplot.pdf" ;|ods pdf file = "&outtlf.\P040_f_kmplot.pdf" ;|author output path
+P042|%LET outdir = /by-sasp/patdb/projects/bsp_test/000000/stat/test_sas92_katja/results;|%LET outdir = &outds.;|author output path
+R001|%let adam   = ~/cdisc-pilot/adam;|%let adam   = D:/meta_hackathon/sas2r-agent/data/derived/cdisc-pilot/adam;|author home path
+R001|%let outtlf = ~/cdisc-pilot/tlfs;|%let outtlf = D:/meta_hackathon/sas2r-agent/output/sas/tlf;|author home path
+P029|outfile="D:\Self Clinical SAS Project\New sdtm\raw data for sdtm\5 sdtm_derivation_TU TR RS\tu.xlsx"|outfile="&outds./tu.xlsx"|author output path
+P001|%let sdtm  = ~/cdisc-pilot/sdtm;|%let sdtm  = D:/meta_hackathon/sas2r-agent/data/raw/cdisc-pilot/sdtm;|author home path
+P001|%let qsraw = ~/cdisc-pilot/raw;|%let qsraw = D:/meta_hackathon/sas2r-agent/data/raw/cdisc-pilot/sdtm;|author home path
+P001|%let adam  = ~/cdisc-pilot/adam;|%let adam  = &outds.;|author home path (writes ADSL)
+P001|%let out   = ~/cdisc-pilot/xpt;|%let out   = &outds.;|author home path (writes xpt)
+P048|options |options ls=256;|stray empty OPTIONS statement swallowed the TITLE1 that followed
+R009|data dth ;|data dm; set psdtm.dm; run; data ex; set psdtm.ex; run;  /* benchmark: SDTM from the pilot */ data dth ;|program expects DM and EX in WORK
+P080|ods rtf file="&tlfpath./f_forest.rtf"|options orientation=landscape; ods rtf file="&tlfpath./f_forest.rtf"|10in-wide graphics on a portrait page are cut off; orientation must precede the ODS RTF open
+P081|ods rtf file="&tlfpath./f_mean_cfb.rtf"|options orientation=landscape; ods rtf file="&tlfpath./f_mean_cfb.rtf"|10in-wide graphics on a portrait page are cut off; orientation must precede the ODS RTF open
+P082|ods rtf file="&tlfpath./f_waterfall.rtf"|options orientation=landscape; ods rtf file="&tlfpath./f_waterfall.rtf"|10in-wide graphics on a portrait page are cut off; orientation must precede the ODS RTF open
+P050|data disp;|data outds.disp;|the author left the final transpose/print commented out; keep the last dataset as the output
+P048|ods rtf;|options orientation=landscape leftmargin=0.5in rightmargin=0.5in; ods rtf;|the 9.8in-wide disposition table is cut off on the default portrait page

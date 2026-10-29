@@ -1,0 +1,96 @@
+                                                           The SAS System
+
+                                                         The FREQ Procedure
+
+                                                        Table of TRTPN by n
+
+                                                TRTPN(Planned Treatment (N))     n
+
+                                                Frequency‚
+                                                Percent  ‚
+                                                Row Pct  ‚
+                                                Col Pct  ‚       0‚       1‚  Total
+                                                ƒƒƒƒƒƒƒƒƒˆƒƒƒƒƒƒƒƒˆƒƒƒƒƒƒƒƒˆ
+                                                       0 ‚     79 ‚      5 ‚     84
+                                                         ‚  31.60 ‚   2.00 ‚  33.60
+                                                         ‚  94.05 ‚   5.95 ‚
+                                                         ‚  33.62 ‚  33.33 ‚
+                                                ƒƒƒƒƒƒƒƒƒˆƒƒƒƒƒƒƒƒˆƒƒƒƒƒƒƒƒˆ
+                                                      54 ‚     79 ‚      5 ‚     84
+                                                         ‚  31.60 ‚   2.00 ‚  33.60
+                                                         ‚  94.05 ‚   5.95 ‚
+                                                         ‚  33.62 ‚  33.33 ‚
+                                                ƒƒƒƒƒƒƒƒƒˆƒƒƒƒƒƒƒƒˆƒƒƒƒƒƒƒƒˆ
+                                                      81 ‚     77 ‚      5 ‚     82
+                                                         ‚  30.80 ‚   2.00 ‚  32.80
+                                                         ‚  93.90 ‚   6.10 ‚
+                                                         ‚  32.77 ‚  33.33 ‚
+                                                ƒƒƒƒƒƒƒƒƒˆƒƒƒƒƒƒƒƒˆƒƒƒƒƒƒƒƒˆ
+                                                Total         235       15      250
+                                                            94.00     6.00   100.00
+
+
+                                                 Statistics for Table of TRTPN by n
+
+                                       Statistic                     DF       Value      Prob
+                                       ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                       Chi-Square                     2      0.0021    0.9990
+                                       Likelihood Ratio Chi-Square    2      0.0021    0.9990
+                                       Mantel-Haenszel Chi-Square     1      0.0012    0.9728
+                                       Phi Coefficient                       0.0029          
+                                       Contingency Coefficient               0.0029          
+                                       Cramer's V                            0.0029          
+
+
+                                                        Fisher's Exact Test
+                                                 ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                                 Table Probability (P)       0.0560
+                                                 Pr <= P                     1.0000
+
+                                                         Sample Size = 250
+                              Scatter Plot-Max. Post-baseline vs Max. Baseline for Lab Test 1 (mmol/L)
+
+                                                                                                              Max Post Basline Resul
+                                                                                                      Max.    Analysis Reference Ran
+                                                                                                      Baseli      Low       Normal  
+                                                                                                      ne         N (%)      N (%)   
+Treatment                                                                                             Result                        
+0 (N = 84)                                                                                            High                     2    
+                                                                                                      Low        6   (7.1)     1    
+                                                                                                      Normal    11  (13.0)    64    
+                                                                                                                                    
+54 (N = 84)                                                                                           High                     1    
+                                                                                                      Low        3   (3.5)     1    
+                                                                                                      Normal    12  (14.2)    67    
+                                                                                                                                    
+81 (N = 82)                                                                                           High                     1    
+                                                                                                      Low        6   (7.3)          
+                                                                                                      Normal     5   (6.0)    70    
+                                                                                                                                    
+                              Scatter Plot-Max. Post-baseline vs Max. Baseline for Lab Test 1 (mmol/L)
+
+                                           Max Post Basline Result (shift from baseline)
+                                           Analysis Reference Range Indicator           
+                                           Normal                                       
+                                           N (%)                                        
+                                                                                        
+                                            (2.3)                                       
+                                            (1.1)                                       
+                                           (76.1)                                       
+                                                                                                                                    
+                                            (1.1)                                       
+                                            (1.1)                                       
+                                           (79.7)                                       
+                                                                                                                                    
+                                            (1.2)                                       
+                                                                                        
+                                           (85.3)                                       
+                                                                                                                                    
+                              Scatter Plot-Max. Post-baseline vs Max. Baseline for Lab Test 1 (mmol/L)
+
+                                            Planned        Treatment Emergent High       
+                                          Treatment                                Fisher
+                                                (N)         Nx          n       %      sP
+                                                  0         84          5     6.0  1.0000
+                                                 54         84          5     6.0        
+                                                 81         82          5     6.1        

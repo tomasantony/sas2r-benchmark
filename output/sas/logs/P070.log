@@ -1,0 +1,526 @@
+1                                                          The SAS System                            15:46 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.43 seconds
+      cpu time            0.59 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P070
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P070 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    t_cm.sas
+3          * Purpose:    Table 14.2.1 - Summary of Concomitant Medications by
+4          *             ATC Class and Preferred Name
+5          * Study:      [STUDYID]
+6          * Author:     [Programmer Name]
+7          * Date:       [Date]
+8          * Input:      adam.adcm, adam.adsl
+9          * Output:     t_cm.rtf
+10         * Population: Safety Analysis Set (SAFFL='Y')
+11         * Notes:      ATC Level 2 and Preferred Name (WHO Drug Dictionary)
+12         *             Sorted by descending frequency in Total column
+13         *****************************************************************************/
+14         
+15         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:46:43
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+81         %include "&macpath./m_counts.sas";
+173        %include "&macpath./m_report.sas";
+245        %include "&pgmpath./utilities/u_titles.sas";
+407        
+408        /*--- Step 1: Get Big N ---*/
+409        %m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+NOTE: Table WORK._BIGN created, with 3 rows and 2 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5545.06k
+      OS Memory           15192.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        2  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._BIGN.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+                                                           The SAS System
+
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              888.48k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        3  Switch Count  0
+      
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5398.59k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        4  Switch Count  0
+      
+
+NOTE: ============================================
+NOTE: Treatment group counts:
+NOTE:   Drug X High Dose: N=63
+NOTE:   Drug X Low Dose: N=82
+NOTE:   Placebo: N=95
+NOTE:   Total: N=240
+NOTE: ============================================
+410        
+411        /*--- Step 2: Prepare CM data ---*/
+412        proc sql noprint;
+413            create table cm as
+414            select a.USUBJID, a.TRTA, a.TRTAN,
+415                   a.CMCLAS,      /* ATC Level 2 Class */
+416                   a.CMDECOD,     /* Preferred medication name */
+417                   a.CMINDC,      /* Indication */
+418                   a.CMSTDTC, a.CMENDTC
+419            from adam.adcm a
+420            inner join adam.adsl b on a.USUBJID = b.USUBJID
+421            where b.SAFFL = 'Y'
+422                  and a.CONCOMFL = 'Y'  /* Concomitant flag */
+423            order by a.TRTAN, a.CMCLAS, a.CMDECOD;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.CM created, with 298 rows and 8 columns.
+
+424        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              10347.46k
+      OS Memory           19184.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        5  Switch Count  0
+      
+
+425        
+426        /*--- Step 3: Any CM row ---*/
+427        proc sql noprint;
+428            create table _any as
+429            select TRTA,
+                                                           The SAS System
+
+430                   count(distinct USUBJID) as cnt,
+431                   'Any Concomitant Medication' as display_term length=200,
+432                   0 as atc_ord, 0 as pref_ord, 0 as rowtype
+433            from cm
+434            group by TRTA;
+NOTE: Table WORK._ANY created, with 3 rows and 6 columns.
+
+435        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5353.62k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        6  Switch Count  0
+      
+
+436        
+437        /*--- Step 4: ATC class counts ---*/
+438        proc sql noprint;
+439            create table _atc as
+440            select TRTA, CMCLAS,
+441                   count(distinct USUBJID) as cnt
+442            from cm
+443            group by TRTA, CMCLAS;
+NOTE: Table WORK._ATC created, with 15 rows and 3 columns.
+
+444        
+445            create table _atc_tot as
+446            select CMCLAS,
+447                   count(distinct USUBJID) as cnt_tot
+448            from cm
+449            group by CMCLAS;
+NOTE: Table WORK._ATC_TOT created, with 5 rows and 2 columns.
+
+450        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5386.78k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        7  Switch Count  0
+      
+
+451        
+452        proc sort data=_atc; by CMCLAS; run;
+
+NOTE: There were 15 observations read from the data set WORK._ATC.
+NOTE: SAS sort was used.
+NOTE: The data set WORK._ATC has 15 observations and 3 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              676.65k
+                                                           The SAS System
+
+      OS Memory           11100.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        8  Switch Count  0
+      
+
+452      !                                       /* test-copy patch: SQL output grouped by TRTA, CMCLAS is not in CMCLAS order */
+453        data _atc_rows;
+454            merge _atc _atc_tot;
+455            by CMCLAS;
+456            length display_term $200;
+457            display_term = CMCLAS;
+458            atc_ord = cnt_tot;
+459            pref_ord = 0;
+460            rowtype = 1;
+461        run;
+
+NOTE: There were 15 observations read from the data set WORK._ATC.
+NOTE: There were 5 observations read from the data set WORK._ATC_TOT.
+NOTE: The data set WORK._ATC_ROWS has 15 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1046.42k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        9  Switch Count  0
+      
+
+462        
+463        /*--- Step 5: Preferred name counts ---*/
+464        proc sql noprint;
+465            create table _pref as
+466            select TRTA, CMCLAS, CMDECOD,
+467                   count(distinct USUBJID) as cnt
+468            from cm
+469            group by TRTA, CMCLAS, CMDECOD;
+NOTE: Table WORK._PREF created, with 15 rows and 4 columns.
+
+470        
+471            create table _pref_tot as
+472            select CMCLAS, CMDECOD,
+473                   count(distinct USUBJID) as cnt_tot
+474            from cm
+475            group by CMCLAS, CMDECOD;
+NOTE: Table WORK._PREF_TOT created, with 5 rows and 3 columns.
+
+476        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5387.78k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        10  Switch Count  0
+      
+
+                                                           The SAS System
+
+477        
+478        proc sql noprint;
+479            create table _pref_rows as
+480            select a.TRTA, a.CMCLAS, a.CMDECOD, a.cnt,
+481                   b.cnt_tot as pref_ord,
+482                   c.cnt_tot as atc_ord,
+483                   '  ' || strip(a.CMDECOD) as display_term length=200,
+484                   2 as rowtype
+485            from _pref a
+486            left join _pref_tot b on a.CMCLAS = b.CMCLAS and a.CMDECOD = b.CMDECOD
+487            left join _atc_tot c on a.CMCLAS = c.CMCLAS;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK._PREF_ROWS created, with 15 rows and 8 columns.
+
+488        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              13396.43k
+      OS Memory           22776.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        11  Switch Count  0
+      
+
+489        
+490        /*--- Step 6: Combine and calculate percentages ---*/
+491        data combined;
+492            set _any _atc_rows _pref_rows;
+493        run;
+
+NOTE: There were 3 observations read from the data set WORK._ANY.
+NOTE: There were 15 observations read from the data set WORK._ATC_ROWS.
+NOTE: There were 15 observations read from the data set WORK._PREF_ROWS.
+NOTE: The data set WORK.COMBINED has 33 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1186.85k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        12  Switch Count  0
+      
+
+494        
+495        proc sql noprint;
+496            create table combined2 as
+497            select a.*, b.bign,
+498                   case when b.bign > 0 then a.cnt / b.bign * 100 else . end as pct
+499            from combined a
+500            left join work._bign b on a.TRTA = b.TRTA
+501            order by atc_ord desc, CMCLAS, rowtype, pref_ord desc, display_term, TRTA;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.COMBINED2 created, with 33 rows and 11 columns.
+
+502        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+                                                           The SAS System
+
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              9177.96k
+      OS Memory           18780.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        13  Switch Count  0
+      
+
+503        
+504        data combined3;
+505            set combined2;
+506            length value $30;
+507            if cnt > 0 then value = cat(strip(put(cnt, 8.)), ' (', strip(put(pct, 5.1)), ')');
+508            else value = '0';
+509        run;
+
+NOTE: There were 33 observations read from the data set WORK.COMBINED2.
+NOTE: The data set WORK.COMBINED3 has 33 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              915.51k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        14  Switch Count  0
+      
+
+510        
+511        /*--- Step 7: Transpose ---*/
+512        proc sort data=combined3 nodupkey;
+513            by descending atc_ord CMCLAS rowtype descending pref_ord display_term TRTA;
+514        run;
+
+NOTE: There were 33 observations read from the data set WORK.COMBINED3.
+NOTE: SAS sort was used.
+NOTE: 0 observations with duplicate key values were deleted.
+NOTE: The data set WORK.COMBINED3 has 33 observations and 12 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              671.62k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        15  Switch Count  0
+      
+
+515        
+516        proc transpose data=combined3 out=final(drop=_name_ rename=(colPlacebo=col1 colDrug_X_Low_Dose=col2
+516      ! colDrug_X_High_Dose=col3)) prefix=col;  /* test-copy patch: name the transposed columns col1-col3 as the report expects
+516      ! */
+517            by descending atc_ord CMCLAS rowtype descending pref_ord display_term;
+518            id TRTA;
+519            var value;
+520        run;
+
+                                                           The SAS System
+
+NOTE: There were 33 observations read from the data set WORK.COMBINED3.
+NOTE: The data set WORK.FINAL has 11 observations and 8 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2551.62k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 03:46:43 PM
+      Step Count                        16  Switch Count  0
+      
+
+521        
+522        /*--- Step 8: Generate output ---*/
+523        %set_titles(output=T_CM, population=Safety Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+524        %ods_on(filename=t_cm);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/t_cm.rtf
+525        
+526        proc report data=final nowd split='~'
+527            style(report)=[outputwidth=9.5in]
+528            style(header)=[just=center fontweight=bold];
+529        
+530            columns atc_ord rowtype pref_ord display_term col1 col2 col3;
+531        
+532            define atc_ord      / order descending noprint;
+533            define rowtype      / order noprint;
+534            define pref_ord     / order descending noprint;
+535            define display_term / display 'ATC Class~  Preferred Name'
+536                                  style(column)=[width=3.5in];
+537            define col1         / display "&col1hdr." style(column)=[width=1.5in just=center];
+538            define col2         / display "&col2hdr." style(column)=[width=1.5in just=center];
+539            define col3         / display "&col3hdr." style(column)=[width=1.5in just=center];
+540        
+541            compute display_term;
+542                if rowtype = 1 then call define(_col_, 'style', 'style=[fontweight=bold]');
+543            endcomp;
+544        
+545        run;
+                                                           The SAS System
+
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 11 observations read from the data set WORK.FINAL.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              7842.90k
+      OS Memory           19304.00k
+      Timestamp           10/27/2026 03:46:44 PM
+      Step Count                        17  Switch Count  0
+      
+
+546        
+547        footnote4 j=l "WHO Drug Dictionary [Version]";
+548        footnote5 j=l "Subjects counted once per ATC class and once per preferred name within ATC class.";
+549        
+550        %ods_off;
+551        %clear_titles;
+552        
+553        proc datasets lib=work nolist;
+554            delete cm _any _atc: _pref: combined: final;
+555        quit;
+
+NOTE: Deleting WORK.CM (memtype=DATA).
+NOTE: Deleting WORK._ANY (memtype=DATA).
+NOTE: Deleting WORK._ATC (memtype=DATA).
+NOTE: Deleting WORK._ATC_ROWS (memtype=DATA).
+NOTE: Deleting WORK._ATC_TOT (memtype=DATA).
+NOTE: Deleting WORK._PREF (memtype=DATA).
+NOTE: Deleting WORK._PREF_ROWS (memtype=DATA).
+NOTE: Deleting WORK._PREF_TOT (memtype=DATA).
+NOTE: Deleting WORK.COMBINED (memtype=DATA).
+NOTE: Deleting WORK.COMBINED2 (memtype=DATA).
+NOTE: Deleting WORK.COMBINED3 (memtype=DATA).
+NOTE: Deleting WORK.FINAL (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              231.59k
+                                                           The SAS System
+
+      OS Memory           13400.00k
+      Timestamp           10/27/2026 03:46:44 PM
+      Step Count                        18  Switch Count  0
+      
+
+556        
+557        %put NOTE: t_cm.sas completed successfully.;
+NOTE: t_cm.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.73 seconds
+      user cpu time       0.50 seconds
+      system cpu time     0.59 seconds
+      memory              21141.21k
+      OS Memory           22776.00k
+      Timestamp           10/27/2026 03:46:44 PM
+      Step Count                        18  Switch Count  48
+      

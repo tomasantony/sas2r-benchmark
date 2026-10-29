@@ -1,0 +1,36 @@
+                                                           The SAS System
+
+                                                        The TTEST Procedure
+ 
+                                                          Variable:  Score
+
+                            Gender         N        Mean     Std Dev     Std Err     Minimum     Maximum
+
+                            f              7     76.8571      2.5448      0.9619     73.0000     80.0000
+                            m              9     80.8889      2.6667      0.8889     76.0000     85.0000
+                            Diff (1-2)           -4.0317      2.6151      1.3179                        
+                                                            Effect Sizes
+                                                      Two Independent Samples
+
+                                                                                                 Hedges'
+                                                             Pooled     Cohen's     Hedges'    correction
+                          n1       m1      n2       m2         SD          d           g         factor
+
+                           7    76.8571     9    80.8889    2.61515    -1.54169    -1.45734      0.94529 
+                                               Comparison of Standard Error Estimates
+                                                      Two Independent Samples
+
+                                                                             MLE      Hedges'
+                                                                            Approx     Approx
+                                       Statistic    Estimate    True SE       SE         SE
+
+                                       Hedges' g    -1.45734    0.63032    0.61395    0.57430
+                                       Cohen's d    -1.54169    0.63979    0.62230    0.58211
+                                                Effect Size and Confidence Interval
+                                                      Two Independent Samples
+
+                                                                            Lower       Upper
+                                      Statistic    Estimate    True SE     95% CL      95% CL
+
+                                      Hedges' g    -1.45734    0.63032    -2.94446    -0.46306
+                                      Cohen's d    -1.54169    0.63979    -3.06027    -0.54328

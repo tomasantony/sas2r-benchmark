@@ -1,0 +1,110 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              211.53k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:58:56 PM
+                                                           The SAS System
+
+      Step Count                        8  Switch Count  0
+      
+
+46         %let pid = P065; %let outds = &root./output/sas/datasets/P065; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P065
+47         %put NOTE: ===== pipeline wxzhai: P065 P065_adlb_qc.sas =====;
+NOTE: ===== pipeline wxzhai: P065 P065_adlb_qc.sas =====
+48         %let _bench_t0 = %sysfunc(datetime());
+49         %include "&root./programs/sas_run/P065_adlb_qc.sas";
+INFO: Data file SDTM.LB.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+
+NOTE: Input data set is already sorted; it has been copied to the output data set.
+NOTE: There were 14 observations read from the data set SDTM.LB.
+NOTE: The data set WORK.LB_QC has 14 observations and 7 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1004.68k
+      OS Memory           11868.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        9  Switch Count  0
+      
+
+INFO: Data file ADAM.ADSL.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+
+NOTE: Input data set is already sorted; it has been copied to the output data set.
+NOTE: There were 4 observations read from the data set ADAM.ADSL.
+NOTE: The data set WORK.ADSL_QC has 4 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1013.53k
+      OS Memory           11868.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        10  Switch Count  0
+      
+
+
+NOTE: Variable first.PARAM is uninitialized.
+NOTE: There were 14 observations read from the data set WORK.LB_QC.
+NOTE: There were 4 observations read from the data set WORK.ADSL_QC.
+NOTE: The data set ADAM.ADLB_QC has 14 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1072.75k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        11  Switch Count  0
+      
+
+                                                           The SAS System
+
+85         %_bench_capture;
+INFO: Data file ADAM.ADAE.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file ADAM.ADAE_QC.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file ADAM.ADSL.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file SDTM.DM.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file SDTM.LB.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5191.18k
+      OS Memory           16732.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        12  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying ADAM.ADLB_QC to OUTDS.ADLB_QC (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 14 observations read from the data set ADAM.ADLB_QC.
+NOTE: The data set OUTDS.ADLB_QC has 14 observations and 12 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              609.68k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        13  Switch Count  0
+      
+
+NOTE: benchmark capture: 1 permanent dataset(s) copied to outds (ADAM ADLB_QC)
+86         proc printto; run;
+

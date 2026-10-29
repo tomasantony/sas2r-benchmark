@@ -1,0 +1,277 @@
+1                                                          The SAS System                            11:25 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.53 seconds
+      cpu time            0.49 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the article
+2             "Create a deviation plot to visualize values relative to a baseline"
+3             by Rick Wicklin, published 02MAR2020 on The DO Loop blog:
+4             https://blogs.sas.com/content/iml/2020/03/02/deviation-plot-baseline.html
+5          
+6             This program shows how to create a deviation-from-baseline plot
+7             (Or "deviation plot," for short). The deviation plot is similar to a waterfall chart
+8             https://blogs.sas.com/content/iml/2015/04/20/waterfall-plot.html
+9          
+10            The temperature data for Raleigh is available from
+11            Data from https://waterdata.usgs.gov/nwis/uv?site_no=02079490
+12            The blood glucose data is artificial.
+13         
+14            This article was inspired by
+15            "3 Steps to Building an Air Temperature Circle Graph"
+16            by Mike Drutar
+17            https://communities.sas.com/t5/SAS-Communities-Library/3-Steps-to-Building-an-Air-Temperature-Circle-Graph/ta-p/620899
+18         */
+19         
+20         /* 0. Read the data */
+21         data Series;
+22         informat Date date.;
+                                                           The SAS System
+
+23         format Date Date.;
+24         input Date y @@;
+25         label y = "Blood Glucose (mg/dL)";
+26         datalines;
+
+NOTE: SAS went to a new line when INPUT statement reached past the end of a line.
+NOTE: The data set WORK.SERIES has 122 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1265.90k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:26:00 AM
+      Step Count                        1  Switch Count  0
+      
+
+45         ;
+46         
+47         /* 1. Compute the deviation and encode the data as 'High' or 'Low' by using the reference value */
+48         %let RefValue = 100;
+49         
+50         data Center;
+51         set Series;
+52         if (y > &RefValue) then Group="High";
+53         else Group="Low";
+54         Low  = min(y, &RefValue);    /* lower end of highlow bar */
+55         High = max(y, &RefValue);    /* upper end of highlow bar */
+56         run;
+
+NOTE: There were 122 observations read from the data set WORK.SERIES.
+NOTE: The data set WORK.CENTER has 122 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              913.71k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 11:26:00 AM
+      Step Count                        2  Switch Count  0
+      
+
+57         
+58         /* 2. Create a discrete attribute map that maps values to colors */
+59         data DAttrs;
+60         length c FillColor LineColor $16.;
+61         ID = "HighLow";
+62         Value = "High"; c="DarkRed";  FillColor=c; LineColor=c; output;
+63         Value = "Low";  c="DarkBlue"; FillColor=c; LineColor=c; output;
+64         run;
+
+NOTE: The data set WORK.DATTRS has 2 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              729.59k
+      OS Memory           10068.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 11:26:00 AM
+      Step Count                        3  Switch Count  0
+      
+
+65         
+66         /* 3. Use a HIGHLOW plot to graph the deviations from the reference value */
+67         title "Deviations from Reference Value (&RefValue)";
+68         title2 "Morning Fasting Blood Glucose";
+69         ods graphics / width=600px height=400px;
+70         proc sgplot data=Center DATTRMAP=DAttrs noautolegend;
+71            highlow x=Date low=Low high=High / group=Group ATTRID=HighLow;
+72            refline &RefValue / axis=y;
+73            yaxis grid label="Blood Glucose Level";
+74         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           3.98 seconds
+      user cpu time       0.31 seconds
+      system cpu time     0.37 seconds
+      memory              7181.75k
+      OS Memory           17172.00k
+      Timestamp           10/27/2026 11:26:04 AM
+      Step Count                        4  Switch Count  0
+      
+NOTE: The column format DATE7 is replaced by an auto-generated format on the axis.
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C045\SGPlot.png.
+NOTE: There were 122 observations read from the data set WORK.CENTER.
+NOTE: There were 2 observations read from the data set WORK.DATTRS.
+
+75         
+76         
+77         /***************************************************************/
+78         /* Do the same for a time series for a full year               */
+79         /* of daily temperature averages.                               */
+80         /***************************************************************/
+81         
+82         
+83         /* 0. Read in raw data. Use PROC MEANS to calculate daily average temperature */
+84         title;
+85         %inc "RDUTemp.sas";
+WARNING: Physical file does not exist, D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C045\RDUTemp.sas.
+ERROR: Cannot open %INCLUDE file RDUTemp.sas.
+86         proc means data=RDUTemp noprint;
+ERROR: File WORK.RDUTEMP.DATA does not exist.
+87            by Date;
+88            var Temperature;
+ERROR: No data set open to look up variables.
+89            output out=RDUDailyAvg mean=Temp;
+90         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+WARNING: The data set WORK.RDUDAILYAVG may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              191.71k
+                                                           The SAS System
+
+      OS Memory           16468.00k
+      Timestamp           10/27/2026 11:26:04 AM
+      Step Count                        5  Switch Count  0
+      
+91         
+92         /* 1. Compute the deviation and encode the data as 'High' or 'Low' by using the reference value */
+93         %let RefValue = 65;
+94         
+
+
+95         data Center;
+96         length Group $10;
+97         set RDUDailyAvg;
+98         if (Temp > &RefValue) then Group="Warm";
+99         else Group="Cold";
+100        Low  = min(Temp, &RefValue);    /* lower end of highlow bar */
+101        High = max(Temp, &RefValue);    /* upper end of highlow bar */
+102        run;
+
+NOTE: The data set WORK.CENTER has 0 observations and 4 variables.
+WARNING: Data set WORK.CENTER was not replaced because this step was stopped.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              643.62k
+      OS Memory           16980.00k
+      Timestamp           10/27/2026 11:26:04 AM
+      Step Count                        6  Switch Count  0
+      
+
+103        
+104        /* 2. Create a discrete attribute map that maps values to colors */
+105        data DAttrs;
+106        length c FillColor LineColor $16.;
+107        ID = "WarmCold";              /* the ID value */
+108        Value = "Warm"; c="DarkRed";  FillColor=c; LineColor=c; output;
+109        Value = "Cold"; c="DarkBlue"; FillColor=c; LineColor=c; output;
+110        run;
+
+NOTE: The data set WORK.DATTRS has 0 observations and 5 variables.
+WARNING: Data set WORK.DATTRS was not replaced because this step was stopped.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              643.62k
+      OS Memory           16724.00k
+      Timestamp           10/27/2026 11:26:04 AM
+      Step Count                        7  Switch Count  0
+      
+
+111        
+112        /* 3. Use a HIGHLOW plot to graph the deviations from the reference value */
+113        title "Deviations from Reference Value (&RefValue)";
+114        title2 "Daily Averages in Raleigh, NC";
+115        ods graphics / width=900px height=400px;
+116        proc sgplot data=Center DATTRMAP=DAttrs;
+                                                           The SAS System
+
+117           highlow x=Date low=Low high=High / group=Group ATTRID=WarmCold;
+118           refline &RefValue / axis=y;
+119           keylegend / location=inside title="" across=1 sortorder=reverseauto;
+                                                                      ___________
+                                                                      22
+                                                                      76
+ERROR 22-322: Syntax error, expecting one of the following: ASCENDING, DESCENDING.  
+ERROR 76-322: Syntax error, statement will be ignored.
+120           yaxis grid label="Daily Average Temperature (F)";
+121        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              374.21k
+      OS Memory           16980.00k
+      Timestamp           10/27/2026 11:26:04 AM
+      Step Count                        8  Switch Count  0
+      
+122        
+
+
+ERROR: Errors printed on pages 3,5.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           5.82 seconds
+      user cpu time       0.59 seconds
+      system cpu time     0.76 seconds
+      memory              15641.43k
+      OS Memory           17172.00k
+      Timestamp           10/27/2026 11:26:04 AM
+      Step Count                        8  Switch Count  28
+      

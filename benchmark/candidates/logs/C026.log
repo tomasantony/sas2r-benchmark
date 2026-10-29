@@ -1,0 +1,257 @@
+1                                                          The SAS System                            11:23 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.66 seconds
+      cpu time            0.49 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the article
+2             "Visualize collinearity diagnostics"
+3             by Rick Wicklin, published 17FEB2020 on The DO Loop blog:
+4             https://blogs.sas.com/content/iml/2020/02/17/visualize-collinearity-diagnostics.html
+5          
+6             This program shows how to create a heat map that visualizes
+7             the collinearity diagnostics that are produced by PROC REG in SAS.
+8          
+9             Main steps of the program:
+10            1. Use
+11               ods output CollinDiag = Collin;
+12               to save the Collinearity Diagnostics table to a data set.
+13            2. Use PROC FORMAT to define a format. The format converts
+14               the table values into discrete values:
+15               A. The condition indices (which are in the range [1, infinity])
+16                  ==> condLow, condMed, condHigh, condExtreme
+17               B. The proportion of variance values (which are in the range [0, 1))
+18                  ==> propLow, propMed, propHigh
+19            3. Convert the data set from wide form to long form.
+20            4. Create a discrete attribute map that maps categories to colors.
+21            5. Create a discrete heat map that visualizes the collinearity
+22               diagnostics. Overlay (rounded) values for the condition indices
+                                                           The SAS System
+
+23               and the important (relatively large) values of the proportion of variance.
+24         
+25            Data from the PROC REG documentation.
+26         */
+27         ods graphics/reset;
+28         
+29         data fitness;
+30            input Age Weight Oxygen RunTime RestPulse RunPulse MaxPulse @@;
+31            datalines;
+
+NOTE: SAS went to a new line when INPUT statement reached past the end of a line.
+NOTE: The data set WORK.FITNESS has 31 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1251.21k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:23:59 AM
+      Step Count                        1  Switch Count  0
+      
+
+48         ;
+49         
+50         /* Run regression collinearity diagnostics:
+51            https://blogs.sas.com/content/iml/2020/01/23/collinearity-regression-collin-option.html
+52         */
+53         proc reg data=fitness plots=none;
+54            model Oxygen = RunTime Age Weight RunPulse MaxPulse RestPulse / collin;
+55            ods select ParameterEstimates CollinDiag;
+56            ods output CollinDiag = Collin;
+57         quit;
+
+NOTE: The data set WORK.COLLIN has 7 observations and 12 variables.
+NOTE: The PROCEDURE REG printed page 1.
+NOTE: PROCEDURE REG used (Total process time):
+      real time           0.08 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              2297.62k
+      OS Memory           12628.00k
+      Timestamp           10/27/2026 11:23:59 AM
+      Step Count                        2  Switch Count  1
+      
+
+58         
+59         /* convert variable ranges into strings for the discrete heat map.
+60            For proportions, the ranges are determined by the cut points
+61            [0.0, 0.4) white
+62            [0.4, 0.5) pink
+63            [0.5, 1)   red
+64            For condition indices, the ranges are determined by the cut points
+65            [1, 20)    green
+66            [20, 30)   yellow
+67            [30, 100)  orange
+68            [100, infinity) red
+69         */
+70         proc format;
+                                                           The SAS System
+
+71         value CollinFmt
+72           0.0 -<  0.4  = "PropLow"
+73           0.4 -<  0.5  = "PropMed"
+74           0.5 -<  1.0  = "PropHigh"
+75           1.0 -<  20   = "CondLow"
+76            20 -<  30   = "CondMed"
+77            30 -< 100   = "CondHigh"
+78            other       = "CondExtreme";
+NOTE: Format COLLINFMT has been output.
+79         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              163.59k
+      OS Memory           11860.00k
+      Timestamp           10/27/2026 11:23:59 AM
+      Step Count                        3  Switch Count  0
+      
+
+80         
+81         /* Convert from wide to long for graphing:
+82            https://blogs.sas.com/content/iml/2019/06/03/graph-wide-data-long-data-sas-sgplot.html
+83            The variables in the long data set are:
+84            Number  : The original row number
+85            VarName : The name of the original (wide) variables
+86            Val     : The numerical value of VarName for the row
+87            TextVal : A string value to be overlaid on the heat map.
+88                    : For the condition index, use a 5.0 format
+89                    : For the proportions of variance, use
+90                    : a blank if Val < 0.4, otherwise use the
+91                    : percentage round(100*Val)
+92         */
+93         data CollinLong;
+94         length VarName $32 TextVal $5;
+95         set collin(drop=Model Dependent Eigenvalue);
+96         array v[*] _numeric_;
+97         do j = 2 to dim(v);
+98            VarName = vname(v[j]);
+99            Val = v[j];
+100           if j=2 then TextVal = put(Val, 5.0);
+101           else do;
+102              if Val<0.4 then TextVal = ' ';
+103              else TextVal = put(100*Val, 2.0); *convert proportion to pct;
+104           end;
+105           output;
+106        end;
+107        keep Number VarName Val TextVal;
+108        run;
+
+NOTE: There were 7 observations read from the data set WORK.COLLIN.
+NOTE: The data set WORK.COLLINLONG has 56 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              926.81k
+                                                           The SAS System
+
+      OS Memory           12116.00k
+      Timestamp           10/27/2026 11:23:59 AM
+      Step Count                        4  Switch Count  0
+      
+
+109        
+110        /* create a discrete attribute map:
+111           https://blogs.sas.com/content/iml/2019/07/15/create-discrete-heat-map-sgplot.html
+112        */
+113        data Order;                            /* create discrete attribute map */
+114        length Value $15 FillColor $15;
+115        input raw FillColor;
+116        Value = put(raw, CollinFmt.);          /* use format to assign values */
+117        retain ID 'SortOrder'                  /* name of map */
+118             Show 'AttrMap';                   /* always show all groups in legend */
+119        datalines;
+
+NOTE: The data set WORK.ORDER has 7 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              757.34k
+      OS Memory           11860.00k
+      Timestamp           10/27/2026 11:23:59 AM
+      Step Count                        5  Switch Count  0
+      
+
+127        ;
+128        
+129        /* Create a discrete heat map and overlay text for the condition numbers
+130           and the important (high) cells of the proportion of variance. */
+131        title "Collinearity Diagnostics";
+132        proc sgplot data=CollinLong dattrmap=Order noautolegend;
+133          format Val CollinFmt.;
+134          heatmapparm x=VarName y=Number colorgroup=Val / outline
+135                      attrid=SortOrder nomissingcolor discretey;
+136          text x=VarName y=Number text=TextVal / strip textattrs=(size=14);
+137          refline "ConditionIndex" / axis=x lineattrs=(color=DarkGray)
+138                  discreteoffset=0.5 discretethickness=0.08;
+                                        _________________
+                                        22
+                                        76
+ERROR 22-322: Syntax error, expecting one of the following: ;, AXIS, DATASKIN, DISCRETEOFFSET, LABEL, LABELATTRS, LABELLOC, 
+              LABELPOS, LEGENDLABEL, LINEATTRS, NAME, NOCLIP, SPLITCHAR, SPLITCHARNODROP, SPLITJUSTIFY, TRANSPARENCY.  
+ERROR 76-322: Syntax error, statement will be ignored.
+139          xaxis display=(nolabel);
+140        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              380.37k
+      OS Memory           11604.00k
+      Timestamp           10/27/2026 11:23:59 AM
+      Step Count                        6  Switch Count  0
+                                                           The SAS System
+
+      
+141        
+
+
+ERROR: Errors printed on page 4.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.10 seconds
+      user cpu time       0.26 seconds
+      system cpu time     0.42 seconds
+      memory              10749.68k
+      OS Memory           12628.00k
+      Timestamp           10/27/2026 11:23:59 AM
+      Step Count                        6  Switch Count  27
+      

@@ -1,0 +1,261 @@
+1                                                          The SAS System                            15:47 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.59 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P076
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:47:05 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P076 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    l_ae.sas
+3          * Purpose:    Listing 16.2.7.1 - Listing of Adverse Events
+4          * Study:      [STUDYID]
+5          * Author:     [Programmer Name]
+6          * Date:       [Date]
+7          * Input:      adam.adae, adam.adsl
+8          * Output:     l_ae.rtf
+9          * Population: Safety Analysis Set (SAFFL='Y')
+10         *****************************************************************************/
+11         
+12         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:47:05
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+78         %include "&macpath./m_report.sas";
+150        %include "&pgmpath./utilities/u_titles.sas";
+312        
+313        /*--- Step 1: Prepare listing data ---*/
+314        proc sql noprint;
+315            create table ae_list as
+316            select a.USUBJID,
+317                   b.TRTA,
+318                   b.AGE, b.SEX, b.RACE,
+319                   a.AEBODSYS as SOC,
+320                   a.AEDECOD as PT,
+321                   a.AETERM as VERBATIM,
+322                   a.AESTDTC as START_DATE,
+323                   a.AEENDTC as END_DATE,
+324                   a.AESEV as SEVERITY,
+325                   a.AEREL as RELATIONSHIP,
+326                   a.AESER as SERIOUS,
+327                   a.AEACN as ACTION_TAKEN,
+328                   a.AEOUT as OUTCOME,
+329                   a.AETOXGR as CTCAE_GRADE,
+330                   a.TRTEMFL
+331            from adam.adae a
+332            inner join adam.adsl b on a.USUBJID = b.USUBJID
+333            where b.SAFFL = 'Y' and a.TRTEMFL = 'Y'
+334            order by b.TRTA, a.USUBJID, a.AESTDTC, a.AEBODSYS, a.AEDECOD;
+                                                           The SAS System
+
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.AE_LIST created, with 345 rows and 17 columns.
+
+335        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              10889.46k
+      OS Memory           19100.00k
+      Timestamp           10/27/2026 03:47:05 PM
+      Step Count                        2  Switch Count  0
+      
+
+336        
+337        /*--- Step 2: Format display values ---*/
+338        data ae_report;
+339            set ae_list;
+340            length severity_d $10 rel_d $15 serious_d $3 action_d $30 outcome_d $30;
+341        
+342            /* Truncate/format for display */
+343            severity_d = propcase(SEVERITY);
+344            rel_d = propcase(RELATIONSHIP);
+345            serious_d = ifc(SERIOUS = 'Y', 'Yes', 'No');
+346        
+347            select(upcase(ACTION_TAKEN));
+348                when('DRUG WITHDRAWN')     action_d = 'Drug Withdrawn';
+349                when('DOSE REDUCED')       action_d = 'Dose Reduced';
+350                when('DRUG INTERRUPTED')   action_d = 'Drug Interrupted';
+351                when('DOSE NOT CHANGED')   action_d = 'Dose Not Changed';
+352                when('NOT APPLICABLE')     action_d = 'Not Applicable';
+353                otherwise                  action_d = propcase(ACTION_TAKEN);
+354            end;
+355        
+356            select(upcase(OUTCOME));
+357                when('RECOVERED/RESOLVED')            outcome_d = 'Resolved';
+358                when('RECOVERING/RESOLVING')          outcome_d = 'Resolving';
+359                when('NOT RECOVERED/NOT RESOLVED')    outcome_d = 'Not Resolved';
+360                when('RECOVERED/RESOLVED WITH SEQUELAE') outcome_d = 'Resolved w/ Sequelae';
+361                when('FATAL')                         outcome_d = 'Fatal';
+362                otherwise                             outcome_d = propcase(OUTCOME);
+363            end;
+364        run;
+
+NOTE: There were 345 observations read from the data set WORK.AE_LIST.
+NOTE: The data set WORK.AE_REPORT has 345 observations and 22 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1170.42k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 03:47:05 PM
+      Step Count                        3  Switch Count  0
+      
+
+365        
+366        /*--- Step 3: Generate listing ---*/
+                                                           The SAS System
+
+367        %set_titles(output=L_AE, population=Safety Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+368        %ods_on(filename=l_ae);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/l_ae.rtf
+369        
+370        proc report data=ae_report nowd split='~'
+371            style(report)=[outputwidth=10in font_size=7pt]
+372            style(header)=[just=center fontweight=bold font_size=7pt
+373                           borderbottomcolor=black borderbottomwidth=1pt]
+374            style(column)=[just=left verticalalign=top font_size=7pt cellpadding=2pt];
+375        
+376            columns TRTA USUBJID SOC PT VERBATIM START_DATE END_DATE
+377                    CTCAE_GRADE severity_d serious_d rel_d action_d outcome_d;
+378        
+379            define TRTA        / order 'Treatment' style(column)=[width=0.7in];
+380            define USUBJID     / order 'Subject~ID' style(column)=[width=0.8in];
+381            define SOC         / display 'System Organ~Class' style(column)=[width=1.2in];
+382            define PT          / display 'Preferred~Term' style(column)=[width=1.0in];
+383            define VERBATIM    / display 'Verbatim~Term' style(column)=[width=1.0in];
+384            define START_DATE  / display 'Start~Date' style(column)=[width=0.7in];
+385            define END_DATE    / display 'End~Date' style(column)=[width=0.7in];
+386            define CTCAE_GRADE / display 'CTCAE~Grade' style(column)=[width=0.4in just=center];
+387            define severity_d  / display 'Severity' style(column)=[width=0.6in];
+388            define serious_d   / display 'SAE' style(column)=[width=0.3in just=center];
+389            define rel_d       / display 'Relationship' style(column)=[width=0.7in];
+390            define action_d    / display 'Action~Taken' style(column)=[width=0.8in];
+391            define outcome_d   / display 'Outcome' style(column)=[width=0.8in];
+392        
+393            break after TRTA / page;
+394        
+395        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 345 observations read from the data set WORK.AE_REPORT.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.16 seconds
+      user cpu time       0.06 seconds
+      system cpu time     0.04 seconds
+      memory              10672.18k
+                                                           The SAS System
+
+      OS Memory           22384.00k
+      Timestamp           10/27/2026 03:47:06 PM
+      Step Count                        4  Switch Count  0
+      
+
+396        
+397        %ods_off;
+398        %clear_titles;
+399        
+400        proc datasets lib=work nolist; delete ae_list ae_report; quit;
+
+NOTE: Deleting WORK.AE_LIST (memtype=DATA).
+NOTE: Deleting WORK.AE_REPORT (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              231.75k
+      OS Memory           13912.00k
+      Timestamp           10/27/2026 03:47:06 PM
+      Step Count                        5  Switch Count  0
+      
+
+401        
+402        %put NOTE: l_ae.sas completed successfully.;
+NOTE: l_ae.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.82 seconds
+      user cpu time       0.50 seconds
+      system cpu time     0.84 seconds
+      memory              20604.09k
+      OS Memory           22384.00k
+      Timestamp           10/27/2026 03:47:06 PM
+      Step Count                        5  Switch Count  22
+      

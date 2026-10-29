@@ -1,0 +1,39 @@
+                                                     The Round-To-Even Function
+
+                                                                 Round
+                                                     Round(x)     E(x)      x
+
+                                                         0         0      0.00
+                                                         0         0      0.25
+                                                         1         0      0.50
+                                                         1         1      0.75
+                                                         1         1      1.00
+                                                         1         1      1.25
+                                                         2         2      1.50
+                                                         2         2      1.75
+                                                         2         2      2.00
+                                                         2         2      2.25
+                                                         3         2      2.50
+                                                         3         3      2.75
+                                                         3         3      3.00
+                                                         3         3      3.25
+                                                         4         4      3.50
+                                                     The Round-To-Even Function
+
+                                                        The MEANS Procedure
+
+                                 Variable     Label                            Sum            Mean
+                                 ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                 Length       True values                  429.530           1.011
+                                 Round        Rounded values               432.800           1.018
+                                 RoundEven    Round-to-even values         430.800           1.014
+                                 ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                                     The Round-To-Even Function
+
+                                                        The MEANS Procedure
+
+                                  Variable       Label                                       Mean
+                                  ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                  RoundUp        Proportion rounded up for ROUND            0.548
+                                  RoundEvenUp    Proportion rounded up for ROUNDE           0.501
+                                  ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ

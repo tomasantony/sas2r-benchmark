@@ -1,0 +1,1407 @@
+1                                                          The SAS System                            10:53 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.99 seconds
+      cpu time            0.67 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R022
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R022 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          %* modification 2019-12-23 - update path as data has been moved;
+2          
+3          filename source "&rawadam./adsl.xpt";
+4          libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+5          
+6          options mprint;
+7          
+8          proc format;
+9             value $destats
+10              'NC'       = 'n[a]'
+11              'MEANC'    = 'Mean'
+12              'STDC'     = 'SD'
+13              'MEDIANC'  = 'Median'
+14              'Q1Q3C'    = 'Q1, Q3'
+15         	 'MINMAXC'  = 'Min, Max'
+16         	 'MISSINGC' = 'Missing';
+NOTE: Format $DESTATS has been output.
+17         
+18            invalue destatso
+19              'NC'       = 0
+20              'MEANC'    = 1
+21              'STDC'     = 2
+22              'MEDIANC'  = 3
+23              'Q1Q3C'    = 4
+24              'MINMAXC'  = 5
+25              'MISSINGC' = 6;
+NOTE: Informat DESTATSO has been output.
+26         
+27             value $sexfmt
+28         	  'N' = 'n[a]'
+29         	  'F' = 'F'
+30         	  'M' = 'M';
+NOTE: Format $SEXFMT has been output.
+31         
+32         	
+32       !  invalue sexfmto
+33         	  'N' = 1
+34         	  'F' = 2
+35         	  'M' = 3;
+NOTE: Informat SEXFMTO has been output.
+36         
+37         	
+37       !  value $agegrfmt
+38         	  'N'     = 'n[a]'
+39               '<65'   = '<65'
+40         	  '65-80' = '65-80'
+41         	  '>80'   = '>80';
+NOTE: Format $AGEGRFMT has been output.
+42         
+43         	
+43       !  invalue agegrfmt
+44         	  'N'     = 1
+45               '<65'   = 2
+                                                           The SAS System
+
+46         	  '65-80' = 3
+47         	  '>80'   = 4;
+NOTE: Informat AGEGRFMT has been output.
+48         
+49         	
+49       !  value $racefmt
+50         	  'N' = 'n[a]'
+51         	  'WHITE' = 'White'
+52         	  'BLACK OR AFRICAN AMERICAN' = 'Black or African American'
+53         	  'AMERICAN INDIAN OR ALASKA NATIVE' = 'American Indian or Alaska Native';
+NOTE: Format $RACEFMT has been output.
+54         
+55         	
+55       !  invalue racefmto
+56         	  'N' = 1
+57         	  'WHITE' = 2
+58         	  'BLACK OR AFRICAN AMERICAN' = 3
+59         	  'AMERICAN INDIAN OR ALASKA NATIVE' = 4;
+NOTE: Informat RACEFMTO has been output.
+60         
+61         	
+61       !  value $ethfmt
+62         	  'N' = 'n[a]'
+63         	  'NOT HISPANIC OR LATINO' = 'Not Hispanic or Latino'
+64         	  'HISPANIC OR LATINO' = 'Hispanic or Latino';
+NOTE: Format $ETHFMT has been output.
+65         
+66         	
+66       !  invalue ethfmto
+67         	  'N' = 1
+68         	  'NOT HISPANIC OR LATINO' = 2
+69         	  'HISPANIC OR LATINO' = 3;
+NOTE: Informat ETHFMTO has been output.
+70         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              165.96k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        2  Switch Count  0
+      
+
+71         
+72         %global trtn trt;
+73         %let trtn = trt01an;
+74         %let trt = trt01a;
+75         
+76         data work.adsl;
+77            set source.adsl;
+78         
+79            where ittfl = 'Y';
+80         run;
+
+NOTE: There were 254 observations read from the data set SOURCE.ADSL.
+      WHERE ittfl='Y';
+                                                           The SAS System
+
+NOTE: The data set WORK.ADSL has 254 observations and 48 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              872.00k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        3  Switch Count  0
+      
+
+81         
+82         proc sort data=adsl out=treatments(keep=&trtn &trt) nodupkey;
+83            by &trtn;
+84         run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: SAS sort was used.
+NOTE: 251 observations with duplicate key values were deleted.
+NOTE: The data set WORK.TREATMENTS has 3 observations and 2 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1324.46k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        4  Switch Count  0
+      
+
+85         
+86         data treatments;
+87            set treatments;
+88            by &trtn;
+89         
+90            __dummytrt + 1;
+91         run;
+
+NOTE: There were 3 observations read from the data set WORK.TREATMENTS.
+NOTE: The data set WORK.TREATMENTS has 3 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              881.03k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        5  Switch Count  0
+      
+
+92         
+93         proc sort data=adsl;
+94            by &trtn;
+95         run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADSL has 254 observations and 48 variables.
+                                                           The SAS System
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              821.65k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        6  Switch Count  0
+      
+
+96         
+97         data adsl_work;
+98            merge adsl treatments;
+99            by &trtn;
+100        run;
+
+INFO: The variable TRT01A on data set WORK.ADSL will be overwritten by data set WORK.TREATMENTS.
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: There were 3 observations read from the data set WORK.TREATMENTS.
+NOTE: The data set WORK.ADSL_WORK has 254 observations and 49 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1289.43k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        7  Switch Count  0
+      
+
+101        
+102        %global trtnum;
+103        
+104        proc sql noprint;
+105           select strip(put(count(__dummytrt), best.)) into: trtnum
+106           from treatments;
+107        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5446.37k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        8  Switch Count  0
+      
+
+108        
+109        %global trt1 trt2 trt3;
+110        
+111        %macro bigns;
+112          proc sql noprint;
+113            %do i=1 %to &trtnum;
+114               select count(usubjid) into: trt&i from adsl_work where __dummytrt = &i;
+115        	   select &trt into: trtname&i from adsl_work where __dummytrt = &i;
+116        	%end;
+117          quit;
+118        %mend bigns;
+                                                           The SAS System
+
+119        
+120        %bigns;
+MPRINT(BIGNS):   proc sql noprint;
+MPRINT(BIGNS):   select count(usubjid) into: trt1 from adsl_work where __dummytrt = 1;
+MPRINT(BIGNS):   select trt01a into: trtname1 from adsl_work where __dummytrt = 1;
+MPRINT(BIGNS):   select count(usubjid) into: trt2 from adsl_work where __dummytrt = 2;
+MPRINT(BIGNS):   select trt01a into: trtname2 from adsl_work where __dummytrt = 2;
+MPRINT(BIGNS):   select count(usubjid) into: trt3 from adsl_work where __dummytrt = 3;
+MPRINT(BIGNS):   select trt01a into: trtname3 from adsl_work where __dummytrt = 3;
+MPRINT(BIGNS):   quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5463.68k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        9  Switch Count  0
+      
+
+121        
+122        %macro prcnt(num=,denom=,pctd=pctd,pctfmt=4.0);
+123          do;
+124            length &pctd $9;
+125        	if &num = 0 and &denom = 0 then &pctd='';
+126        	else do;
+127        	  if &num = 0 then &pctd = '';
+128              else &pctd = '(' || compress(put(100*&num/&denom,&pctfmt)) || '%)';
+129        	end;
+130        	&pctd = right(&pctd);
+131          END;
+132        %mend;
+133        
+134        %macro descrstats(indata=, outdata=, varn=, dec=, name=, ord=);
+135           proc sort data=&indata out=__indata;
+136              by __dummytrt;
+137           run;
+138        
+139           proc means data=__indata noprint;
+140              by __dummytrt;
+141        	  var &varn;
+142        	  output out=__meansres n=n mean=mean stddev=std min=min max=max q1=q1 q3=q3 median=median;
+143           run;
+144        
+145           data __meansres;
+146              set __meansres;
+147              nc = put(n,6.0);
+148              meanc = put(mean,6.%eval(&dec+1));
+149        	  medianc = put(median,6.%eval(&dec+1));
+150        	  stdc = put(std,6.%eval(&dec+1));
+151        	  q1q3c = trim(put(q1,6.%eval(&dec+1)))||', '||trim(put(q3,6.%eval(&dec+1)));
+152        	  minmaxc = trim(put(min,6.%eval(&dec+0)))||', '||put(max,6.%eval(&dec+0));
+153           run;
+154        
+155           proc transpose data=__meansres out=__trout prefix=col;
+156              id __dummytrt;
+157              var nc meanc stdc minmaxc q1q3c medianc;
+158           run;
+                                                           The SAS System
+
+159        
+160           data __descrres;
+161              length col1-col&trtnum $50;
+162              set __trout;
+163        	  length name col0 $200;
+164        	
+165        	  col0 = put(upcase(_NAME_), $destats.);
+166        	  ord = input(upcase(_NAME_), destatso.);
+167        	  name = &name;
+168        	  mainord = &ord;
+169        
+170              keep name col0 ord col1-col&trtnum mainord;
+171           run;
+172        
+173           data &outdata;
+174              set __descrres;
+175           run;
+176        %mend descrstats;
+177        
+178        %descrstats(indata=adsl_work,
+179                    outdata=ageres,
+180                    varn=age,
+181                    dec=0,
+182                    name="Age (years)",
+183                    ord=2);
+MPRINT(DESCRSTATS):   proc sort data=adsl_work out=__indata;
+MPRINT(DESCRSTATS):   by __dummytrt;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL_WORK.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.__INDATA has 254 observations and 49 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1337.78k
+      OS Memory           11616.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        10  Switch Count  0
+      
+
+MPRINT(DESCRSTATS):   proc means data=__indata noprint;
+MPRINT(DESCRSTATS):   by __dummytrt;
+MPRINT(DESCRSTATS):   var age;
+MPRINT(DESCRSTATS):   output out=__meansres n=n mean=mean stddev=std min=min max=max q1=q1 q3=q3 median=median;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 254 observations read from the data set WORK.__INDATA.
+NOTE: The data set WORK.__MEANSRES has 3 observations and 11 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1723.31k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        11  Switch Count  0
+                                                           The SAS System
+
+      
+
+MPRINT(DESCRSTATS):   data __meansres;
+MPRINT(DESCRSTATS):   set __meansres;
+MPRINT(DESCRSTATS):   nc = put(n,6.0);
+MPRINT(DESCRSTATS):   meanc = put(mean,6.1);
+MPRINT(DESCRSTATS):   medianc = put(median,6.1);
+MPRINT(DESCRSTATS):   stdc = put(std,6.1);
+MPRINT(DESCRSTATS):   q1q3c = trim(put(q1,6.1))||', '||trim(put(q3,6.1));
+MPRINT(DESCRSTATS):   minmaxc = trim(put(min,6.0))||', '||put(max,6.0);
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 3 observations read from the data set WORK.__MEANSRES.
+NOTE: The data set WORK.__MEANSRES has 3 observations and 17 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              892.56k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        12  Switch Count  0
+      
+
+MPRINT(DESCRSTATS):   proc transpose data=__meansres out=__trout prefix=col;
+MPRINT(DESCRSTATS):   id __dummytrt;
+MPRINT(DESCRSTATS):   var nc meanc stdc minmaxc q1q3c medianc;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 3 observations read from the data set WORK.__MEANSRES.
+NOTE: The data set WORK.__TROUT has 6 observations and 4 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2522.53k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        13  Switch Count  0
+      
+
+MPRINT(DESCRSTATS):   data __descrres;
+MPRINT(DESCRSTATS):   length col1-col3 $50;
+MPRINT(DESCRSTATS):   set __trout;
+MPRINT(DESCRSTATS):   length name col0 $200;
+MPRINT(DESCRSTATS):   col0 = put(upcase(_NAME_), $destats.);
+MPRINT(DESCRSTATS):   ord = input(upcase(_NAME_), destatso.);
+MPRINT(DESCRSTATS):   name = "Age (years)";
+MPRINT(DESCRSTATS):   mainord = 2;
+MPRINT(DESCRSTATS):   keep name col0 ord col1-col3 mainord;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 6 observations read from the data set WORK.__TROUT.
+NOTE: The data set WORK.__DESCRRES has 6 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+                                                           The SAS System
+
+      memory              934.68k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        14  Switch Count  0
+      
+
+MPRINT(DESCRSTATS):   data ageres;
+MPRINT(DESCRSTATS):   set __descrres;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 6 observations read from the data set WORK.__DESCRRES.
+NOTE: The data set WORK.AGERES has 6 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              895.56k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        15  Switch Count  0
+      
+
+184        
+185        %descrstats(indata=adsl_work,
+186                    outdata=weightres,
+187                    varn=weightbl,
+188                    dec=0,
+189                    name="Weight (kg)",
+190                    ord=5);
+MPRINT(DESCRSTATS):   proc sort data=adsl_work out=__indata;
+MPRINT(DESCRSTATS):   by __dummytrt;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL_WORK.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.__INDATA has 254 observations and 49 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1337.53k
+      OS Memory           11872.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        16  Switch Count  0
+      
+
+MPRINT(DESCRSTATS):   proc means data=__indata noprint;
+MPRINT(DESCRSTATS):   by __dummytrt;
+MPRINT(DESCRSTATS):   var weightbl;
+MPRINT(DESCRSTATS):   output out=__meansres n=n mean=mean stddev=std min=min max=max q1=q1 q3=q3 median=median;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 254 observations read from the data set WORK.__INDATA.
+NOTE: The data set WORK.__MEANSRES has 3 observations and 11 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+                                                           The SAS System
+
+      memory              1711.71k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        17  Switch Count  0
+      
+
+MPRINT(DESCRSTATS):   data __meansres;
+MPRINT(DESCRSTATS):   set __meansres;
+MPRINT(DESCRSTATS):   nc = put(n,6.0);
+MPRINT(DESCRSTATS):   meanc = put(mean,6.1);
+MPRINT(DESCRSTATS):   medianc = put(median,6.1);
+MPRINT(DESCRSTATS):   stdc = put(std,6.1);
+MPRINT(DESCRSTATS):   q1q3c = trim(put(q1,6.1))||', '||trim(put(q3,6.1));
+MPRINT(DESCRSTATS):   minmaxc = trim(put(min,6.0))||', '||put(max,6.0);
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 3 observations read from the data set WORK.__MEANSRES.
+NOTE: The data set WORK.__MEANSRES has 3 observations and 17 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              892.53k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        18  Switch Count  0
+      
+
+MPRINT(DESCRSTATS):   proc transpose data=__meansres out=__trout prefix=col;
+MPRINT(DESCRSTATS):   id __dummytrt;
+MPRINT(DESCRSTATS):   var nc meanc stdc minmaxc q1q3c medianc;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 3 observations read from the data set WORK.__MEANSRES.
+NOTE: The data set WORK.__TROUT has 6 observations and 4 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              2522.53k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        19  Switch Count  0
+      
+
+MPRINT(DESCRSTATS):   data __descrres;
+MPRINT(DESCRSTATS):   length col1-col3 $50;
+MPRINT(DESCRSTATS):   set __trout;
+MPRINT(DESCRSTATS):   length name col0 $200;
+MPRINT(DESCRSTATS):   col0 = put(upcase(_NAME_), $destats.);
+MPRINT(DESCRSTATS):   ord = input(upcase(_NAME_), destatso.);
+MPRINT(DESCRSTATS):   name = "Weight (kg)";
+MPRINT(DESCRSTATS):   mainord = 5;
+MPRINT(DESCRSTATS):   keep name col0 ord col1-col3 mainord;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 6 observations read from the data set WORK.__TROUT.
+NOTE: The data set WORK.__DESCRRES has 6 observations and 7 variables.
+                                                           The SAS System
+
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              918.62k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        20  Switch Count  0
+      
+
+MPRINT(DESCRSTATS):   data weightres;
+MPRINT(DESCRSTATS):   set __descrres;
+MPRINT(DESCRSTATS):   run;
+
+NOTE: There were 6 observations read from the data set WORK.__DESCRRES.
+NOTE: The data set WORK.WEIGHTRES has 6 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              895.56k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        21  Switch Count  0
+      
+
+191        
+192        %macro freqstats(indata=, outdata=, var=, varfmt=, ordfmt=, name=, ord=);
+193          proc freq data = &indata noprint;
+194            tables &var*__dummytrt / out = __frout (drop = percent);
+195          run;
+196        
+197          proc sql noprint;
+198            %do i=1 %to &trtnum;
+199               select count(usubjid) into: denom&i from &indata where ^missing(&var) and __dummytrt = &i;
+200        	%end;
+201          quit;
+202        
+203          proc sort data = __frout;
+204            by &var;
+205          run;
+206        
+207          proc transpose data = __frout out = __trout_fr (drop = _LABEL_ _NAME_ ) prefix=n;
+208            var count;
+209            id __dummytrt;
+210            by &var;
+211          run;
+212        
+213          data denom;
+214             &var = "N";
+215             %do i=1 %to &trtnum;
+216        	     n&i = &&denom&i;
+217        	 %end;
+218          run;
+219        
+220          data &outdata;
+221            set __trout_fr denom;
+222            length name col0 $200 col1-col&trtnum $50;
+                                                           The SAS System
+
+223        
+224        	%do i=1 %to &trtnum;
+225              if n&i = . then n&i = 0;
+226        	  %prcnt(num=n&i,denom=&&denom&i,pctd=pct&i,pctfmt=5.1);
+227              col&i = put(n&i,6.0-R) || pct1;
+228        	%end;
+229        
+230        	name = &name;
+231        	col0 = put(&var, $&varfmt..);
+232        	mainord = &ord;
+233        	ord = input(&var, &ordfmt..);
+234          run;
+235        
+236        %mend freqstats;
+237        
+238        %freqstats(indata=adsl_work,
+239                   outdata=sexres,
+240                   var=sex,
+241                   varfmt=sexfmt,
+242        		   ordfmt=sexfmto,
+243                   name="Sex n(%)",
+244                   ord=1);
+MPRINT(FREQSTATS):   proc freq data = adsl_work noprint;
+MPRINT(FREQSTATS):   tables sex*__dummytrt / out = __frout (drop = percent);
+MPRINT(FREQSTATS):   run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL_WORK.
+NOTE: The data set WORK.__FROUT has 6 observations and 3 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.11 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              1622.65k
+      OS Memory           12380.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        22  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc sql noprint;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom1 from adsl_work where ^missing(sex) and __dummytrt = 1;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom2 from adsl_work where ^missing(sex) and __dummytrt = 2;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom3 from adsl_work where ^missing(sex) and __dummytrt = 3;
+MPRINT(FREQSTATS):   quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5462.00k
+      OS Memory           16732.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        23  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc sort data = __frout;
+MPRINT(FREQSTATS):   by sex;
+MPRINT(FREQSTATS):   run;
+
+NOTE: There were 6 observations read from the data set WORK.__FROUT.
+                                                           The SAS System
+
+NOTE: SAS sort was used.
+NOTE: The data set WORK.__FROUT has 6 observations and 3 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              714.06k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        24  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc transpose data = __frout out = __trout_fr (drop = _LABEL_ _NAME_ ) prefix=n;
+MPRINT(FREQSTATS):   var count;
+MPRINT(FREQSTATS):   id __dummytrt;
+MPRINT(FREQSTATS):   by sex;
+MPRINT(FREQSTATS):   run;
+
+NOTE: There were 6 observations read from the data set WORK.__FROUT.
+NOTE: The data set WORK.__TROUT_FR has 2 observations and 4 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2541.12k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        25  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   data denom;
+MPRINT(FREQSTATS):   sex = "N";
+MPRINT(FREQSTATS):   n1 = 86;
+MPRINT(FREQSTATS):   n2 = 84;
+MPRINT(FREQSTATS):   n3 = 84;
+MPRINT(FREQSTATS):   run;
+
+NOTE: The data set WORK.DENOM has 1 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              741.59k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        26  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   data sexres;
+MPRINT(FREQSTATS):   set __trout_fr denom;
+MPRINT(FREQSTATS):   length name col0 $200 col1-col3 $50;
+MPRINT(FREQSTATS):   if n1 = . then n1 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct1 $9;
+MPRINT(PRCNT):   if n1 = 0 and 86 = 0 then pct1='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n1 = 0 then pct1 = '';
+MPRINT(PRCNT):   else pct1 = '(' || compress(put(100*n1/86,5.1)) || '%)';
+                                                           The SAS System
+
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct1 = right(pct1);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col1 = put(n1,6.0-R) || pct1;
+MPRINT(FREQSTATS):   if n2 = . then n2 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct2 $9;
+MPRINT(PRCNT):   if n2 = 0 and 84 = 0 then pct2='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n2 = 0 then pct2 = '';
+MPRINT(PRCNT):   else pct2 = '(' || compress(put(100*n2/84,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct2 = right(pct2);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col2 = put(n2,6.0-R) || pct1;
+MPRINT(FREQSTATS):   if n3 = . then n3 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct3 $9;
+MPRINT(PRCNT):   if n3 = 0 and 84 = 0 then pct3='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n3 = 0 then pct3 = '';
+MPRINT(PRCNT):   else pct3 = '(' || compress(put(100*n3/84,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct3 = right(pct3);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col3 = put(n3,6.0-R) || pct1;
+MPRINT(FREQSTATS):   name = "Sex n(%)";
+MPRINT(FREQSTATS):   col0 = put(sex, $sexfmt.);
+MPRINT(FREQSTATS):   mainord = 1;
+MPRINT(FREQSTATS):   ord = input(sex, sexfmto.);
+MPRINT(FREQSTATS):   run;
+
+NOTE: There were 2 observations read from the data set WORK.__TROUT_FR.
+NOTE: There were 1 observations read from the data set WORK.DENOM.
+NOTE: The data set WORK.SEXRES has 3 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1073.25k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:53:45 AM
+      Step Count                        27  Switch Count  0
+      
+
+245        
+246        %freqstats(indata=adsl_work,
+247                   outdata=agegrres,
+248                   var=agegr1,
+249                   varfmt=agegrfmt,
+250        		   ordfmt=agegrfmto,
+251                   name="Age categories n(%)",
+252                   ord=3);
+MPRINT(FREQSTATS):   proc freq data = adsl_work noprint;
+MPRINT(FREQSTATS):   tables agegr1*__dummytrt / out = __frout (drop = percent);
+                                                           The SAS System
+
+MPRINT(FREQSTATS):   run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL_WORK.
+NOTE: The data set WORK.__FROUT has 9 observations and 3 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.12 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1531.25k
+      OS Memory           12380.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        28  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc sql noprint;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom1 from adsl_work where ^missing(agegr1) and __dummytrt = 1;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom2 from adsl_work where ^missing(agegr1) and __dummytrt = 2;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom3 from adsl_work where ^missing(agegr1) and __dummytrt = 3;
+MPRINT(FREQSTATS):   quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5462.00k
+      OS Memory           16732.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        29  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc sort data = __frout;
+MPRINT(FREQSTATS):   by agegr1;
+MPRINT(FREQSTATS):   run;
+
+NOTE: There were 9 observations read from the data set WORK.__FROUT.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.__FROUT has 9 observations and 3 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              709.06k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        30  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc transpose data = __frout out = __trout_fr (drop = _LABEL_ _NAME_ ) prefix=n;
+MPRINT(FREQSTATS):   var count;
+MPRINT(FREQSTATS):   id __dummytrt;
+MPRINT(FREQSTATS):   by agegr1;
+MPRINT(FREQSTATS):   run;
+
+NOTE: There were 9 observations read from the data set WORK.__FROUT.
+NOTE: The data set WORK.__TROUT_FR has 3 observations and 4 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              2541.12k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        31  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   data denom;
+MPRINT(FREQSTATS):   agegr1 = "N";
+MPRINT(FREQSTATS):   n1 = 86;
+MPRINT(FREQSTATS):   n2 = 84;
+MPRINT(FREQSTATS):   n3 = 84;
+MPRINT(FREQSTATS):   run;
+
+NOTE: The data set WORK.DENOM has 1 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              741.59k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        32  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   data agegrres;
+MPRINT(FREQSTATS):   set __trout_fr denom;
+MPRINT(FREQSTATS):   length name col0 $200 col1-col3 $50;
+MPRINT(FREQSTATS):   if n1 = . then n1 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct1 $9;
+MPRINT(PRCNT):   if n1 = 0 and 86 = 0 then pct1='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n1 = 0 then pct1 = '';
+MPRINT(PRCNT):   else pct1 = '(' || compress(put(100*n1/86,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct1 = right(pct1);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col1 = put(n1,6.0-R) || pct1;
+MPRINT(FREQSTATS):   if n2 = . then n2 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct2 $9;
+MPRINT(PRCNT):   if n2 = 0 and 84 = 0 then pct2='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n2 = 0 then pct2 = '';
+MPRINT(PRCNT):   else pct2 = '(' || compress(put(100*n2/84,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct2 = right(pct2);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col2 = put(n2,6.0-R) || pct1;
+MPRINT(FREQSTATS):   if n3 = . then n3 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct3 $9;
+MPRINT(PRCNT):   if n3 = 0 and 84 = 0 then pct3='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n3 = 0 then pct3 = '';
+MPRINT(PRCNT):   else pct3 = '(' || compress(put(100*n3/84,5.1)) || '%)';
+                                                           The SAS System
+
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct3 = right(pct3);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col3 = put(n3,6.0-R) || pct1;
+MPRINT(FREQSTATS):   name = "Age categories n(%)";
+MPRINT(FREQSTATS):   col0 = put(agegr1, $agegrfmt.);
+MPRINT(FREQSTATS):   mainord = 3;
+NOTE: Line generated by the macro variable "ORDFMT".
+252         agegrfmto
+            __________
+            48
+MPRINT(FREQSTATS):   ord = input(agegr1, agegrfmto.);
+MPRINT(FREQSTATS):   run;
+
+ERROR 48-59: The informat AGEGRFMTO was not found or could not be loaded.
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+WARNING: The data set WORK.AGEGRRES may be incomplete.  When this step was stopped there were 0 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              649.34k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        33  Switch Count  0
+      
+
+253        
+254        %freqstats(indata=adsl_work,
+255                   outdata=raceres,
+256                   var=race,
+257                   varfmt=racefmt,
+258        		   ordfmt=racefmto,
+259                   name="Race n(%)",
+260                   ord=4);
+MPRINT(FREQSTATS):   proc freq data = adsl_work noprint;
+MPRINT(FREQSTATS):   tables race*__dummytrt / out = __frout (drop = percent);
+MPRINT(FREQSTATS):   run;
+
+NOTE: The data set WORK.__FROUT has 0 observations and 0 variables.
+WARNING: Data set WORK.__FROUT was not replaced because new file is incomplete.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              273.31k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        34  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc sql noprint;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom1 from adsl_work where ^missing(race) and __dummytrt = 1;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom2 from adsl_work where ^missing(race) and __dummytrt = 2;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom3 from adsl_work where ^missing(race) and __dummytrt = 3;
+                                                           The SAS System
+
+MPRINT(FREQSTATS):   quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5462.00k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        35  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc sort data = __frout;
+MPRINT(FREQSTATS):   by race;
+ERROR: Variable RACE not found.
+MPRINT(FREQSTATS):   run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              171.40k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        36  Switch Count  0
+      
+
+
+MPRINT(FREQSTATS):   proc transpose data = __frout out = __trout_fr (drop = _LABEL_ _NAME_ ) prefix=n;
+MPRINT(FREQSTATS):   var count;
+MPRINT(FREQSTATS):   id __dummytrt;
+MPRINT(FREQSTATS):   by race;
+ERROR: Variable RACE not found.
+MPRINT(FREQSTATS):   run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.__TROUT_FR may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+WARNING: Data set WORK.__TROUT_FR was not replaced because this step was stopped.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              178.40k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        37  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   data denom;
+MPRINT(FREQSTATS):   race = "N";
+MPRINT(FREQSTATS):   n1 = 0;
+MPRINT(FREQSTATS):   n2 = 0;
+MPRINT(FREQSTATS):   n3 = 0;
+MPRINT(FREQSTATS):   run;
+
+NOTE: The data set WORK.DENOM has 0 observations and 4 variables.
+WARNING: Data set WORK.DENOM was not replaced because this step was stopped.
+NOTE: DATA statement used (Total process time):
+                                                           The SAS System
+
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              607.68k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        38  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   data raceres;
+MPRINT(FREQSTATS):   set __trout_fr denom;
+MPRINT(FREQSTATS):   length name col0 $200 col1-col3 $50;
+MPRINT(FREQSTATS):   if n1 = . then n1 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct1 $9;
+MPRINT(PRCNT):   if n1 = 0 and 0 = 0 then pct1='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n1 = 0 then pct1 = '';
+MPRINT(PRCNT):   else pct1 = '(' || compress(put(100*n1/0,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct1 = right(pct1);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col1 = put(n1,6.0-R) || pct1;
+MPRINT(FREQSTATS):   if n2 = . then n2 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct2 $9;
+MPRINT(PRCNT):   if n2 = 0 and 0 = 0 then pct2='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n2 = 0 then pct2 = '';
+MPRINT(PRCNT):   else pct2 = '(' || compress(put(100*n2/0,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct2 = right(pct2);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col2 = put(n2,6.0-R) || pct1;
+MPRINT(FREQSTATS):   if n3 = . then n3 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct3 $9;
+MPRINT(PRCNT):   if n3 = 0 and 0 = 0 then pct3='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n3 = 0 then pct3 = '';
+MPRINT(PRCNT):   else pct3 = '(' || compress(put(100*n3/0,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct3 = right(pct3);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col3 = put(n3,6.0-R) || pct1;
+MPRINT(FREQSTATS):   name = "Race n(%)";
+NOTE: Line generated by the macro variable "VARFMT".
+260         $racefmt
+            _________
+            48
+MPRINT(FREQSTATS):   col0 = put(race, $racefmt.);
+WARNING: Variable race has already been defined as numeric.
+MPRINT(FREQSTATS):   mainord = 4;
+MPRINT(FREQSTATS):   ord = input(race, racefmto.);
+MPRINT(FREQSTATS):   run;
+                                                           The SAS System
+
+
+ERROR 48-59: The format RACEFMT was not found or could not be loaded.
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      260:1   
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.RACERES may be incomplete.  When this step was stopped there were 0 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              649.71k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        39  Switch Count  0
+      
+
+261        
+262        %freqstats(indata=adsl_work,
+263                   outdata=ethnicres,
+264                   var=ethnic,
+265                   varfmt=ethfmt,
+266        		   ordfmt=ethfmto,
+267                   name="Ethnicity n(%)",
+268                   ord=5);
+MPRINT(FREQSTATS):   proc freq data = adsl_work noprint;
+MPRINT(FREQSTATS):   tables ethnic*__dummytrt / out = __frout (drop = percent);
+MPRINT(FREQSTATS):   run;
+
+NOTE: The data set WORK.__FROUT has 0 observations and 0 variables.
+WARNING: Data set WORK.__FROUT was not replaced because new file is incomplete.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              273.31k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        40  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc sql noprint;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom1 from adsl_work where ^missing(ethnic) and __dummytrt = 1;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom2 from adsl_work where ^missing(ethnic) and __dummytrt = 2;
+MPRINT(FREQSTATS):   select count(usubjid) into: denom3 from adsl_work where ^missing(ethnic) and __dummytrt = 3;
+MPRINT(FREQSTATS):   quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5462.00k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        41  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   proc sort data = __frout;
+MPRINT(FREQSTATS):   by ethnic;
+                                                           The SAS System
+
+ERROR: Variable ETHNIC not found.
+MPRINT(FREQSTATS):   run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              171.40k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        42  Switch Count  0
+      
+
+
+MPRINT(FREQSTATS):   proc transpose data = __frout out = __trout_fr (drop = _LABEL_ _NAME_ ) prefix=n;
+MPRINT(FREQSTATS):   var count;
+MPRINT(FREQSTATS):   id __dummytrt;
+MPRINT(FREQSTATS):   by ethnic;
+ERROR: Variable ETHNIC not found.
+MPRINT(FREQSTATS):   run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.__TROUT_FR may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+WARNING: Data set WORK.__TROUT_FR was not replaced because this step was stopped.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              178.40k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        43  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   data denom;
+MPRINT(FREQSTATS):   ethnic = "N";
+MPRINT(FREQSTATS):   n1 = 0;
+MPRINT(FREQSTATS):   n2 = 0;
+MPRINT(FREQSTATS):   n3 = 0;
+MPRINT(FREQSTATS):   run;
+
+NOTE: The data set WORK.DENOM has 0 observations and 4 variables.
+WARNING: Data set WORK.DENOM was not replaced because this step was stopped.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              607.68k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        44  Switch Count  0
+      
+
+MPRINT(FREQSTATS):   data ethnicres;
+MPRINT(FREQSTATS):   set __trout_fr denom;
+MPRINT(FREQSTATS):   length name col0 $200 col1-col3 $50;
+MPRINT(FREQSTATS):   if n1 = . then n1 = 0;
+                                                           The SAS System
+
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct1 $9;
+MPRINT(PRCNT):   if n1 = 0 and 0 = 0 then pct1='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n1 = 0 then pct1 = '';
+MPRINT(PRCNT):   else pct1 = '(' || compress(put(100*n1/0,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct1 = right(pct1);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col1 = put(n1,6.0-R) || pct1;
+MPRINT(FREQSTATS):   if n2 = . then n2 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct2 $9;
+MPRINT(PRCNT):   if n2 = 0 and 0 = 0 then pct2='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n2 = 0 then pct2 = '';
+MPRINT(PRCNT):   else pct2 = '(' || compress(put(100*n2/0,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct2 = right(pct2);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col2 = put(n2,6.0-R) || pct1;
+MPRINT(FREQSTATS):   if n3 = . then n3 = 0;
+MPRINT(PRCNT):   do;
+MPRINT(PRCNT):   length pct3 $9;
+MPRINT(PRCNT):   if n3 = 0 and 0 = 0 then pct3='';
+MPRINT(PRCNT):   else do;
+MPRINT(PRCNT):   if n3 = 0 then pct3 = '';
+MPRINT(PRCNT):   else pct3 = '(' || compress(put(100*n3/0,5.1)) || '%)';
+MPRINT(PRCNT):   end;
+MPRINT(PRCNT):   pct3 = right(pct3);
+MPRINT(PRCNT):   END;
+MPRINT(FREQSTATS):  ;
+MPRINT(FREQSTATS):   col3 = put(n3,6.0-R) || pct1;
+MPRINT(FREQSTATS):   name = "Ethnicity n(%)";
+NOTE: Line generated by the macro variable "VARFMT".
+268         $ethfmt
+            ________
+            48
+MPRINT(FREQSTATS):   col0 = put(ethnic, $ethfmt.);
+WARNING: Variable ethnic has already been defined as numeric.
+MPRINT(FREQSTATS):   mainord = 5;
+MPRINT(FREQSTATS):   ord = input(ethnic, ethfmto.);
+MPRINT(FREQSTATS):   run;
+
+ERROR 48-59: The format ETHFMT was not found or could not be loaded.
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      268:1   
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.ETHNICRES may be incomplete.  When this step was stopped there were 0 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              649.71k
+      OS Memory           11352.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        45  Switch Count  0
+      
+
+269        
+270        data report;
+271           set ageres weightres sexres agegrres raceres ethnicres;
+272        run;
+
+NOTE: The data set WORK.REPORT has 0 observations and 17 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1249.65k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        46  Switch Count  0
+      
+
+273        
+274        options nodate nobyline nonumber nocenter
+275                formchar='|_---|+|---+=|-/\<>*' charcode;
+276        
+277        /*proc printto print="&list\&prog..lst" new;
+278        run;
+279        title;
+280        footnote;*/
+281        
+282        title5 "&under";
+WARNING: Apparent symbolic reference UNDER not resolved.
+283        
+284        footnote1 "&under";
+WARNING: Apparent symbolic reference UNDER not resolved.
+285        footnote2 "n[a] - number of subject with non-missing data, used as denominator";
+286        
+287        proc report data=report ls=150 ps=45 split="@"  headline headskip nocenter
+288        nowd missing spacing=2;
+289          column mainord name ord col0 col1 col2 col3;
+290        
+291          define mainord / order order=internal noprint;
+292          define ord  / order order=internal noprint;
+293          define name / display " " width=62 spacing=0 flow order;
+294          define col0 / display " " width=30 ;
+295          define col1 / display "&trtname1@      (N=%qcmpres(&trt1))" width=20;
+WARNING: Apparent symbolic reference TRTNAME1 not resolved.
+WARNING: Apparent symbolic reference TRTNAME1 not resolved.
+WARNING: Apparent symbolic reference TRTNAME1 not resolved.
+WARNING: Apparent symbolic reference TRTNAME1 not resolved.
+WARNING: Apparent symbolic reference TRTNAME1 not resolved.
+WARNING: Apparent symbolic reference TRTNAME1 not resolved.
+296          define col2 / display "trtname1@      (N=%qcmpres(&trt2))" width=20;
+297          define col3 / display "trtname1@     (N=%qcmpres(&trt3))" width=20;
+298        
+299          break after mainord / skip;
+300        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+The SAS System
+
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              845.93k
+      OS Memory           11868.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        47  Switch Count  0
+      
+301        
+302        /*proc printto;
+303        run;*/
+
+
+ERROR: Errors printed on pages 17,18,19,20,21,22.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.29 seconds
+      user cpu time       0.60 seconds
+      system cpu time     0.62 seconds
+      memory              14294.31k
+      OS Memory           16732.00k
+      Timestamp           10/27/2026 10:53:46 AM
+      Step Count                        47  Switch Count  106
+      

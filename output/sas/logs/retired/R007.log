@@ -1,0 +1,375 @@
+1                                                          The SAS System                            10:50 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.29 seconds
+      cpu time            0.71 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R007
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:50:45 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R007 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*** normal distribution ******/
+2          %macro normal (size=200, mu1=22, sd1=10, Delta=20, sd2=10, PCT=100);
+3          	data final;
+4          	     category='test';
+5          		 do study_id=1 to 3;
+6          		     do n=1 to &size ;
+7          			  trt=1;
+8          			  if study_id=3 then do;
+9          				  a1=&mu1+sqrt(&SD1)*rannor(-1)+10;
+10         				  bse=&mu1+sqrt(&SD1)*rannor(-1)+10;
+11         				  output;
+12         			  end;
+13         			  else if study_id<3 then do;
+14                         a1=&mu1+sqrt(&SD1)*rannor(-1);
+15         				bse=&mu1+sqrt(&SD1)*rannor(-1);
+16         			  output;
+17         			  end;
+18         			  trt=2;
+19         			  bse=&mu1+sqrt(&SD1)*rannor(-1);
+20         			  if n>&size*(&PCT/100) then a1=&mu1+sqrt(&SD1)*rannor(-1);
+21         	          else
+22         			  a1=&mu1+&delta+sqrt(&SD2)*rannor(-1);
+23         			  output;
+24         			end;
+25         		 end;
+26         	Run;
+27          proc sort data=final;
+28           by study_id;
+29             data final;
+30         	 set final;
+31         	 by study_id;
+32         	 if first.study_id then do;
+33         		 xorg=0;
+34         		 yorg=0;
+35         		 xend=50;
+36         		 yend=50;
+37         	 end;
+38         	 if trt=1 then treatment='A';
+39         	 if trt=2 then treatment='B';
+40         	 id=compress('Study'||study_id||'_TRT_'||treatment);
+41         	run;
+42         
+43          %mend normal;
+44         
+45         /**** hard code in the inferential statistics for convenience.
+46               Usually this should from actual analysis using
+47               Proc Freq with CMH statistics requested
+48               ******/
+49         
+50         data n;
+51          input trt $ BigN $ SMLn $ PCT $ OR $ Heter_P $ PVal $;
+52          label trt='Treatment';
+53          label BigN='N';
+54          label SMLn='n';
+55          label PCT='%';
+56          label OR='MH Odds Ratio';
+                                                           The SAS System
+
+57          label Heter_p='Heterogenity P value';
+58          label PVAL='CMH P value';
+59          cards;
+
+NOTE: The data set WORK.N has 2 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              744.90k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:50:45 AM
+      Step Count                        2  Switch Count  0
+      
+
+62          ;
+63         run;
+64         
+65         /*simulated the raw data */
+66         %normal (size=200, mu1=22, sd1=20, delta=20, sd2=30, PCT=5);
+
+NOTE: The data set WORK.FINAL has 1200 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              770.12k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:50:45 AM
+      Step Count                        3  Switch Count  0
+      
+
+NOTE: There were 1200 observations read from the data set WORK.FINAL.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.FINAL has 1200 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              694.53k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:50:45 AM
+      Step Count                        4  Switch Count  0
+      
+
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      66:71   
+NOTE: There were 1200 observations read from the data set WORK.FINAL.
+NOTE: The data set WORK.FINAL has 1200 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              917.43k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:45 AM
+      Step Count                        5  Switch Count  0
+                                                           The SAS System
+
+      
+
+67         
+68           /*template for the symbol, table, color and font format */
+69          proc template;
+70           Define style styles.Weistyle;
+71           Parent=styles.default;
+72           Style graphdata1 from graphdata1 / MarkerSymbol="circle" Color=green Contrastcolor=green;
+73           Style graphdata2 from graphdata2 / MarkerSymbol="circle" Color=orange Contrastcolor=orange;
+74           Style graphdata3 from graphdata3 / MarkerSymbol="square" Color=green Contrastcolor=green;
+75           Style graphdata4 from graphdata4 / MarkerSymbol="square" Color=orange Contrastcolor=orange;
+76           Style graphdata5 from graphdata5 / MarkerSymbol="plus" Color=green Contrastcolor=green;
+77           Style graphdata6 from graphdata6 / MarkerSymbol="plus" Color=orange Contrastcolor=orange;
+78           replace Table from Output /
+79         	 frame = hside /* outside borders: void, box, above/below, vsides/hsides, lhs/rhs */
+80         	 rules = rows /* internal borders: none, all, cols, rows, groups */
+             _____
+             79
+             76
+ERROR 79-322: Expecting a (.
+ERROR 76-322: Syntax error, statement will be ignored.
+81         	 cellpadding = 4pt /* the space between table cell contents and the cell border */
+82         	 cellspacing = 0.25pt /* the space between table cells, allows background to show */
+83         	 borderwidth = 0.75pt /* the width of the borders and rules */;
+84           replace color_list /
+85         	 'link' = blue /* links */
+86         	 'bgH' = gray /* row and column header background */
+87         	 'bgT' = gray /* table background */
+88         	 'bgD' = white /* data cell background */
+89         	 'fg' = black /* text color */
+90         	 'bg' = white; /* page background color */;
+91          replace fonts /
+92         	 'TitleFont' = ("Arial",12pt,Bold) /* Titles from TITLE statements */
+93         	 'TitleFont2' = ("Arial",12pt,Bold) /* Proc titles ("The XX Procedure")*/
+94         	 'StrongFont' = ("Arial",10pt,Bold)
+95         	 'EmphasisFont' = ("Arial",10pt,Italic)
+96         	 'headingEmphasisFont' = ("Arial",10pt,Bold Italic)
+97         	 'headingFont' = ("Arial",10pt) /* Table column and row headings */
+98         	 'docFont' = ("Arial",10pt) /* Data in table cells */
+99         	 'footFont' = ("Arial",8pt, Italic) /* Footnotes from FOOTNOTE statements */
+100        	 'FixedEmphasisFont' = ("Courier",9pt,Italic)
+101        	 'FixedStrongFont' = ("Courier",9pt,Bold)
+102        	 'FixedHeadingFont' = ("Courier",9pt,Bold)
+103        	 'BatchFixedFont' = ("Courier",6.7pt)
+104        	 'FixedFont' = ("Courier",8pt);
+105          end;
+WARNING: Object will not be saved.
+106        run;
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              159.37k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:50:45 AM
+      Step Count                        6  Switch Count  0
+      
+WARNING: Errors were produced.
+                                                           The SAS System
+
+NOTE: The SAS System stopped processing this step because of errors.
+107        
+108        title;
+109        footnote;
+110        
+111        options nodate nonumber ;
+112        Options orientation=landscape nonumber nodate;
+113        ods pdf file="Maps.pdf" startpage=no style=styles.Weistyle notoc;
+WARNING: Style STYLES.WEISTYLE not found; Pearl style will be used instead.
+NOTE: Writing ODS PDF output to DISK destination "D:\meta_hackathon\sas2r-agent\output\sas\datasets\R007\Maps.pdf", printer "PDF".
+114        ods escapechar='^';
+115        ods layout start width=12in height=9.5in;
+WARNING: WIDTH exceeds available space for PDF destination.  This option will be ignored.
+WARNING: HEIGHT exceeds available space for PDF destination.  This option will be ignored.
+116        ods region width=9in height=1.5in x=0.5 in y=0in;
+117        ods pdf text="^{style [just=c fontsize=13pt fontweight=bold color=black] Shift/Outlier Analysis
+118        â€“ Maximum During Baseline to Maximum During Post-baseline  for Lab test 1}";
+119        ods region width=9in height=1.5in x=0.5 in y=0.2in;
+120        
+121        ods pdf text="^{style [just=c fontsize=13pt fontweight=bold color=black] Population xxxx}";
+122        
+123        ods region width=6in height=1.5in x=.5 in y=0.65in;
+124        
+125        ods pdf text="^{style [just=c fontsize=12pt color=black] ScatterPlot by Study}";
+126        ods region width=5in height=1.5in x=6in y=1.4in;
+WARNING: REGION placement exceeds available space for PDF destination.  Setting X=5.5in.
+127        ods pdf text="^{style [just=c fontsize=12pt color=black] Treatment Emergent High}";
+128        ods region width=4in height=4.5in x=6.8in y=4.4in;
+WARNING: REGION placement exceeds available space for PDF destination.  Setting X=6.5in.
+WARNING: REGION placement exceeds available space for PDF destination.  Setting Y=3.5in.
+129        ods pdf text="^{style [just=l fontsize=9pt color=black] N=number of subjects with maximum baseline measurement }";
+130        ods pdf text="^{style [just=l fontsize=9pt color=black] below upper limit of normal and at least one post-baseline  }";
+131        ods pdf text="^{style [just=l fontsize=9pt color=black] measurement; n = number of subjects with a post-baseline  }";
+132        ods pdf text="^{style [just=l fontsize=9pt color=black] measurement above upper limit of normal; CMH P-value = }";
+133        ods pdf text="^{style [just=l fontsize=9pt color=black] Cochran-Mantel-Haenszel (CMH) test stratified by study.}";
+134        ods pdf text="^{style [just=l fontsize=9pt color=black] The denominator for Mantel-Haenszel odds ratio is treatment A }";
+135        ods pdf text="^{style [just=l fontsize=9pt color=black] Heterogeneity P value is from Breslow-Day test. }";
+136        ods region width=8in height=1in x=0.5 in y=7in;
+137        ods pdf text="^{style [just=l fontsize=9pt color=black] XXX lab reference range is used. }";
+138        
+139        ods region width=6in height=7.5in x=.5in y=0.8in;
+                                                           The SAS System
+
+WARNING: REGION placement exceeds available space for PDF destination.  Setting Y=0.5in.
+140        ods graphics/ BORDER= OFF;
+
+
+141        proc sgpanel data=final;
+142        	   panelby study_id;
+143        	   scatter x=bse y=a1 / group=treatment;
+144        	  refline 40 /axis=x label="ULN"  LABELPOS= min LINEATTRs=(color=red pattern=dot);
+145              refline 40 /axis=y label="ULN" LABELPOS= min LINEATTRs=(color=red pattern=dot);
+146              refline 10 /axis=x label="LLN"  LABELPOS= min LINEATTRs=(color=blue pattern=dot);
+147              refline 10 /axis=y label="LLN"  LABELPOS= min  LINEATTRs=(color=blue pattern=dot);
+148              vector x=xend y=yend/xorigin=xorg yorigin=yorg noarrowheads lineattrs=(thickness=1px  color=gray);
+149        	  colaxis label='Maximum Baseline Measurement' values= (0 to 50 by 10) offsetmin=0 offsetmax=0.05 ;
+150              rowaxis  label='Maximum Post-baseline Measurement' values=(0 to 50 by 10) offsetmin=0 offsetmax=0.05 ;
+151            run;
+
+NOTE: PROCEDURE SGPANEL used (Total process time):
+      real time           9.19 seconds
+      user cpu time       0.50 seconds
+      system cpu time     0.81 seconds
+      memory              12534.28k
+      OS Memory           26380.00k
+      Timestamp           10/27/2026 10:50:55 AM
+      Step Count                        7  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R007\SGPanel.png.
+NOTE: There were 1200 observations read from the data set WORK.FINAL.
+
+152        quit;
+153        
+154        
+155        ods region width=5in height=4in x=6 in y=1.7in;
+WARNING: REGION placement exceeds available space for PDF destination.  Setting X=5.5in.
+156        proc print data=n label noobs style=[font_size=.2in] blankline=5;
+157         var trt bign smln pct;
+158        run;
+
+NOTE: There were 2 observations read from the data set WORK.N.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.05 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              821.40k
+      OS Memory           26200.00k
+      Timestamp           10/27/2026 10:50:55 AM
+      Step Count                        8  Switch Count  0
+      
+
+159        
+160        
+161        proc print data=n label noobs style=[font_size=.2in] blankline=5;
+162         where or^='-';
+163         title 'Treatment Comparison - B vs. A';
+164         var or heter_p Pval;
+165        run;
+
+NOTE: There were 1 observations read from the data set WORK.N.
+      WHERE or not = '-';
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              690.09k
+      OS Memory           26456.00k
+      Timestamp           10/27/2026 10:50:55 AM
+      Step Count                        9  Switch Count  0
+      
+
+166        ods layout end;
+167        ods pdf close;
+NOTE: ODS PDF printed 1 page to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R007\Maps.pdf.
+168        
+
+ERROR: Errors printed on page 4.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           12.92 seconds
+      user cpu time       1.10 seconds
+      system cpu time     1.60 seconds
+                                                           The SAS System
+
+      memory              25180.75k
+      OS Memory           26692.00k
+      Timestamp           10/27/2026 10:50:55 AM
+      Step Count                        9  Switch Count  31
+      

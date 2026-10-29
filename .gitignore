@@ -1,0 +1,20 @@
+# secrets
+.env
+.env.*
+api key/
+*.key
+
+# SAS session scratch (recreated on every run)
+*.sas7bcat
+*.sas7butl
+*.utl
+*.lck
+data/derived/sasuser/
+$MAP
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

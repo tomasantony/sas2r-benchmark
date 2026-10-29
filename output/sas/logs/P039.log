@@ -1,0 +1,1263 @@
+1                                                          The SAS System                            15:59 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.47 seconds
+      cpu time            0.65 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P039
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.28k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:59:08 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P039 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          %**********************************************************************;
+2          * Project           : Standard Macro
+3          *
+4          * Program name      : Supp2Par_v1.sas
+5          *
+6          * Author            : Dirk Van Krunckelsven (DVK, M164821), Merck Serono
+7          * E-mail            : dirk.van.krunckelsven@merckgroup.com OR dirk.vk@gmail.com
+8          *
+9          * Date created      : 2012-11-08
+10         *
+11         * Purpose           : Macro that merges the Supplemental Qualifiers (SUPPQUAL or SUPP--)
+12         *                      onto the parent domain for well-formed SDTM datasets.
+13         *                     Refer to Supp2Par_v1.pdf for a complete description.
+14         *
+15         * Revision History  :
+16         *
+17         * Date        Author    Ref  Revision
+18         * 2013-03-12  DVK       1    Modified header: removed all pre-release comments,
+19         *                             removed full detailed description, added reference
+20         *                             to PDF
+21         ***********************************************************************;
+22         %macro SUPP2PAR_v1(
+23           inlib=work,                 /* Name of Input library for Parent and Supplemental Datasets */
+24           parent=,                    /* Name of Parent Input Dataset */
+25           supp=,                      /* Name of Supplemental Input Dataset */
+26           outlib=work,                /* Name of Destination/Output library for Merged dataset */
+27           outname=%str(&parent.FULL), /* Name of Merged Output Dataset */
+28           clean=Y,                    /* Whether or not (Y/N) to clean work environment at end */
+29           dev=N,                      /* Whether or not (Y/N) to show all messages in the log */
+30           Info=1,                     /* Level of information to provide in the log:
+31                                          1 (all), 2 (start and summary), 3 (only summary) */
+32           RC=RC_S2P                   /* Name of Return Code Macro variable */
+33         );
+34         
+35         %* Globalizing the RC macrovariable and setting a local RC_WAR macrovariable
+36             Latter increments the Warnings (negative RCs) that do not end the processing
+37             Former picks up the terminating RCs, only when no more termination is possible
+38             (at the end almost) RC_WAR is put into the RC and reporting is done of the global RC;
+39         %global &RC;
+40         %let &RC = 99999;
+41         %local RC_WAR ;
+42         %let RC_WAR = 0;
+43         
+44         %* Info not in (1 2 3) -> reverts to default;
+45         %if %upcase(%trim(&Info)) ne 1 AND %upcase(%trim(&Info)) ne 2 AND %upcase(%trim(&Info)) ne 3 %then %let Info = 1;
+46         
+47         %* First info in log for Info = 1 OR 2 - obviously nonotes at this stage disables this regardless of Info;
+48         %if %upcase(%trim(&Info)) = 1 OR %upcase(%trim(&Info)) = 2 %then %do;
+49         data _null_;
+50             put "NO" "TE- " " ";
+51             put "NO" "TE- " "*****************************";
+52             put "NO" "TE- Started Processing for ";
+53             put "NO" "TE-  PARENT = %upcase(&inlib..&PARENT.)";
+54         	  put "NO" "TE-  SUPP   = %upcase(&inlib..&SUPP.)";
+55             put "NO" "TE- " "*****************************";
+56         run;
+                                                           The SAS System
+
+57         %end;
+58         
+59         %************************************************************************;
+60         %* Turning off LOG Clutter unless specifically marked as development run ;
+61         %* Assuring we know the original settings and can recall them later      ;
+62         %if %upcase(%quote(&DEV)) ne Y %then %do;
+63         %let save_opts=%sysfunc(getoption(SYMBOLGEN))
+64            %sysfunc(getoption(MACROGEN)) %sysfunc(getoption(MPRINT))
+65            %sysfunc(getoption(MLOGIC)) %sysfunc(getoption(NOTES))
+66            %sysfunc(getoption(SOURCE)) %sysfunc(getoption(SOURCE2)) ;
+67         options noSYMBOLGEN noMACROGEN noMPRINT noMLOGIC noNOTES noSOURCE noSOURCE2 ;
+68         %end;
+69         %************************************************************************;
+70         
+71         %****************************;
+72         %* Macrovariables used       ;
+73         %let WA = WARN;
+74         %let RN = ING;
+75         %let ER = ERR;
+76         %let R = OR;
+77         *% Early termination macrovar flag, troublelist macrovariable (that needs to exist for where clause below);
+78         %local S2P_Early S2P_ParCopy S2P_TROUBLELIST;
+79         %let S2P_Early = 0;
+80         %let S2P_ParCopy = 0;
+81         %let S2P_TROUBLELIST = '';
+82         %****************************;
+83         
+84         %* To make sure that in all cases there is a dataset for the cleaning at the end;
+85         %* This avoids log clutter;
+86         data S2P_; run;
+87         
+88         %***********************************************************************;
+89         %* Testing Input parameters                                          ***;
+90         %***********************************************************************;
+91         %* Empty INLIB is caught seperately for functioning of libref;
+92         %* INLIB: Valid libarary defined, if not terminate;
+93         %if &INLIB ne %then %do;
+94         %if %sysfunc(libref(&INLIB.)) ne 0 %then %do;
+95           %if %upcase(%trim(&Info)) = 1 %then %do;
+96             %put &ER.&R.-;
+97             %put &ER.&R.: *******************************************************;
+98             %put &ER.&R.: * LIBRARY %upcase(&INLIB) AS SPECIFIED IN PARAMETER INLIB ;
+99             %put &ER.&R.: * DOES NOT EXIST, TERMINATED MACRO ;
+100            %put &ER.&R.: *******************************************************;
+101          %end;
+102            %let S2P_Early=1;
+103            %let &RC=1 ;
+104            %goto S2P_TERMIN;
+105          %end;
+106        %end;
+107        %else %if &INLIB eq %then %do;
+108          %if %upcase(%trim(&Info)) = 1 %then %do;
+109            %put &ER.&R.-;
+110            %put &ER.&R.: *******************************************************;
+111            %put &ER.&R.: * LIBRARY %upcase(&INLIB) AS SPECIFIED IN PARAMETER INLIB ;
+112            %put &ER.&R.: * DOES NOT EXIST, TERMINATED MACRO ;
+113            %put &ER.&R.: *******************************************************;
+114          %end;
+                                                           The SAS System
+
+115            %let S2P_Early=1;
+116            %let &RC=1 ;
+117            %goto S2P_TERMIN;
+118        %end;
+119        
+120        %* OUTLIB: Valid libarary defined, if not use WORK and issue log note;
+121        %if &OUTLIB ne %then %do;
+122        %if %sysfunc(libref(&OUTLIB.)) ne 0 %then %do;
+123          %if %upcase(%trim(&Info)) = 1 %then %do;
+124            %put &WA.&RN.-;
+125            %put &WA.&RN.- *******************************************************;
+126            %put &WA.&RN.- * LIBRARY %upcase(&OUTLIB) AS SPECIFIED IN PARAMETER OUTLIB ;
+127            %put &WA.&RN.- * DOES NOT EXIST, DEFAULTING TO WORK ;
+128            %put &WA.&RN.- *******************************************************;
+129          %end;
+130            %let RC_WAR=%sysfunc(sum(&RC_WAR,-1)) ;
+131            %let OUTLIB = WORK;
+132        %end;
+133        %end;
+134        %else %if &OUTLIB eq %then %do;
+135          %if %upcase(%trim(&Info)) = 1 %then %do;
+136            %put &WA.&RN.-;
+137            %put &WA.&RN.- *******************************************************;
+138            %put &WA.&RN.- * LIBRARY %upcase(&OUTLIB) AS SPECIFIED IN PARAMETER OUTLIB ;
+139            %put &WA.&RN.- * DOES NOT EXIST, DEFAULTING TO WORK ;
+140            %put &WA.&RN.- *******************************************************;
+141          %end;
+142            %let RC_WAR=%sysfunc(sum(&RC_WAR,-1)) ;
+143            %let OUTLIB = WORK;
+144        %end;
+145        %* PARENT: Dataset exists, if not terminate;
+146        %if %sysfunc(exist(%upcase(&INLIB..&PARENT.))) ne 1 %then %do;
+147        %if %upcase(%trim(&Info)) = 1 %then %do;
+148          %put &ER.&R.-;
+149          %put &ER.&R.: *******************************************************;
+150          %put &ER.&R.: * DATASET %upcase(&INLIB..&PARENT) AS SPECIFIED IN PARAMETER PARENT ;
+151          %put &ER.&R.: * DOES NOT EXIST, TERMINATED MACRO ;
+152          %put &ER.&R.: *******************************************************;
+153        %end;
+154          %let &RC=2 ;
+155          %let S2P_Early=1;
+156          %goto S2P_TERMIN;
+157        %end;
+158        %* PARENT: Dataset should not be empty, if not terminate;
+159        %local S2P_dsid_PAR S2P_NOBS_PAR S2P_rc_PAR;
+160        %let S2P_dsid_PAR = %sysfunc(open(&inlib..&parent,i));
+161        %if &S2P_dsid_PAR le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+162        %let S2P_NObs_PAR = %sysfunc(attrn(&S2P_dsid_PAR,NOBS));
+163        %let S2P_rc_PAR = %sysfunc(close(&S2P_dsid_PAR));
+164        %if &S2P_NObs_PAR = 0 %then %do;
+165          %if %upcase(%trim(&Info)) = 1 %then %do;
+166            %put &ER.&R.-;
+167            %put &ER.&R.: *******************************************************;
+168            %put &ER.&R.: * DATASET %upcase(&INLIB..&PARENT) AS SPECIFIED IN PARAMETER PARENT ;
+169            %put &ER.&R.: * IS EMPTY, TERMINATED MACRO ;
+170            %put &ER.&R.: *******************************************************;
+171          %end;
+172          %let &RC=3 ;
+                                                           The SAS System
+
+173          %let S2P_Early=1;
+174          %goto S2P_TERMIN;
+175        %end;
+176        %* SUPP: Dataset exists, if not continue to simple copy;
+177        %if %sysfunc(exist(%upcase(&INLIB..&SUPP.))) ne 1 %then %do;
+178          %if %upcase(%trim(&Info)) = 1 %then %do;
+179            %put &WA.&RN.-;
+180            %put &WA.&RN.- *******************************************************;
+181            %put &WA.&RN.- * DATASET %upcase(&INLIB..&SUPP) AS SPECIFIED IN PARAMETER SUPP ;
+182            %put &WA.&RN.- *  DOES NOT EXIST, THE MACRO CONTINUES BUT THE CREATED  ;
+183            %put &WA.&RN.- *  OUTPUT DATASET IS A SIMPLE COPY OF THE %upcase(&PARENT) DATASET,    ;
+184            %put &WA.&RN.- *  THERE IS NO REMERGE OF SUPPLEMENTAL INFORMATION ;
+185            %put &WA.&RN.- *******************************************************;
+186          %end;
+187          %let RC_WAR=%sysfunc(sum(&RC_WAR,-2)) ;
+188          %let S2P_ParCopy=1;
+189          %goto S2P_COPY;
+190        %end;
+191        %* SUPP: Dataset should not be empty, if not continue to simple copy;
+192        %local S2P_dsid_SUP S2P_NOBS_SUP S2P_rc_SUP;
+193        %let S2P_dsid_SUP = %sysfunc(open(&inlib..&supp,i));
+194        %if &S2P_dsid_SUP le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+195        %let S2P_NObs_SUP = %sysfunc(attrn(&S2P_dsid_SUP,NOBS));
+196        %let S2P_rc_SUP = %sysfunc(close(&S2P_dsid_SUP));
+197        %if &S2P_NObs_SUP = 0 %then %do;
+198          %if %upcase(%trim(&Info)) = 1 %then %do;
+199            %put &WA.&RN.-;
+200            %put &WA.&RN.- *******************************************************;
+201            %put &WA.&RN.- * DATASET %upcase(&INLIB..&SUPP) AS SPECIFIED IN PARAMETER SUPP ;
+202            %put &WA.&RN.- * IS EMPTY, THE MACRO CONTINUES BUT THE CREATED  ;
+203            %put &WA.&RN.- *  OUTPUT DATASET IS A SIMPLE COPY OF THE %upcase(&PARENT) DATASET,    ;
+204            %put &WA.&RN.- *  THERE IS NO REMERGE OF SUPPLEMENTAL INFORMATION ;
+205            %put &WA.&RN.- *******************************************************;
+206          %end;
+207          %let RC_WAR=%sysfunc(sum(&RC_WAR,-4)) ;
+208          %let S2P_ParCopy=1;
+209          %goto S2P_COPY;
+210        %end;
+211        %* OUTNAME: Valid dataset name, if not use default: &PARENT.FULL;
+212        data _null_;
+213        if length(trim(left("&OUTNAME"))) gt 32 OR
+214             prxmatch('/\W/',trim(left("&OUTNAME"))) OR
+215        	  ( not(prxmatch('/^[[:alpha:]]/',trim(left("&OUTNAME"))))
+216                AND not(prxmatch('/^_/',trim(left("&OUTNAME"))))       ) then do;
+217        	  call symput("RC_WAR",put(sum(&RC_WAR,-8),best.));
+218        %if %upcase(%trim(&Info)) = 1 %then %do;
+219              put "&WA.&RN.-";
+220              put "&WA.&RN.- *******************************************************";
+221              put "&WA.&RN.- DATASET NAME %upcase(&OUTNAME) AS SPECIFIED IN PARAMETER OUTNAME";
+222              put "&WA.&RN.- HAS ILLEGAL NAMING, DEFAULTING TO [PARENT]FULL: %upcase(&PARENT.FULL)";
+223        	  if length(trim(left("&OUTNAME"))) gt 32 then do;
+224              put "&WA.&RN.- - NAME IS MORE THAN 32 CHARACTERS LONG";
+225        	  end;
+226        	  if prxmatch('/\W/',trim(left("&OUTNAME"))) OR
+227        	     ( not(prxmatch('/^[[:alpha:]]/',trim(left("&OUTNAME"))))
+228                   AND not(prxmatch('/^_/',trim(left("&OUTNAME"))))       ) then do;
+229              put "&WA.&RN.- - NAME STARTS WITH A NO. AND/OR CONTAINS SPECIAL CHARS/BLANKS";
+230        	  end;
+                                                           The SAS System
+
+231              put "&WA.&RN.- *******************************************************";
+232        %end;
+233          call symput("OUTNAME",%upcase("&parent.FULL"));
+234        end;
+235        run;
+236              %if &syserr > 4 %then %do ;
+237                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+238                 %let &rc=500;
+239                 %goto S2P_TERMIN ;
+240              %end ;
+241        
+242        %****************************************************************************;
+243        %* Seeing whether required variables exist on the datsets &PARENT and &SUPP  ;
+244        
+245        %* &PARENT REQUIRES at least STUDYID DOMAIN USUBJID ;
+246        
+247        %local S2P_dsidA S2P_NvarA S2P_colexistcntA S2P_rcA;
+248        %local S2P_foundUSUBJID S2P_foundDOMAIN S2P_foundSTUDYID;
+249        %let S2P_dsidA = %sysfunc(open(&inlib..&parent,i));
+250        %if &S2P_dsidA le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+251        
+252        %let S2P_NVarA = %sysfunc(attrn(&S2P_dsidA,NVARS));
+253        
+254        %let N1 = USUBJID;
+255        %let N2 = DOMAIN;
+256        %let N3 = STUDYID;
+257        
+258        %do iA = 1 %to 3;
+259        
+260        %let S2P_found&&N&iA = 0;
+261            %do S2P_colexistcntA = 1 %to &S2P_NvarA ;
+262        		  %local vn&S2P_colexistcntA;
+263              %let vn&S2P_colexistcntA = %sysfunc(varname(&S2P_dsidA,&S2P_colexistcntA));
+264              %if %upcase("&&vn&S2P_colexistcntA") = %upcase("&&N&iA") %then %do;
+265        	      %let S2P_found&&N&iA = 1;
+266        		   %goto ColdStopA;
+267              %end;
+268        	  %ColdStopA:
+269        	%end;
+270        
+271        %end;
+272        
+273        %let S2P_rcA = %sysfunc(close(&S2P_dsidA));
+274        
+275        %if not ( &S2P_foundUSUBJID AND &S2P_foundDOMAIN AND &S2P_foundSTUDYID ) %then %do;
+276          %if %upcase(%trim(&Info)) = 1 %then %do;
+277            %put &ER.&R.-;
+278            %put &ER.&R.: *******************************************************;
+279            %put &ER.&R.: * DATASET %upcase(&INLIB..&PARENT) LACKS REQUIRED VARIABLE(S):  ;
+280            %do iA = 1 %to 3;
+281              %if "&&&&s2P_found&&N&iA" ne "1" %then %do;
+282            %put &ER.&R.: *  - &&N&iA  ;
+283              %end;
+284            %end;
+285            %put &ER.&R.: * TERMINATED MACRO ;
+286            %put &ER.&R.: *******************************************************;
+287          %end;
+288          %let S2P_Early=1;
+                                                           The SAS System
+
+289          %let &RC = 5;
+290          %goto S2P_TERMIN;
+291        %end;
+292        
+293        %* &SUPP REQUIRES at least STUDYID RDOMAIN USUBJID IDVAR IDVARVAL QNAM QVAL and QLABEL;
+294        
+295        %local S2P_dsidB S2P_NvarB S2P_colexistcntB S2P_rcB;
+296        %local S2P_foundUSUBJID S2P_foundDOMAIN S2P_foundSTUDYID;
+297        %let S2P_dsidB = %sysfunc(open(&inlib..&supp,i));
+298        %if &S2P_dsidB le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+299        
+300        %let S2P_NVarB = %sysfunc(attrn(&S2P_dsidB,NVARS));
+301        
+302        %let N1 = USUBJID;
+303        %let N2 = RDOMAIN;
+304        %let N3 = STUDYID;
+305        %let N4 = IDVAR;
+306        %let N5 = IDVARVAL;
+307        %let N6 = QNAM;
+308        %let N7 = QVAL;
+309        %let N8 = QLABEL;
+310        
+311        %do iB = 1 %to 8;
+312        
+313        %let S2P_found&&N&iB = 0;
+314            %do S2P_colexistcntB = 1 %to &S2P_NvarB ;
+315        		  %local vn&S2P_colexistcntB;
+316              %let vn&S2P_colexistcntB = %sysfunc(varname(&S2P_dsidA,&S2P_colexistcntB));
+317              %if %upcase("&&vn&S2P_colexistcntB") = %upcase("&&N&iB") %then %do;
+318        	      %let S2P_found&&N&iB = 1;
+319        		   %goto ColdStopB;
+320              %end;
+321        	  %ColdStopB:
+322        	%end;
+323        
+324        %end;
+325        
+326        %let S2P_rcB = %sysfunc(close(&S2P_dsidB));
+327        
+328        %if not ( &S2P_foundUSUBJID AND &S2P_foundRDOMAIN AND &S2P_foundSTUDYID AND &S2P_foundIDVAR
+329                   AND &S2P_foundIDVARVAL AND &S2P_foundQNAM AND &S2P_foundQVAL AND &S2P_foundQLABEL) %then %do;
+330          %if %upcase(%trim(&Info)) = 1 %then %do;
+331            %put &ER.&R.-;
+332            %put &ER.&R.: *******************************************************;
+333            %put &ER.&R.: * DATASET %upcase(&INLIB..&SUPP) LACKS REQUIRED VARIABLE(S):  ;
+334            %do iB = 1 %to 8;
+335              %if "&&&&s2P_found&&N&iB" ne "1" %then %do;
+336            %put &ER.&R.: *  - &&N&iB  ;
+337              %end;
+338            %end;
+339            %put &ER.&R.: * TERMINATED MACRO ;
+340            %put &ER.&R.: *******************************************************;
+341          %end;
+342          %let S2P_Early=1;
+343          %let &RC = 6;
+344          %goto S2P_TERMIN;
+345        %end;
+346        
+                                                           The SAS System
+
+347        %* End: Seeing whether required variables exist on the datsets &PARENT and &SUPP ;
+348         ********************************************************************************;
+349        
+350        %* SUPP must have RDOMAIN = &PARENT, if that selection is empty then output is simple copy of input parent;
+351        data S2P_RDOMCHECK;
+352          set &inlib..&supp (where = (RDOMAIN = "%upcase(&parent)"));
+353        run;
+354              %if &syserr > 4 %then %do ;
+355                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+356                 %let &rc=500;
+357                 %goto S2P_TERMIN ;
+358              %end ;
+359        
+360        %local S2P_dsid_FSUP S2P_NOBS_FSUP S2P_rc_FSUP;
+361        %let S2P_dsid_FSUP = %sysfunc(open(S2P_RDOMCHECK,i));
+362        %if &S2P_dsid_FSUP le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+363        %let S2P_NObs_FSUP = %sysfunc(attrn(&S2P_dsid_FSUP,NLOBS));
+364        %let S2P_rc_FSUP = %sysfunc(close(&S2P_dsid_FSUP));
+365        %if &S2P_NObs_FSUP = 0 %then %do;
+366          %if %upcase(%trim(&Info)) = 1 %then %do;
+367            %put &WA.&RN.-;
+368            %put &WA.&RN.- *******************************************************;
+369            %put &WA.&RN.- * DATASET %upcase(&INLIB..&SUPP) AS SPECIFIED IN PARAMETER SUPP ;
+370            %put &WA.&RN.- * IS EMPTY after selecting for RDOMAIN = %upcase(&parent);
+371            %put &WA.&RN.- * THE MACRO CONTINUES BUT THE CREATED OUTPUT DATASET ;
+372            %put &WA.&RN.- * IS A SIMPLE COPY OF THE %upcase(&PARENT) DATASET;
+373            %put &WA.&RN.- *******************************************************;
+374          %end;
+375          %let RC_WAR=%sysfunc(sum(&RC_WAR,-32)) ;
+376          %let S2P_ParCopy=1;
+377          %goto S2P_COPY;
+378        %end;
+379        
+380        %* END: Testing Input parameters and data                            ***;
+381        %* More can be performed lateron                                     ***;
+382        %***********************************************************************;
+383        
+384        %* Contents dataset for the parent domain;
+385        proc contents data=&inlib..&parent out=S2P_contents_&parent noprint;
+386        run;
+387              %if &syserr > 4 %then %do ;
+388                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+389                 %let &rc=600;
+390                 %goto S2P_TERMIN ;
+391              %end ;
+392        
+393        %**************************************;
+394        %* Checks on the supplemental dataset *;
+395        
+396        %* Checking whether Supplemental dataset has records where either USUBJID and/or RDOMAIN and/or QNAM is empty;
+397        %* If so, ignore the record and issue notification(s) in the log with an output dataset to contain the ignored records;
+398        %* The processing does continue however;
+399        data &supp._IGNOR S2P_&supp._Accept;
+400          set &inlib..&supp. (where = (strip(RDOMAIN) = '' or strip(USUBJID) = '' or strip(QNAM) = '') in = a)
+401              &inlib..&supp. (where = (not(strip(RDOMAIN) = '' or strip(USUBJID) = '' or strip(QNAM) = '')) in = b) ;
+402          if a then output &supp._IGNOR;
+403          else if b then output S2P_&supp._Accept;
+404        run;
+                                                           The SAS System
+
+405        %if &syserr > 4 %then %do ;
+406           %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+407           %let &rc=500;
+408           %goto S2P_TERMIN ;
+409        %end ;
+410        %local S2P_dsid_IGNOR S2P_NOBS_IGNOR S2P_rc_IGNOR;
+411        %let S2P_dsid_IGNOR = %sysfunc(open(WORK.&SUPP._IGNOR,i));
+412        %if &S2P_dsid_IGNOR le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+413        %let S2P_NObs_IGNOR = %sysfunc(attrn(&S2P_dsid_IGNOR,NOBS));
+414        %let S2P_rc_IGNOR = %sysfunc(close(&S2P_dsid_IGNOR));
+415        %if &S2P_NObs_IGNOR ne 0 %then %do;
+416          %let RC_WAR=%sysfunc(sum(&RC_WAR,-512)) ;
+417            %put &WA.&RN.- *******************************************************;
+418            %put &WA.&RN.- * DATASET %upcase(&INLIB..&SUPP) AS SPECIFIED IN PARAMETER SUPP ;
+419            %put &WA.&RN.- * HAS &S2P_NObs_IGNOR. RECORD(S) WITH EMPTY VALUES FOR ;
+420            %put &WA.&RN.- * STUDYID, USUBJID, RDOMAIN OR QNAM ;
+421            %put &WA.&RN.- * THE MACRO CONTINUES BUT THESE RECORD(S) ARE IGNORED ;
+422            %put &WA.&RN.- * REFER TO THE DATASET %upcase(WORK.&SUPP)_IGNOR TO IDENTIFY THESE RECORDS ;
+423            %put &WA.&RN.- *******************************************************;
+424        %end;
+425        %* Checking whether Supplemental dataset is unique on USUBJID RDOMAIN IDVAR IDVARVAL QNAM;
+426        %* If not, the macro warns and terminates;
+427        proc sort data = S2P_&supp._Accept
+428          dupout = WORK.&SUPP._DUPP nodupkey out=_null_;
+429          by USUBJID RDOMAIN IDVAR IDVARVAL QNAM;
+430        run;
+431              %if &syserr > 4 %then %do ;
+432                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+433                 %let &rc=600;
+434                 %goto S2P_TERMIN ;
+435              %end ;
+436        %local S2P_dsid_SUPPDUP S2P_NOBS_SUPPDUP S2P_rc_SUPPDUP;
+437        %let S2P_dsid_SUPPDUP = %sysfunc(open(WORK.&SUPP._DUPP,i));
+438        %if &S2P_dsid_SUPPDUP le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+439        %let S2P_NObs_SUPPDUP = %sysfunc(attrn(&S2P_dsid_SUPPDUP,NOBS));
+440        %let S2P_rc_SUPPDUP = %sysfunc(close(&S2P_dsid_SUPPDUP));
+441        %if &S2P_NObs_SUPPDUP ne 0 %then %do;
+442          %if %upcase(%trim(&Info)) = 1 %then %do;
+443            %put &ER.&R.-;
+444            %put &ER.&R.: *******************************************************;
+445            %put &ER.&R.: * DATASET %upcase(&INLIB..&SUPP) AS SPECIFIED IN PARAMETER SUPP ;
+446            %put &ER.&R.: *   HAS &S2P_NObs_SUPPDUP. DUPLICATE RECORD(S) ;
+447            %put &ER.&R.: *   ON THE KEYS USUBJID RDOMAIN IDVAR IDVARVAL QNAM ;
+448            %put &ER.&R.: * IT IS IMPOSSIBLE TO DETERMINE WHICH RECORD TO MERGE ;
+449        	  %put &ER.&R.: * THE MACRO WILL TERMINATE ;
+450            %put &ER.&R.: *******************************************************;
+451            %put &ER.&R.: * Duplicate Records listed here (limited to 15 duplicates) ;
+452            %put &ER.&R.: *  Simple list of key values mentioned above ;
+453            %put &ER.&R.: *  All duplicate records are stored in WORK.%upcase(&supp)._DUPP;
+454        	data _null_;
+455        	  set WORK.&SUPP._DUPP (obs=15) end=eof;
+456              put "&ER.&R.: * " USUBJID RDOMAIN IDVAR IDVARVAL QNAM;
+457        	  if eof then  put "&ER.&R.: *******************************************************";
+458        	run;
+459          %end;
+460          %let &RC=10;
+461          %let S2P_Early=1;
+462          %goto S2P_TERMIN;
+                                                           The SAS System
+
+463        %end;
+464        
+465        %* Checking whether the same QNAM occurs with different labels ;
+466        %* The QNAM that occurs more than once is writen out to log ;
+467        %* List of troublesome QNAMs is written into a macrovariable to retrieve lateron if necessary ;
+468        %local S2P_NONUNIQ_QNAM;
+469        proc freq data = S2P_&supp._Accept noprint;
+470        table QNAM*QLABEL/list out = S2P_SUPPFREQ_&parent (drop = count percent);
+471        run;
+472              %if &syserr > 4 %then %do ;
+473                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+474                 %let &rc=600;
+475                 %goto S2P_TERMIN ;
+476              %end ;
+477        data S2P_SUPPFREQ_&parent;
+478          set S2P_SUPPFREQ_&parent;
+479          QNAM = upcase(QNAM);
+480        run;
+481              %if &syserr > 4 %then %do ;
+482                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+483                 %let &rc=500;
+484                 %goto S2P_TERMIN ;
+485              %end ;
+486        proc sort data = S2P_SUPPFREQ_&parent;
+487          by QNAM;
+488        run;
+489              %if &syserr > 4 %then %do ;
+490                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+491                 %let &rc=600;
+492                 %goto S2P_TERMIN ;
+493              %end ;
+494        data _null_;
+495          set S2P_SUPPFREQ_&parent;
+496          by QNAM;
+497          if not(first.QNAM) and last.QNAM then do;
+498            call symput("S2P_TROUBLELIST","&S2P_TROUBLELIST. " !! "'" !! trim(left(QNAM))!! "'");
+499        	call symput("S2P_NONUNIQ_QNAM","1");
+500          end;
+501        run;
+502              %if &syserr > 4 %then %do ;
+503                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+504                 %let &rc=500;
+505                 %goto S2P_TERMIN ;
+506              %end ;
+507        %if %upcase(%trim(&Info)) = 1 %then %do;
+508        data _null_;
+509          set S2P_SUPPFREQ_&parent
+510          (where = (QNAM in (&S2P_TROUBLELIST)) )
+511          end = lastrec;
+512          by QNAM;
+513          if _N_ = 1 then do;
+514            put "&ER.&R.- **************************************************************************" ;
+515            put "&ER.&R.- The same QNAM occurs with different labels (QLABEL) in the %upcase(&supp) dataset. " ;
+516          end;
+517          if first.QNAM then do;
+518            put "&ER.&R.-  * QNAM = " QNAM ;
+519          end;
+520            put "&ER.&R.-   - QLABEL = " QLABEL;
+                                                           The SAS System
+
+521          if lastrec then do;
+522            put "&ER.&R.- -------------------------------------------------------------------------- " ;
+523            put "&ER.&R.- IMPOSSIBLE TO FURTHER PROCESS " ;
+524            put "&ER.&R.- **************************************************************************" ;
+525          end;
+526        run;
+527              %if &syserr > 4 %then %do ;
+528                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+529                 %let &rc=500;
+530                 %goto S2P_TERMIN ;
+531              %end ;
+532        %end;
+533        %if &S2P_NONUNIQ_QNAM = 1 %then %do;
+534          %let S2P_Early=1;
+535          %let &RC = 7;
+536          %goto S2P_TERMIN;
+537        %end;
+538        
+539        %*END: Checks on the supplemental dataset *;
+540        %******************************************;
+541        
+542        %**********************************************************************;
+543        %*Creating a version of supplemental dataset in the WORK library      *;
+544        %*And ensuring that IDVAR is not empty, but substituted by USUBJID    *;
+545        %local S2P_IDVARE S2P_IDVARNE USUBLEN;
+546        
+547        * Determining Length of USUBJID (assuming it is always a text variable);
+548        * So that it can be assigned as such on IDVARVAL (in order to avoid truncation,
+549           because empty IDVARVAL which will be replaced by USUBJID is likely to not
+550           have the apropriate length);
+551        * 2011-11-16: Addition: Possibly IDVAR has length smaller than length('USUBJID')
+552                        in that case adapt, if not leave as is;
+553        proc contents noprint data = S2P_&supp._Accept out = S2P_ATT_USUB (where = (NAME = 'USUBJID' OR NAME = 'IDVAR'));
+554        quit;
+555              %if &syserr > 4 %then %do ;
+556                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+557                 %let &rc=600;
+558                 %goto S2P_TERMIN ;
+559              %end ;
+560        
+561        data _null_;
+562          set S2P_ATT_USUB (keep = LENGTH NAME);
+563          if NAME = 'USUBJID' then call symput("USUBLEN","$"!!trim(left(put(LENGTH,best.)))!!".");
+564          else if NAME = 'IDVAR' then do;
+565          if LENGTH ge length('USUBJID') then call symput("IDVARLEN","$"!!trim(left(put(LENGTH,best.)))!!".");
+566        	else call symput("IDVARLEN","$"!!trim(left(put(length('USUBJID'),best.)))!!".");
+567          end;
+568        run;
+569        * End 2011-11-16 addition;
+570              %if &syserr > 4 %then %do ;
+571                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+572                 %let &rc=500;
+573                 %goto S2P_TERMIN ;
+574              %end ;
+575        
+576        data S2P_&SUPP.;
+577          length IDVARVAL &USUBLEN IDVAR &IDVARLEN;
+578          set S2P_&supp._Accept;
+                                                           The SAS System
+
+579          if IDVAR = '' and IDVARVAL = '' then do;
+580            IDVAR = 'USUBJID';
+581        	IDVARVAL = USUBJID;
+582        	call symput("S2P_IDVARE","1");
+583          end;
+584          else if IDVAR = '' AND IDVARVAL ne '' then do;
+585        	call symput("S2P_IDVARNE","1");
+586          end;
+587        run;
+588              %if &syserr > 4 %then %do ;
+589                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+590                 %let &rc=500;
+591                 %goto S2P_TERMIN ;
+592              %end ;
+593        
+594        %***********************************;
+595        *% Check for QNAM allready on parent;
+596        %* Determining which ones already occur on Parent first;
+597        proc sort data=s2P_contents_&parent out= S2P_QNAM_PAR(keep=NAME);
+598          by NAME;
+599        quit;
+600              %if &syserr > 4 %then %do ;
+601                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+602                 %let &rc=600;
+603                 %goto S2P_TERMIN ;
+604              %end ;
+605        proc sort nodupkey data = S2P_&supp._Accept out = S2P_QNAM_SUP (keep = QNAM);
+606        by QNAM;
+607        run;
+608              %if &syserr > 4 %then %do ;
+609                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+610                 %let &rc=600;
+611                 %goto S2P_TERMIN ;
+612              %end ;
+613        
+614        %* Adding check on Legal Variable Name in QNAM;
+615        %let CHK = 0;
+616        data _null_;
+617          set S2P_QNAM_SUP (where = (strip(QNAM) ne ''));
+618          if not(nvalid(strip(QNAM))) OR length(strip(QNAM)) gt 8 then do;
+619              NAM = strip(QNAM);
+620              put "&WA.&RN.- *******************************************************";
+621              put "&WA.&RN.- QNAM VARIABLE (" NAM ") IN SUPPLEMENTAL DATA (%upcase(&SUPP.))";
+622              if not(nvalid(strip(QNAM))) then put "&WA.&RN.- HAS ILEGAL NAMING, PROC TRANSPOSE WILL CORRECT THIS";
+623        	  if length(strip(QNAM)) gt 8 then put "&WA.&RN.- HAS LENGTH GREATER THAN 8, SAS ALLOWS BUT XPT V5 DOES NOT";
+624              put "&WA.&RN.- CDISC COMPLIANCE REQUIRES A CORRECTION";
+625              put "&WA.&RN.- *******************************************************";
+626        	  call symput ( "CHK", "1" );
+627          end;
+628        run;
+629              %if &syserr > 4 %then %do ;
+630                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+631                 %let &rc=500;
+632                 %goto S2P_TERMIN ;
+633              %end ;
+634        
+635        %if %eval(&CHK ) = 1 %then %do;
+636           %let RC_WAR=%sysfunc(sum(&RC_WAR,-256)) ;
+                                                           The SAS System
+
+637        %end;
+638        
+639        data S2P_QNAM_CHECK;
+640          merge S2P_QNAM_PAR (in=par)
+641                S2P_QNAM_SUP (in = sup rename = (QNAM = NAME));
+642          by NAME;
+643          if par and sup;
+644        run;
+645              %if &syserr > 4 %then %do ;
+646                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+647                 %let &rc=500;
+648                 %goto S2P_TERMIN ;
+649              %end ;
+650        
+651        %* Renaming the QNAMs already taken to ..._2 and informing in the log;
+652        %* If there is a case of QNAMs allready existing on the parent;
+653        
+654        %local S2P_dsid_QNAMC S2P_NOBS_QNAMC S2P_rc_QNAMC;
+655        %let S2P_dsid_QNAMC = %sysfunc(open(S2P_QNAM_CHECK,i));
+656        %if &S2P_dsid_QNAMC le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+657        %let S2P_NObs_QNAMC = %sysfunc(attrn(&S2P_dsid_QNAMC,NOBS));
+658        %let S2P_rc_QNAMC = %sysfunc(close(&S2P_dsid_QNAMC));
+659        %if &S2P_NObs_QNAMC ne 0 %then %do;
+660        
+661        data _null_;
+662          set S2P_QNAM_CHECK end = eof;
+663          if _N_=1 then call execute('data S2P_&SUPP.;length QNAM $10.; set S2P_&SUPP.; ');
+664          %* By definition, max. length of QNAM = 8, therefore adapted QNAM has 10;
+665          call execute('if QNAM = "' !! strip(NAME) !! '" then QNAM = "' !! strip(NAME) !! '_2" ;');
+666          call symput('QNAM'!!strip(put(_N_,best.)),NAME);
+667          if eof then do;
+668            call symput('QNAMNUM',put(_N_,best.));
+669            call execute('run;');
+670          end;
+671        run;
+672              %if &syserr > 4 %then %do ;
+673                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+674                 %let &rc=500;
+675                 %goto S2P_TERMIN ;
+676              %end ;
+677        
+678          %if %upcase(%trim(&Info)) = 1 %then %do;
+679            %put &WA.&RN.-;
+680            %put &WA.&RN.- *******************************************************;
+681            %put &WA.&RN.- * PARENT DATASET %upcase(&PARENT) HAS VARIABLE(S) NAMED IDENTICAL ;
+682            %put &WA.&RN.- * TO A VALUE OF QNAM IN THE SUPPLEMENTAL DATASET %upcase(&SUPP.) ;
+683            %put &WA.&RN.- * THE REMERGED VARIABLES WILL RECEIVE THE SUFFIX '_2':  ;
+684              %do i = 1 %to &QNAMNUM;
+685            %put &WA.&RN.- *    %trim(&&QNAM&i) -> %trim(&&QNAM&i)_2;
+686              %end;
+687            %put &WA.&RN.- *******************************************************;
+688          %end;
+689          %let RC_WAR=%sysfunc(sum(&RC_WAR,-64)) ;
+690        %end;
+691        
+692        *% End: Check for QNAM allready on parent;
+693        %****************************************;
+694        
+                                                           The SAS System
+
+695        %if "&S2P_IDVARE" = "1" %then %do;
+696        	%*put &WA&RN- Empty IDVAR and IDVARVAL have been substituted with USUBJID;
+697          %let RC_WAR=%sysfunc(sum(&RC_WAR,-16)) ;
+698        %end;
+699        
+700        %if "&S2P_IDVARNE" = "1" %then %do;
+701          %*put &WA&RN: IDVAR empty while IDVARVAL not empty - Not processing further;
+702          %let S2P_Early=1;
+703          %let &RC = 8;
+704          %goto S2P_TERMIN;
+705        %end;
+706        
+707        %*END: Creating a version of supplemental dataset in the WORK library *;
+708        %**********************************************************************;
+709        
+710        %***************************************************************************;
+711        %* CORE PROCESSING FOR THE REQUIREMENT: MERGE SUPP ONTO PARENT BEGINS HERE *;
+712        %***************************************************************************;
+713        
+714        %* To determine the values for IDVAR in the Supplemental,
+715           which will be variable(s) needed for the merge;
+716        %* Also the supplementals will be treated in subsets according to
+717           the IDVAR value unless only one IDVAR value encountered;
+718        proc freq data = S2P_&SUPP. ( where = (RDOMAIN = "%upcase(&parent)") ) noprint;
+719          table idvar /out=S2P_ids_&parent;
+720        run;
+721              %if &syserr > 4 %then %do ;
+722                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+723                 %let &rc=600;
+724                 %goto S2P_TERMIN ;
+725              %end ;
+726        
+727        %* Putting these into macrovariable IDn, and the max. number into IDMAX;
+728        data _null_;
+729          set S2P_ids_&parent end=eof;
+730          call symput('ID'!!trim(left(put(_N_,best.))),trim(left(IDVAR)));
+731          if eof then do;
+732            call symput('IDMAX',put(_N_,best.));
+733          end;
+734        run;
+735              %if &syserr > 4 %then %do ;
+736                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+737                 %let &rc=500;
+738                 %goto S2P_TERMIN ;
+739              %end ;
+740        
+741        %* Determining for each IDVAR (in macrovar. IDn) what
+742           the TYPE and FORMAT needed (i.e. as on the parent domain) is;
+743        %* Checking whether the IDVAR values are indeed variables on the parent domain;
+744        %local NOID;
+745        %let NOID= 0;
+746        data _null_;
+747        retain
+748          %do i = 1 %to &IDMAX;
+749          CATCH_&&ID&i
+750          %end;
+751          ;
+752          set S2P_contents_&parent end = eof;
+                                                           The SAS System
+
+753          %do i = 1 %to &IDMAX;
+754          if trim(left(NAME)) = "&&ID&i" then do;
+755            CATCH_&&ID&i = 1;
+756            if type = 1 then do;
+757        	  call symput("IDTYP&i","N");
+758        	end;
+759        	else if type = 2 then do;
+760        	  call symput("IDTYP&i","C");
+761        	end;
+762          end;
+763          %end;
+764          if eof then do;
+765          %do i = 1 %to &IDMAX;
+766            if CATCH_&&ID&i ne 1 then do;
+767              call symput("IDDROP&i","&&ID&i");
+768        	    call symput("NOID",trim(left(input(1,best.))));
+769        	  end;
+770            else call symput("IDDROP&i","");
+771          %end;
+772          end;
+773        run;
+774              %if &syserr > 4 %then %do ;
+775                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+776                 %let &rc=500;
+777                 %goto S2P_TERMIN ;
+778              %end ;
+779        
+780        %* If there are IDS not present on the PARENT, then we end it here;
+781        %if &NOID %then %do;
+782          %if %upcase(%trim(&Info)) = 1 %then %do;
+783            %put &ER.&R.-;
+784            %put &ER.&R.- *******************************************************;
+785            %put &ER.&R.- * NOT RE-MERGING: SOME IDVARS DEFINED IN THE ;
+786            %put &ER.&R.- *  SUPPLEMENTAL (%upcase(&SUPP.)) DATASET ;
+787            %put &ER.&R.- *  ARE NOT PRESENT ON THE PARENT (%upcase(&PARENT));
+788              %do i = 1 %to &IDMAX;
+789                %if "%trim(&&IDDROP&i)" ne "" %then %put &ER.&R.- *    %trim(&&IDDROP&i);
+790            %end;
+791            %put &ER.&R.- * THE MACRO TERMINATES ;
+792            %put &ER.&R.- *******************************************************;
+793          %end;
+794          %let &RC=9 ;
+795          %let S2P_Early=1;
+796          %goto S2P_TERMIN;
+797        %end;
+798        
+799        %do i = 1 %to &IDMAX;
+800        
+801        %local IDCLN&i;
+802        %if "&&ID&i" ne "USUBJID"  %then %let IDCLN&i = &&ID&i;
+803        %else %let IDCLN&i = ;
+804        
+805        %* Adapting the supplemental so that the IDVAR is actually turned into a variable
+806           identical as on the parent domain (same type, format as determined in previous step);
+807        %* IDVAR is not formatted, in SAS the merge ensures that the 1st dataset mentioned
+808             (here: Parent) will dictate the format of the resulting dataset;
+809        %* Additionally to convert the character IDVARVAL in case IDVAR is numeric,
+810             a best format is applied;
+                                                           The SAS System
+
+811        data S2P_&parent._SUPP&i;
+812          set S2P_&SUPP. ( where = (IDVAR = "&&ID&i" and RDOMAIN = "%upcase(&parent)" ) );
+813          %if "&&IDTYP&i" = "N" %then %do;
+814          &&ID&i = input(trim(left(IDVARVAL)),best.);
+815          %end;
+816          %else %if "&&IDTYP&i" = "C" %then %do;
+817          &&ID&i = IDVARVAL;
+818          %end;
+819        run;
+820              %if &syserr > 4 %then %do ;
+821                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+822                 %let &rc=500;
+823                 %goto S2P_TERMIN ;
+824              %end ;
+825        
+826        proc sort
+827          data = S2P_&parent._SUPP&i ( where = (IDVAR = "&&ID&i") )
+828          out = S2P_&parent._SORT_&supp._&i  (drop = IDVARVAL IDVAR) ;
+829          by STUDYID RDOMAIN USUBJID &&IDCLN&i;
+830        run;
+831              %if &syserr > 4 %then %do ;
+832                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+833                 %let &rc=600;
+834                 %goto S2P_TERMIN ;
+835              %end ;
+836        
+837        %* Transposing the supplemental so that the QNAMs become variables
+838            with QVAL as values and QLABELs are applied;
+839        proc transpose data = S2P_&parent._SORT_&supp._&i (rename = (RDOMAIN = DOMAIN))
+840                       out  = S2P_&parent._SORT_&supp._&i.T (drop = _NAME_ _LABEL_);
+841          by STUDYID DOMAIN USUBJID &&IDCLN&i;
+842          var qval;
+843          id qnam;
+844          idlabel qlabel ;
+845        run;
+846              %if &syserr > 4 %then %do ;
+847                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+848                 %let &rc=600;
+849                 %goto S2P_TERMIN ;
+850              %end ;
+851        
+852        %* Sorting the parent domain to ready it for the merge;
+853        proc sort data = &inlib..&parent out = S2P_&parent._SORT_&parent._&i ;
+854          by STUDYID DOMAIN USUBJID &&IDCLN&i;
+855        run;
+856              %if &syserr > 4 %then %do ;
+857                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+858                 %let &rc=600;
+859                 %goto S2P_TERMIN ;
+860              %end ;
+861        
+862        %* Merging parent and supplemental together;
+863        %* Informing in the log if Supplemental record has no Parent;
+864        data S2P_&parent._STEP_&i S2P_&supp.DROP_&i;
+865          merge S2P_&parent._SORT_&parent._&i (in = PARENT)
+866        	    S2P_&parent._SORT_&supp._&i.T     (in = SUPP);
+867        	by STUDYID DOMAIN USUBJID &&IDCLN&i;
+868          if PARENT then output S2P_&parent._STEP_&i;
+                                                           The SAS System
+
+869        	else if SUPP and not(PARENT) then output S2P_&supp.DROP_&i;
+870        run;
+871              %if &syserr > 4 %then %do ;
+872                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+873                 %let &rc=500;
+874                 %goto S2P_TERMIN ;
+875              %end ;
+876        
+877        %end;
+878        *%Determining whether --SEQ variable exists or not on the PARENT dataset;
+879        
+880        %local S2P_dsid S2P_Nvar S2P_found S2P_colexistcnt S2P_rc;
+881        %let S2P_dsid = %sysfunc(open(&inlib..&parent,i));
+882        %if &S2P_dsid le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+883        %let S2P_NVar = %sysfunc(attrn(&S2P_dsid,NVARS));
+884        %let S2P_found = 0;
+885            %do S2P_colexistcnt = 1 %to &S2P_Nvar ;
+886        		  %local vn&S2P_colexistcnt;
+887              %let vn&S2P_colexistcnt = %sysfunc(varname(&S2P_dsid,&S2P_colexistcnt));
+888              %if %upcase("&&vn&S2P_colexistcnt") = %upcase("&parent.SEQ") %then %do;
+889        	      %let S2P_found = 1;
+890        		   %goto ColdStop;
+891              %end;
+892        	  %ColdStop:
+893        	%end;
+894        %let S2P_rc = %sysfunc(close(&S2P_dsid));
+895        
+896        %do i = 1 %to &IDMAX;
+897        
+898        %* Readying merging the subsets of remerged datasets together: SORT;
+899        %* Or if only one IDVAR value encountered this will resort;
+900        proc sort data = S2P_&parent._STEP_&i ;
+901        %if &S2P_found = 1 %then %do;
+902        by STUDYID DOMAIN USUBJID &parent.SEQ;
+903        %end;
+904        %else %do;
+905        by STUDYID DOMAIN USUBJID;
+906        %end;
+907        run;
+908              %if &syserr > 4 %then %do ;
+909                 %put ERROR: &sysmacroname: Procedure Step Error Trapped - Terminating;
+910                 %let &rc=600;
+911                 %goto S2P_TERMIN ;
+912              %end ;
+913        
+914        %end;
+915        
+916        %* Merging subsets of remerged datasets together;
+917        %* Or if only one IDVAR it is just set;
+918        %* In the dataset S2P_FINAL_&parent. - which is later set to OUTLIB.OUTNAME;
+919        data S2P_FINAL_&parent.;;
+920        merge
+921        %do i = 1 %to &IDMAX;
+922        S2P_&parent._STEP_&i
+923        %end;
+924        ;
+925        %if &S2P_found = 1 %then %do;
+926        by STUDYID DOMAIN USUBJID &parent.SEQ;
+                                                           The SAS System
+
+927        %end;
+928        %else %do;
+929        by STUDYID DOMAIN USUBJID;
+930        %end;
+931        run;
+932              %if &syserr > 4 %then %do ;
+933                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+934                 %let &rc=500;
+935                 %goto S2P_TERMIN ;
+936              %end ;
+937        
+938        %* Setting DROP datasets together;
+939        data %upcase(&supp._DROP);
+940        set
+941        %do i = 1 %to &IDMAX;
+942          S2P_&supp.DROP_&i
+943        %end;
+944        ;
+945        run;
+946              %if &syserr > 4 %then %do ;
+947                 %put ERROR: &sysmacroname: Data Step Error Trapped - Terminating;
+948                 %let &rc=500;
+949                 %goto S2P_TERMIN ;
+950              %end ;
+951        
+952        %* ACTUAL OUTPUT DATASET WRITTEN HERE (IN CASE OF CORRECTLY PROCESSED - not for copy;
+953        data %upcase(&outlib..&outname);
+954          set S2P_FINAL_&parent.;
+955        run;
+956              %if &syserr > 4 %then %do ;
+957                 %put ERROR: &sysmacroname: Data Step Error Trapped - Cannot write output dataset - Terminating;
+958                 %let &rc=599;
+959                 %goto S2P_TERMIN ;
+960              %end ;
+961        
+962        %* Determining whether drops exist and reporting;
+963        %local S2P_dsid_DROPS S2P_NOBS_DROPS S2P_rc_DROPS;
+964        %let S2P_dsid_DROPS = %sysfunc(open(&supp._DROP,i));
+965        %if &S2P_dsid_DROPS le 0 %then %put &WA.&RN.: %sysfunc(sysrc()) -- %sysfunc(SysMsg());
+966        %let S2P_NObs_DROPS = %sysfunc(attrn(&S2P_dsid_DROPS,NOBS));
+967        %let S2P_rc_DROPS = %sysfunc(close(&S2P_dsid_DROPS));
+968        %if &S2P_NObs_DROPS ne 0 %then %do;
+969          %let RC_WAR=%sysfunc(sum(&RC_WAR,-128)) ;
+970          %if %upcase(%trim(&Info)) = 1 %then %do;
+971            %put &WA.&RN.- *******************************************************;
+972            %put &WA.&RN.- * DATASET %upcase(&INLIB..&SUPP) HAS RECORDS ;
+973            %put &WA.&RN.- *  THAT DO NOT EXIST ON THE PARENT DOMAIN ;
+974            %put &WA.&RN.- *  REFER TO THE DATASET IN WORK: %upcase(&SUPP._DROP) ;
+975            %put &WA.&RN.- *******************************************************;
+976          %end;
+977        %end;
+978        %else %do;
+979          %if "%upcase(&clean)" = "Y" %then %do;
+980          proc datasets lib=work nolist;
+981            delete &SUPP.DROP;
+982          quit;
+983          %end;
+984        %end;
+                                                           The SAS System
+
+985        
+986        %********************************************************************************;
+987        %* END: CORE PROCESSING FOR THE REQUIREMENT: MERGE SUPP ONTO PARENT BEGINS HERE *;
+988        %********************************************************************************;
+989        %* Copy Termination is here so that options are still reset and cleaning is still performed;
+990        %S2P_COPY:
+991        %if &S2P_ParCopy %then %do;
+992        data %upcase(&outlib..&outname);
+993          set &inlib..&parent;
+994        run;
+995              %if &syserr > 4 %then %do ;
+996                 %put ERROR: &sysmacroname: Data Step Error Trapped - Cannot write output dataset - Terminating;
+997                 %let &rc=599;
+998                 %goto S2P_TERMIN ;
+999              %end ;
+1000       %end;
+1001       
+1002       *% At this stage the 99999 is fine, it would have meant unexpected termination;
+1003       %* Complete Termination is here so that options are still reset and cleaning is still performed;
+1004       %let &RC = %sysfunc(sum(0,&RC_WAR));
+1005       %S2P_TERMIN:
+1006       
+1007       %* Cleaning work library if requested;
+1008       %if %upcase("&clean") = "Y" %then %do;
+1009       proc datasets nolist lib=work memtype = data;
+1010         delete S2P_:;
+1011       quit;
+1012       %end;
+1013       
+1014       data S2P_ReturnCode;
+1015         INFO = &&&RC;
+1016       run;
+1017       
+1018       *% The below is a min minor correction because the NOTEs where not delivered;
+1019       %local note_opt;
+1020       %let note_opt=%sysfunc(getoption(NOTES));
+1021       options NOTES ;
+1022       
+1023       data _null_;
+1024         set S2P_ReturnCode;
+1025         INFO2 = INFO * -1;
+1026         if INFO = 0 then do;
+1027           %if %upcase(%trim(&Info)) = 1 OR %upcase(%trim(&Info)) = 2 %then %do;
+1028           put "NO" "TE- " " ";
+1029           put "NO" "TE- " "*****************************";
+1030           put "NO" "TE- Finished Processing Successfully without Remarks";
+1031           put "NO" "TE-  CREATED: %upcase(&outlib..&outname)";
+1032           put "NO" "TE- " "*****************************";
+1033           put "NO" "TE- Nevertheless, do inspect the log...  ";
+1034           %end;
+1035        end;
+1036         else if INFO lt 0 then do;
+1037            put "WARN" "ING- " " ";
+1038          put "WARN" "ING- " "*****************************";
+1039           put "WARN" "ING- Finished Processing Successfully with Remarks: ";
+1040           put "WARN" "ING-  CREATED: %upcase(&outlib..&outname)";
+1041           if INFO2 = '1'b then put "WARN" 'ING- * Outlib does not exist, defaults to WORK';
+1042           if INFO2 = '1.'b then put "WARN" 'ING- * Supplemental dataset does not exist, output will be copy of parent';
+                                                           The SAS System
+
+1043           if INFO2 = '1..'b then put "WARN" 'ING- * Supplemental dataset is empty, output will be copy of parent';
+1044           if INFO2 = '1...'b then put "WARN" 'ING- * Improper Outname specified, defaults to [PARENT]FULL:
+1044     ! %upcase(&parent)FULL';
+1045           if INFO2 = '1....'b then put "WARN" 'ING- * IDVAR and IDVARVAL were empty substituted by USUBJID';
+1046           if INFO2 = '1.....'b then put "WARN" 'ING- * Supplemental empty after selecting for RDOMAIN';
+1047           if INFO2 = '1......'b then put "WARN" 'ING- * QNAM value in Supplemental is already a variable on Parent. Suffixed
+1047     ! with _2';
+1048           if INFO2 = '1.......'b then put "WARN" "ING- * Records on Supplemental do not exist on the Parent domain, refer to:
+1048     ! %trim(%upcase(&supp.))_DROP";
+1049           if INFO2 = '1........'b then put "WARN" "ING- * QNAM value in Supplemental is not a Valid SAS variable Name";
+1050           if INFO2 = '1.........'b then put "WARN" "ING- * Records ignored: empty STUDYID USUBJID RDOMAIN or QNAM, refer to:
+1050     ! %trim(%upcase(&supp.))_IGNOR";
+1051       
+1052           put "WARN" "ING- " "*****************************";
+1053           put "WARN" "ING- " "For CDISC compliance most of these messages must be fixed";
+1054           put "WARN" "ING- " "*****************************";
+1055           put "WARN" "ING- Nevertheless, do inspect the log...  ";
+1056       end;
+1057         else if INFO gt 0 then do;
+1058           put "ERR" "OR- " " ";
+1059           put "ERR" "OR- " "*****************************";
+1060           put "ERR" "OR- " "* EARLY TERMINATION DUE TO: *";
+1061                 if INFO = 1 then put "ERR" 'OR- * Inlib does not exist';
+1062            else if INFO = 2 then put "ERR" 'OR- * Parent dataset does not exist';
+1063            else if INFO = 3 then put "ERR" 'OR- * Parent dataset is empty';
+1064            else if INFO = 5 then put "ERR" 'OR- * Required variables not present on the Parent dataset';
+1065            else if INFO = 6 then put "ERR" 'OR- * Required variables not present on the Supplemental dataset';
+1066            else if INFO = 7 then put "ERR" 'OR- * Same QNAM has different labels';
+1067            else if INFO = 8 then put "ERR" 'OR- * IDVAR empty while IDVARVAL not empty';
+1068            else if INFO = 9 then put "ERR" 'OR- * IDVAR(s) not present on PARENT domain';
+1069            else if INFO =10 then put "ERR" 'OR- * Supplemental dataset not unique on USUBJID RDOMAIN IDVAR IDVARVAL QNAM';
+1070            else if INFO = 500 then put "ERR" 'OR- * Data Step Error Trapped in macro';
+1071            else if INFO = 599 then put "ERR" 'OR- * Data Step Error Trapped in macro: Cannot write output dataset';
+1072            else if INFO = 600 then put "ERR" 'OR- * Proc Step Error Trapped in macro';
+1073            else if INFO = 99999 then put "ERR" 'OR- * Unexpected Error';
+1074       	 else put "ERR" 'OR- * Unknown Reason';
+1075          put "ERR" "OR- " "*****************************";
+1076       end;
+1077       run;
+1078       
+1079       *% Setting option NOTES back as found WITHIN (!) the macro ;
+1080       options &note_opt. ;
+1081       
+1082       proc datasets nolist;
+1083         delete S2P_Returncode;
+1084       quit;
+1085       
+1086       %*end;
+1087       
+1088       %* Resetting options to original state;
+1089       %if %upcase(&DEV) ne Y %then %do;
+1090       options &save_opts ;
+1091       %end;
+1092       
+1093       %mend SUPP2PAR_v1;
+1094       
+1095       /* benchmark driver: the program only defines %SUPP2PAR_v1; run it on the CDISC pilot SDTM AE + SUPPAE */
+1096       %SUPP2PAR_v1(inlib=psdtm, parent=AE, supp=SUPPAE, outlib=outds, outname=AEFULL);
+                                                           The SAS System
+
+
+       
+      *****************************
+      Started Processing for 
+       PARENT = PSDTM.AE
+       SUPP   = PSDTM.SUPPAE
+      *****************************
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              745.00k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 03:59:08 PM
+      Step Count                        2  Switch Count  0
+      
+
+WARNING: Multiple lengths were specified for the variable IDVARVAL by input data set(s). This can cause truncation of data.
+
+       
+      *****************************
+      Finished Processing Successfully without Remarks
+       CREATED: OUTDS.AEFULL
+      *****************************
+      Nevertheless, do inspect the log...  
+NOTE: There were 1 observations read from the data set WORK.S2P_RETURNCODE.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              913.78k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:59:09 PM
+      Step Count                        36  Switch Count  0
+      
+
+
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5274.59k
+      OS Memory           16476.00k
+      Timestamp           10/27/2026 03:59:09 PM
+      Step Count                        38  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.51 seconds
+      user cpu time       0.46 seconds
+      system cpu time     0.73 seconds
+      memory              14161.65k
+      OS Memory           16476.00k
+      Timestamp           10/27/2026 03:59:09 PM
+      Step Count                        38  Switch Count  88
+                                                           The SAS System
+
+      

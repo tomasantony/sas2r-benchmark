@@ -1,0 +1,283 @@
+1                                                          The SAS System                            10:53 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.82 seconds
+      cpu time            0.71 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R020
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R020 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          %* modification 2019-12-23 - update path as data has been moved;
+2          %* dataset adae_updated is not available, but program runs also with adae (slow);
+3          
+4            %LOCAL _num_groups ;
+ERROR: The %LOCAL statement is not valid in open code.
+5          
+6            *** read input datasets: adsl *** ;
+7            filename source "&rawadam./adsl.xpt" ;
+8            *filename source "&rawadam./adsl.xpt" ;
+9            libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+10           data work.adsl ;
+11             set source.adsl ;
+12           run ;
+
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+NOTE: The data set WORK.ADSL has 0 observations and 48 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              607.68k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        2  Switch Count  0
+      
+
+13         
+14           *** read input datasets: adsl *** ;
+15           filename source "&rawadam./adae.xpt" ;
+16           *filename source "&rawadam./adae.xpt" ;
+17           libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adae.xpt
+18           data work.adae ;
+19             set source.adae ;
+20           run ;
+
+NOTE: The data set WORK.ADAE has 0 observations and 55 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              607.68k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        3  Switch Count  0
+      
+
+21         
+22         
+23         
+24         
+                                                           The SAS System
+
+25         
+26         %MACRO scriptathon_target24 ;
+27         
+28           ** DETERMINE HOW MANY ACTIVE TREATMENT GROUPS THERE ARE IN ORDER TO LOOP FOR EACH ONE ***;
+29           %let _num_groups = 0 ;
+30           proc sql noprint;
+31             select count(distinct trt01a) into: _num_groups
+32             from   work.adsl
+33           ;
+34           quit ;
+35           %let _num_groups = %trim(%left(&_num_groups)) ;
+36           %put _num_groups = &_num_groups ;
+37         
+38         
+39         
+40           %MACRO AEstat (  dsin    = work.adae
+41                          , byvar   =
+42                          , tclause =
+43                          , wclause = %STR()
+44                         ) ;
+45         
+46             %LET paramcount = %EVAL(&paramcount. + 1) ;
+47         
+48             proc sort data= work.adae ;
+49               BY &byvar. ;
+50             run ;
+51         
+52             PROC MEANS DATA = work.adae ;
+53               BY &byvar. ;
+54               &wclause. ;
+55               OUTPUT OUT = work.stat&paramcount.
+56                       n  = n
+57               ;
+58             QUIT ;
+59         
+60           %MEND AEstat ;
+61         
+62           %LET paramcount = 0 ;
+63         
+64           *** number of subjects experiencing treatment emergent adverse events *** ;
+65           %AEstat (dsin = work.adae , byvar = trtan , tclause = trtemfl  , wclause = %NRSTR(WHERE UPCASE(STRIP(SAFFL)) ='Y' AND
+65       ! UPCASE(STRIP(AOCCFL))='Y')) ;
+66         
+67           *** number of subjects experiencing treatment emergent adverse events *** ;
+68           %AEstat (dsin = work.adae , byvar = trtan aesoc , tclause = AOCCSFL  , wclause = %NRSTR(WHERE UPCASE(STRIP(SAFFL)) ='Y'
+68       !  AND UPCASE(STRIP(AOCCSFL))='Y')) ;
+69         
+70           *** number of subjects experiencing treatment emergent adverse events *** ;
+71           %AEstat (dsin = work.adae , byvar = trtan aesoc aedecod , tclause = AOCCSFL  , wclause = %NRSTR(WHERE
+71       ! UPCASE(STRIP(SAFFL)) ='Y' AND UPCASE(STRIP(AOCCPFL))='Y')) ;
+72         
+73         
+74         
+75         
+76         
+77         
+78         
+79         %MEND scriptathon_target24 ;
+                                                           The SAS System
+
+80         
+81         %scriptathon_target24 ;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5430.56k
+      OS Memory           15448.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        4  Switch Count  0
+      
+
+_num_groups = 0
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              188.71k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        5  Switch Count  0
+      
+
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.STAT1 may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              274.40k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        6  Switch Count  0
+      
+
+
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              187.68k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        7  Switch Count  0
+      
+
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.STAT2 may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              270.40k
+      OS Memory           10840.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        8  Switch Count  0
+      
+
+
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              187.68k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        9  Switch Count  0
+      
+
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.STAT3 may be incomplete.  When this step was stopped there were 0 observations and 0 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              270.40k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        10  Switch Count  0
+      
+
+
+ERROR: Errors printed on page 2.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.05 seconds
+      user cpu time       0.46 seconds
+      system cpu time     0.39 seconds
+      memory              13677.96k
+      OS Memory           15448.00k
+      Timestamp           10/27/2026 10:53:21 AM
+      Step Count                        10  Switch Count  32
+      

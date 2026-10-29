@@ -1,0 +1,165 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              213.50k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        97  Switch Count  0
+      
+
+1330       %let pid = P004; %let outds = &root./output/sas/datasets/P004; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P004
+1331       %put NOTE: ===== pipeline c2c: P004 P004_adam_adae.sas =====;
+NOTE: ===== pipeline c2c: P004 P004_adam_adae.sas =====
+1332       %let _bench_t0 = %sysfunc(datetime());
+                                                           The SAS System
+
+1333       %include "&root./programs/sas_run/P004_adam_adae.sas";
+
+NOTE: Input data set is already sorted; it has been copied to the output data set.
+NOTE: There were 50 observations read from the data set ADAM.ADSL.
+NOTE: The data set WORK.ADSL_SORTED has 50 observations and 17 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              431.12k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        98  Switch Count  0
+      
+
+
+NOTE: There were 54 observations read from the data set SDTM.AE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.AE_SORTED has 54 observations and 12 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1188.75k
+      OS Memory           17256.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        99  Switch Count  0
+      
+
+
+INFO: The variable STUDYID on data set WORK.ADSL_SORTED will be overwritten by data set WORK.AE_SORTED.
+NOTE: There were 50 observations read from the data set WORK.ADSL_SORTED.
+NOTE: There were 54 observations read from the data set WORK.AE_SORTED.
+NOTE: The data set WORK.ADAE_DRAFT has 54 observations and 19 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1086.65k
+      OS Memory           16736.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        100  Switch Count  0
+      
+
+
+NOTE: There were 54 observations read from the data set WORK.ADAE_DRAFT.
+NOTE: The data set WORK.ADAE_OCCURRENCE_ORDER has 54 observations and 20 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              914.43k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        101  Switch Count  0
+      
+
+
+                                                           The SAS System
+
+NOTE: There were 54 observations read from the data set WORK.ADAE_OCCURRENCE_ORDER.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADAE_OCCURRENCE_ORDER has 54 observations and 20 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              677.43k
+      OS Memory           16740.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        102  Switch Count  0
+      
+
+
+NOTE: There were 54 observations read from the data set WORK.ADAE_OCCURRENCE_ORDER.
+NOTE: The data set WORK.ADAE_FLAGGED has 54 observations and 20 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              916.81k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        103  Switch Count  0
+      
+
+
+NOTE: There were 54 observations read from the data set WORK.ADAE_FLAGGED.
+NOTE: SAS sort was used.
+NOTE: The data set ADAM.ADAE has 54 observations and 20 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1190.68k
+      OS Memory           17256.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        104  Switch Count  0
+      
+
+
+NOTE: There were 15 observations read from the data set ADAM.ADAE.
+NOTE: The PROCEDURE PRINT printed page 10.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              423.50k
+      OS Memory           16224.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        105  Switch Count  0
+      
+
+1437       %_bench_capture;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              5190.62k
+      OS Memory           21348.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        106  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying ADAM.ADAE to OUTDS.ADAE (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 54 observations read from the data set ADAM.ADAE.
+NOTE: The data set OUTDS.ADAE has 54 observations and 20 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              616.00k
+      OS Memory           16736.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        107  Switch Count  0
+      
+
+NOTE: benchmark capture: 1 permanent dataset(s) copied to outds (ADAM ADAE)
+1438       proc printto; run;
+

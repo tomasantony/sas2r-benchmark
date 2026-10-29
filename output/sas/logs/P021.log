@@ -1,0 +1,51 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              212.84k
+      OS Memory           26216.00k
+      Timestamp           10/27/2026 03:58:50 PM
+      Step Count                        195  Switch Count  0
+      
+
+2396       %let pid = P021; %let outds = &root./output/sas/datasets/P021; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P021
+2397       %put NOTE: ===== pipeline c2c: P021 P021_tlf_table1.sas =====;
+NOTE: ===== pipeline c2c: P021 P021_tlf_table1.sas =====
+2398       %let _bench_t0 = %sysfunc(datetime());
+                                                           The SAS System
+
+2399       %include "&root./programs/sas_run/P021_tlf_table1.sas";
+NOTE: Writing RTF Body file: D:\meta_hackathon\sas2r-agent/data/derived/c2c/tlfs/tlf_table1.rtf
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 47 observations read from the data set ADAM.ADSL.
+      WHERE ITTFL='Y';
+NOTE: The PROCEDURE TABULATE printed page 20.
+NOTE: PROCEDURE TABULATE used (Total process time):
+      real time           0.14 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              8496.59k
+      OS Memory           32380.00k
+      Timestamp           10/27/2026 03:58:50 PM
+      Step Count                        196  Switch Count  0
+      
+
+2439       %_bench_capture;
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5187.75k
+      OS Memory           31852.00k
+      Timestamp           10/27/2026 03:58:50 PM
+      Step Count                        197  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+2440       proc printto; run;
+

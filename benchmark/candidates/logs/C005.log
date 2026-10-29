@@ -1,0 +1,150 @@
+1                                                          The SAS System                            11:19 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.77 seconds
+      cpu time            0.57 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*--------------------------------------------------*/
+2          /* SAS Programming for R Users - code for exercises */
+3          /* Copyright 2016 SAS Institute Inc.                */
+4          /*--------------------------------------------------*/
+5          
+6          /*SP4R02d02*/
+7          
+8          /*Import data using a DATA step*/
+9          data sp4r.all_names;
+10            length First_Name $ 25 Last_Name $ 25;
+11            infile "&path\allnames.csv" dlm=',';
+WARNING: Apparent symbolic reference PATH not resolved.
+WARNING: Apparent symbolic reference PATH not resolved.
+12            input First_Name $ Last_Name $ age height;
+13         run;
+
+ERROR: Libref SP4R is not assigned.
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+                                                           The SAS System
+
+      system cpu time     0.01 seconds
+      memory              1278.18k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:19:52 AM
+      Step Count                        1  Switch Count  0
+      
+
+14         
+15         /***************************************************************************************************/
+16         /*Import data using PROC IMPORT*/
+NOTE: PROCEDURE IMPORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              22.43k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:19:52 AM
+      Step Count                        2  Switch Count  0
+      
+WARNING: Apparent symbolic reference PATH not resolved.
+NOTE: The SAS System stopped processing this step because of errors.
+17         proc import out=sp4r.baseball
+18            datafile= "&path\baseball.csv" DBMS=CSV REPLACE;
+19            getnames=yes;
+20            datarow=2;
+21         run;
+22         
+23         /*Rename the variables*/
+
+
+24         data sp4r.baseball;
+25            set sp4r.baseball;
+ERROR: Libref SP4R is not assigned.
+26            rename nAtBat = At_Bats
+27         	     nHits = Hits
+28         	     nHome = Home_Runs
+29         	     nRuns = Runs
+30         	     nRBI = RBIs
+31         	     nError = Errors;
+32         run;
+
+ERROR: Libref SP4R is not assigned.
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              607.65k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:19:52 AM
+      Step Count                        3  Switch Count  0
+      
+
+33         
+34         /***************************************************************************************************/
+35         /*Creating a SAS data set from delimited data by hand*/
+36         data sp4r.example_data3;
+37            length First_name $ 25;
+                                                           The SAS System
+
+38            infile datalines dlm='*';
+39            input First_Name $ Last_Name $ age height;
+40            datalines;
+
+ERROR: Libref SP4R is not assigned.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              607.65k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:19:52 AM
+      Step Count                        4  Switch Count  0
+      
+
+46         ;run;
+
+ERROR: Errors printed on pages 1,2,3.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.91 seconds
+      user cpu time       0.35 seconds
+      system cpu time     0.34 seconds
+      memory              8817.84k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:19:52 AM
+      Step Count                        4  Switch Count  20
+      

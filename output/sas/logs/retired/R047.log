@@ -1,0 +1,143 @@
+1                                                          The SAS System                            11:29 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.70 seconds
+      cpu time            0.60 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R047
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1160,
+      Last Modified=27Oct2026:11:27:17,
+      Create Time=27Oct2026:11:27:17
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:29:18 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R047 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          %let name=bar4;
+2          
+                                                           The SAS System
+
+3          /*
+4          Set your current-working-directory (to read/write files), if you need to ...
+5          %let rc=%sysfunc(dlgcdir('c:\someplace\public_html'));
+6          */
+7          filename odsout '.';
+8          
+9          data my_data;
+10         input CATEGORY SERIES $ 3-11 AMOUNT;
+11         datalines;
+
+NOTE: The data set WORK.MY_DATA has 6 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              741.50k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:29:18 AM
+      Step Count                        2  Switch Count  0
+      
+
+18         ;
+19         run;
+20         
+21         
+22         ODS LISTING CLOSE;
+23         ODS HTML path=odsout body="&name..htm"
+24          (title="SGplot Horizontal Stacked Bar (3D)")
+25          style=htmlblue;
+NOTE: Writing HTML Body file: bar4.htm
+26         
+27         ods graphics / imagefmt=png imagename="&name"
+28          width=800px height=600px noborder imagemap;
+29         
+30         title1 color=gray33 ls=0.5 h=23pt "Horizontal Stacked Bar";
+31         title2 color=gray33 ls=0.5 h=17pt "With 3D Shading";
+32         
+33         proc sgplot data=my_data noautolegend;
+34         styleattrs datacolors=(cx9999ff cx993366);
+35         hbar category / response=amount stat=sum
+36          group=series /*groupdisplay=cluster grouporder=descending*/
+37          dataskin=sheen /* <--- basically, added this line! */
+38          outlineattrs=(color=black) nostatlabel;
+39         xaxis
+40          values=(0 to 16 by 4)
+41          labelattrs=(size=16pt weight=bold color=gray33)
+42          valueattrs=(size=16pt weight=bold color=gray33)
+43          offsetmax=0 grid minor minorcount=1;
+44         yaxis
+45          labelattrs=(size=16pt weight=bold color=gray33)
+46          valueattrs=(size=16pt weight=bold color=gray33)
+47          display=(noticks);
+48         run;
+
+NOTE: Since no format is assigned, the numeric category variable will use the default of BEST6.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           4.09 seconds
+      user cpu time       0.34 seconds
+                                                           The SAS System
+
+      system cpu time     0.31 seconds
+      memory              7733.62k
+      OS Memory           21460.00k
+      Timestamp           10/27/2026 11:29:24 AM
+      Step Count                        3  Switch Count  0
+      
+NOTE: There were 6 observations read from the data set WORK.MY_DATA.
+
+49         
+50         quit;
+51         ODS HTML CLOSE;
+52         ODS LISTING;
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           7.71 seconds
+      user cpu time       0.79 seconds
+      system cpu time     1.09 seconds
+      memory              19913.85k
+      OS Memory           21460.00k
+      Timestamp           10/27/2026 11:29:24 AM
+      Step Count                        3  Switch Count  18
+      

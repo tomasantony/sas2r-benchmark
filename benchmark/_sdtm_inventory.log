@@ -1,0 +1,91 @@
+1                                           The SAS System             13:00 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           0.41 seconds
+      cpu time            0.26 seconds
+      
+1          libname psdtm "D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm";
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+2          libname c2c "D:\meta_hackathon\sas2r-agent\data\derived\c2c\data\sdtm";
+NOTE: Libref C2C was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\c2c\data\sdtm
+3          libname wx "D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\sdtm";
+NOTE: Libref WX was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\sdtm
+4          options ls=120 nodate nonumber;
+5          proc contents data=psdtm._all_ out=c1(keep=libname memname name nobs) noprint; run;
+
+NOTE: The data set WORK.C1 has 313 observations and 4 variables.
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.08 seconds
+      cpu time            0.01 seconds
+      
+
+6          proc contents data=c2c._all_ out=c2(keep=libname memname name nobs) noprint; run;
+
+NOTE: The data set WORK.C2 has 113 observations and 4 variables.
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.12 seconds
+      cpu time            0.01 seconds
+      
+
+7          proc contents data=wx._all_ out=c3(keep=libname memname name nobs) noprint; run;
+
+NOTE: Data file WX.DM.DATA is in a format that is native to another host, or the file encoding does not match the 
+      session encoding. Cross Environment Data Access will be used, which might require additional CPU resources and 
+      might reduce performance.
+                                                     The SAS System
+
+NOTE: Data file WX.LB.DATA is in a format that is native to another host, or the file encoding does not match the 
+      session encoding. Cross Environment Data Access will be used, which might require additional CPU resources and 
+      might reduce performance.
+NOTE: The data set WORK.C3 has 25 observations and 4 variables.
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.01 seconds
+      
+
+8          data all; set c1 c2 c3; run;
+
+NOTE: There were 313 observations read from the data set WORK.C1.
+NOTE: There were 113 observations read from the data set WORK.C2.
+NOTE: There were 25 observations read from the data set WORK.C3.
+NOTE: The data set WORK.ALL has 451 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.01 seconds
+      
+
+9          proc sql;
+9        !           select libname, memname, count(*) as nvars, max(nobs) as nobs from all group by libname, memname
+9        ! order by libname, memname; quit;
+NOTE: The PROCEDURE SQL printed page 1.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.05 seconds
+      cpu time            0.04 seconds
+      
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           0.80 seconds
+      cpu time            0.40 seconds
+      

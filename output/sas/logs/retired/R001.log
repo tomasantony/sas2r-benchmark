@@ -1,0 +1,395 @@
+1                                                          The SAS System                            10:59 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.75 seconds
+      cpu time            0.64 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R001
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:59:56 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R001 family=pilotrep
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2           * tlf_demog.sas - Parallel SAS implementation of Table 14.1.1 (Demographics
+                                                           The SAS System
+
+3           * and Baseline Characteristics by Treatment Arm).
+4           *
+5           * Mirrors R/07_tlf_tables.R::build_t_demog. PDF/RTF output for side-by-side
+6           * comparison with the R-built t_14_1_1_demog.pdf.
+7           *
+8           * Inputs:  &adam.adsl (built by sas/adsl.sas)
+9           * Outputs: &outtlf./t_14_1_1_demog_sas.rtf
+10          *          &outtlf./t_14_1_1_demog_sas.pdf
+11          *
+12          * Run on SAS ODA after adsl.sas has populated &adam.adsl.
+13          *****************************************************************************/
+14         
+15         %let adam   = D:/meta_hackathon/sas2r-agent/data/derived/cdisc-pilot/adam;
+16         %let outtlf = D:/meta_hackathon/sas2r-agent/output/sas/tlf;
+17         
+18         libname adam "&adam.";
+NOTE: Libref ADAM refers to the same physical library as PADAM.
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+19         
+20         /* ITT population only - drop Screen Failure subjects */
+21         data itt;
+22           set adam.adsl;
+23           where ITTFL = "Y";
+24           length AGEGR1_LBL $32;
+25           AGEGR1_LBL = catx(": ", put(AGEGR1N, z1.), AGEGR1);
+26         run;
+
+NOTE: There were 254 observations read from the data set ADAM.ADSL.
+      WHERE ITTFL='Y';
+NOTE: The data set WORK.ITT has 254 observations and 49 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1008.56k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:59:56 AM
+      Step Count                        2  Switch Count  0
+      
+
+27         
+28         
+29         /* === N counts per ARM (for the "n" row and column headers) ============= */
+30         proc sql noprint;
+31           select count(*) into :n_total trimmed from itt;
+32           select put(count(*), 3.) into :n_pbo  trimmed from itt where ARM = "Placebo";
+33           select put(count(*), 3.) into :n_xlo  trimmed from itt where ARM = "Xanomeline Low Dose";
+34           select put(count(*), 3.) into :n_xhi  trimmed from itt where ARM = "Xanomeline High Dose";
+35         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5824.81k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 10:59:56 AM
+                                                           The SAS System
+
+      Step Count                        3  Switch Count  0
+      
+
+36         
+37         
+38         /* === AGE descriptives by ARM =========================================== */
+39         proc means data=itt noprint;
+40           class ARM;
+41           var AGE;
+42           output out=_age (drop=_type_ _freq_)
+43                  n=n mean=mean std=std median=median min=mn max=mx;
+44         run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 254 observations read from the data set WORK.ITT.
+NOTE: The data set WORK._AGE has 4 observations and 7 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              7817.84k
+      OS Memory           17776.00k
+      Timestamp           10/27/2026 10:59:56 AM
+      Step Count                        4  Switch Count  0
+      
+
+45         
+46         
+47         /* === Categorical counts (AGEGR1, SEX, RACE) ============================ */
+48         %macro cat_summary(var=, lbl=);
+49           proc freq data=itt noprint;
+50             tables ARM*&var. / out=_&var. (drop=percent) outpct;
+51           run;
+52           data _&var._fmt;
+53             set _&var.;
+54             length stat $40 row $40;
+55             stat = catx(" ", put(count, 3.), cats("(", put(pct_row, 5.1), "%)"));
+56             row  = "&lbl.";
+57             keep ARM &var. stat row;
+58           run;
+59         %mend;
+60         %cat_summary(var=AGEGR1, lbl=Age group);
+
+NOTE: There were 254 observations read from the data set WORK.ITT.
+NOTE: The data set WORK._AGEGR1 has 9 observations and 5 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1104.67k
+      OS Memory           12632.00k
+      Timestamp           10/27/2026 10:59:56 AM
+      Step Count                        5  Switch Count  0
+      
+
+
+NOTE: There were 9 observations read from the data set WORK._AGEGR1.
+NOTE: The data set WORK._AGEGR1_FMT has 9 observations and 4 variables.
+                                                           The SAS System
+
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              903.62k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 10:59:56 AM
+      Step Count                        6  Switch Count  0
+      
+
+61         %cat_summary(var=SEX,    lbl=Sex);
+
+NOTE: There were 254 observations read from the data set WORK.ITT.
+NOTE: The data set WORK._SEX has 6 observations and 5 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              969.53k
+      OS Memory           12632.00k
+      Timestamp           10/27/2026 10:59:57 AM
+      Step Count                        7  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK._SEX.
+NOTE: The data set WORK._SEX_FMT has 6 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              903.62k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 10:59:57 AM
+      Step Count                        8  Switch Count  0
+      
+
+62         %cat_summary(var=RACE,   lbl=Race);
+
+NOTE: There were 254 observations read from the data set WORK.ITT.
+NOTE: The data set WORK._RACE has 7 observations and 5 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              969.53k
+      OS Memory           12632.00k
+      Timestamp           10/27/2026 10:59:57 AM
+      Step Count                        9  Switch Count  0
+      
+
+
+NOTE: There were 7 observations read from the data set WORK._RACE.
+NOTE: The data set WORK._RACE_FMT has 7 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              903.62k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 10:59:57 AM
+      Step Count                        10  Switch Count  0
+      
+
+63         
+64         
+65         /* === Render to RTF + PDF ============================================== */
+66         title;
+67         footnote;
+68         
+69         ods escapechar = '^';
+70         ods listing close;
+71         ods rtf file="&outtlf./t_14_1_1_demog_sas.rtf" bodytitle nogtitle;
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/t_14_1_1_demog_sas.rtf
+72         ods pdf file="&outtlf./t_14_1_1_demog_sas.pdf" notoc;
+NOTE: Writing ODS PDF output to DISK destination "D:\meta_hackathon\sas2r-agent\output\sas\tlf\t_14_1_1_demog_sas.pdf", 
+      printer "PDF".
+73         
+74         title  j=c "Table 14.1.1 (SAS): Demographics and Baseline Characteristics";
+75         title2 j=c "Intent-to-Treat Population";
+76         footnote j=l "Source: SAS ADSL. Parallel implementation of R t_14_1_1_demog.";
+77         
+78         /* Use PROC REPORT to lay out one row per analysis cell with columns by ARM */
+79         proc report data=_age nowd
+80                     style(header)=[fontweight=bold backgroundcolor=lightgrey];
+81           columns ARM ("Age (years)" n mean std median mn mx);
+82           define ARM    / group;
+83           define n      / "n";
+84           define mean   / "Mean" format=6.2;
+85           define std    / "SD"   format=6.2;
+86           define median / "Median" format=6.2;
+87           define mn     / "Min" format=4.;
+88           define mx     / "Max" format=4.;
+89         run;
+
+ERROR: There is a statistic but no ANALYSIS usage associated
+       with the column defined by the following elements.
+       Name                              Usage
+       --------------------------------  --------
+       mean                              STATISTIC
+ERROR: There is a statistic but no ANALYSIS usage associated
+       with the column defined by the following elements.
+       Name                              Usage
+       --------------------------------  --------
+       std                               STATISTIC
+ERROR: There is a statistic but no ANALYSIS usage associated
+       with the column defined by the following elements.
+       Name                              Usage
+       --------------------------------  --------
+       median                            STATISTIC
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              366.90k
+                                                           The SAS System
+
+      OS Memory           14940.00k
+      Timestamp           10/27/2026 10:59:57 AM
+      Step Count                        11  Switch Count  0
+      
+90         
+
+
+91         proc report data=_AGEGR1_fmt nowd
+92                     style(header)=[fontweight=bold backgroundcolor=lightgrey];
+93           columns row AGEGR1 ARM, stat;
+94           define row    / order "Age group";
+95           define AGEGR1 / "Group";
+96           define ARM    / across "Treatment arm";
+97           define stat   / display "n (%)";
+98         run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 9 observations read from the data set WORK._AGEGR1_FMT.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.04 seconds
+      memory              8616.18k
+      OS Memory           23156.00k
+      Timestamp           10/27/2026 10:59:57 AM
+      Step Count                        12  Switch Count  0
+      
+
+99         
+100        proc report data=_SEX_fmt nowd
+101                    style(header)=[fontweight=bold backgroundcolor=lightgrey];
+102          columns row SEX ARM, stat;
+103          define row  / order "Sex";
+104          define SEX  / "Value";
+105          define ARM  / across "Treatment arm";
+106          define stat / display "n (%)";
+107        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 6 observations read from the data set WORK._SEX_FMT.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              7622.43k
+      OS Memory           23924.00k
+      Timestamp           10/27/2026 10:59:57 AM
+      Step Count                        13  Switch Count  0
+      
+
+108        
+109        proc report data=_RACE_fmt nowd
+110                    style(header)=[fontweight=bold backgroundcolor=lightgrey];
+111          columns row RACE ARM, stat;
+112          define row  / order "Race";
+113          define RACE / "Value";
+114          define ARM  / across "Treatment arm";
+115          define stat / display "n (%)";
+                                                           The SAS System
+
+116        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 7 observations read from the data set WORK._RACE_FMT.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              7476.28k
+      OS Memory           23916.00k
+      Timestamp           10/27/2026 10:59:57 AM
+      Step Count                        14  Switch Count  0
+      
+
+117        
+118        ods pdf close;
+NOTE: ODS PDF printed 3 pages to D:\meta_hackathon\sas2r-agent\output\sas\tlf\t_14_1_1_demog_sas.pdf.
+119        ods rtf close;
+120        ods listing;
+121        
+122        %put NOTE: SAS demographics table written to &outtlf./t_14_1_1_demog_sas.{rtf,pdf};
+NOTE: SAS demographics table written to D:/meta_hackathon/sas2r-agent/output/sas/tlf/t_14_1_1_demog_sas.{rtf,pdf}
+ERROR: Errors printed on page 5.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.44 seconds
+      user cpu time       0.54 seconds
+      system cpu time     0.56 seconds
+      memory              22672.98k
+      OS Memory           23924.00k
+      Timestamp           10/27/2026 10:59:57 AM
+      Step Count                        14  Switch Count  41
+      

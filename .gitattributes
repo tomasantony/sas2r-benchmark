@@ -1,0 +1,6 @@
+*.xlsx filter=lfs diff=lfs merge=lfs -text
+*.sas7bdat filter=lfs diff=lfs merge=lfs -text
+*.xpt filter=lfs diff=lfs merge=lfs -text
+*.sas7bndx filter=lfs diff=lfs merge=lfs -text
+*.sas7bitm filter=lfs diff=lfs merge=lfs -text
+*.xls filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,270 @@
+1                                                          The SAS System                            11:25 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.75 seconds
+      cpu time            0.53 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          options cmplib=sasuser.funcs;
+2          %let gpath=\\sashq\root\dept\dvr\DVR_Knowledge_Center\sgf2019\Papers\A_Combined_Waterfall_and_Swimmer_Plot\Image;
+3          %let dpi=300;
+4          
+5          options mautosource mprint mlogic;
+6          ods html close;
+7          
+8          proc format;
+9            value res
+10             0='1.0 mg'
+11         	1='2.0 mg'
+12         	2='3.0 mg'
+13         	3='4.0 mg'
+14         	4='3.0 F6 mg'
+15         	5='4.0 F6 mg';
+NOTE: Format RES has been output.
+16         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              153.87k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:25:14 AM
+      Step Count                        1  Switch Count  0
+      
+
+17         
+18         /*--Create some data--*/
+19         /*data tumor;*/
+20         /*  format Drug res.;*/
+21         /*  length Code $6;*/
+22         /*  drop i;*/
+23         /*  do i=1 to 20;*/
+24         /*    Response=100*(ranuni(3)-0.7);*/
+25         /*    Duration=50*ranuni(3);*/
+26         /*	Dropped=0;*/
+27         /*    if ranuni(3) > 0.6 then Dropped=1; */
+28         /*	Drug=floor(6*ranuni(3));*/
+29         /*	if ranuni(3) > 0.7 then Code='FL';*/
+30         /*	else Code='DLBCL';*/
+31         /*    output;*/
+32         /*  end;*/
+33         /*run;*/
+34         
+35         /*--Create some data--*/
+36         data tumor;
+37           format Drug res.;
+38           length Code $6;
+39           do i=1 to 20;
+40             Response=100*(ranuni(3)-0.7);
+41             Duration=50*ranuni(3);
+42         	Dropped=.;
+43             if ranuni(3) > 0.8 then Dropped=duration-5;
+44         	Drug=floor(6*ranuni(3));
+45         	if ranuni(3) > 0.7 then Code='FL';
+46         	else Code='DLBCL';
+47         	codeloc=ifn(response > 0, 0, response);
+48         	baseline=20+180*(ranuni(2));
+49             output;
+50           end;
+51         run;
+
+NOTE: The data set WORK.TUMOR has 20 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              1293.75k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:25:14 AM
+      Step Count                        2  Switch Count  0
+      
+
+52         
+53         /*--Sort by descending response--*/
+54         proc sort data=tumor out=tumor;
+55           by descending Response;
+56         run;
+                                                           The SAS System
+
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TUMOR has 20 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1244.06k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 11:25:14 AM
+      Step Count                        3  Switch Count  0
+      
+
+57         
+58         data tumorsorted;
+59           set tumor;
+60           j=_n_;
+61         run;
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: The data set WORK.TUMORSORTED has 20 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              910.21k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 11:25:14 AM
+      Step Count                        4  Switch Count  0
+      
+
+62         
+63         /*ods html;*/
+64         /*proc print;*/
+65         /*var j drug code response duration dropped codeloc baseline;*/
+66         /*run;*/
+67         /*ods html close;*/
+68         
+69         ods _all_ close;
+70         ods listing gpath="&gpath" image_dpi=&dpi;
+71         
+72         /*--Define Attributes map for walls and axes and Drug Group Colors--*/
+73         data attrmap;
+74           length ID $ 9 value $10 fillcolor $ 10 linecolor $ 10 linepattern $ 10 show $8;
+75           id='Walls'; value='Center'; fillcolor='cxd0d0d0'; linecolor='cxd0d0d0'; linepattern='Solid'; output;
+76           id='Walls'; value='Back';   fillcolor='cxe0e0e0'; linecolor='cxe0e0e0'; linepattern='Solid'; output;
+77           id='Walls'; value='Right';  fillcolor='cxf0f0f0'; linecolor='cxf0f0f0'; linepattern='Solid'; output;
+78           id='Walls'; value='Bottom'; fillcolor='cxe7e7e7'; linecolor='cxe7e7e7'; linepattern='Solid'; output;
+79           id='Axes';  value='D';      fillcolor='white'; linecolor='black'; linepattern='Solid'; output;
+80           id='Axes';  value='L';      fillcolor='white'; linecolor='black'; linepattern='ShortDash'; output;
+81         
+82           /*--Change only the values below this for Treatment Group--*/
+83           id='Resp';  value='1.0 mg';     fillcolor='white'; show='Attrmap'; output;
+84           id='Resp';  value='2.0 mg';     fillcolor='cxffffc0'; show='Attrmap'; output;
+85           id='Resp';  value='3.0 mg';     fillcolor='cxf0d0a0'; show='Attrmap'; output;
+86           id='Resp';  value='4.0 mg';     fillcolor='orange'; show='Attrmap'; output;
+87           id='Resp';  value='3.0 F6 mg';  fillcolor='cxff7f00'; show='Attrmap'; output;
+                                                           The SAS System
+
+88           id='Resp';  value='4.0 F6 mg';  fillcolor='red'; show='Attrmap'; output;
+89         run;
+
+NOTE: The data set WORK.ATTRMAP has 12 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              755.37k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 11:25:15 AM
+      Step Count                        5  Switch Count  0
+      
+
+90         
+91         /*proc print;run;*/
+92         /*ods html;*/
+93         ods graphics / reset attrpriority=color width=4in height=4in imagename="Waterfall_Xf_100";
+WARNING: Apparent invocation of macro WATERFALL_3D_MACRO not resolved.
+94         %WaterFall_3D_Macro (Data=tumor, Duration=Duration, Response=response, Dropped=dropped, Group=Drug, Code=Code,
+           _
+           180
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+
+95                   AttrMap=attrmap, Lblx=Subject, Lbly=Duration of Treatment in Days, Lblz=Tumor Lesion Best Change,
+96                   xFac=1.0, Tilt=75, Rotate=-45, Title=Tumor Response and Duration);
+
+97         
+98         ods graphics / reset attrpriority=color width=4in height=4in imagename="Waterfall_Xf_125";
+WARNING: Apparent invocation of macro WATERFALL_3D_MACRO not resolved.
+99         %WaterFall_3D_Macro (Data=tumor, Duration=Duration, Response=response, Dropped=dropped, Group=Drug, Code=Code,
+           _
+           180
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+
+100                  AttrMap=attrmap, Lblx=Subject, Lbly=Duration of Treatment in Days, Lblz=Tumor Lesion Best Change,
+101                  xFac=1.25, Tilt=75, Rotate=-45, Title=Tumor Response and Duration);
+
+102        
+103        ods graphics / reset attrpriority=color width=4in height=4in imagename="Waterfall_Xf_150";
+WARNING: Apparent invocation of macro WATERFALL_3D_MACRO not resolved.
+104        %WaterFall_3D_Macro (Data=tumor, Duration=Duration, Response=response, Dropped=dropped, Group=Drug, Code=Code,
+           _
+           180
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+
+105                  AttrMap=attrmap, Lblx=Subject, Lbly=Duration of Treatment in Days, Lblz=Tumor Lesion Best Change,
+106                  xFac=1.5, Tilt=75, Rotate=-45, Title=Tumor Response and Duration);
+
+107        
+108        /*ods html close;*/
+109        
+110        /*ods graphics / reset attrpriority=color width=4in height=4in imagename="Waterfall_075";*/
+111        /*%WaterFall_3D_Macro (Data=tumor, Duration=duration, Response=response, Dropped=dropped, Group=Drug, Code=Code,*/
+112        /*          AttrMap=attrmap, Lblx=Subject, Lbly=Duration of Treatment in Days, Lblz=Tumor Lesion Best Change, */
+113        /*          xFac=0.75, Tilt=75, Rotate=-45, Title=Tumor Response and Duration);*/
+114        /**/
+115        /*ods graphics / reset attrpriority=color width=4in height=4in imagename="Waterfall_100";*/
+                                                           The SAS System
+
+116        /*%WaterFall_3D_Macro (Data=tumor, Duration=duration, Response=response, Dropped=dropped, Group=Drug, Code=Code,*/
+117        /*          AttrMap=attrmap, Lblx=Subject, Lbly=Duration of Treatment in Days, Lblz=Tumor Lesion Best Change,*/
+118        /*          xFac=1.0, Tilt=75, Rotate=-45, Title=Tumor Response and Duration);*/
+119        /**/
+120        /*ods graphics / reset attrpriority=color width=4in height=4in imagename="Waterfall_150";*/
+121        /*%WaterFall_3D_Macro (Data=tumor, Duration=duration, Response=response, Dropped=dropped, Group=Drug, Code=Code,*/
+122        /*          AttrMap=attrmap, Lblx=Subject, Lbly=Duration of Treatment in Days, Lblz=Tumor Lesion Best Change, */
+123        /*          xFac=1.5, Tilt=75, Rotate=-45, Title=Tumor Response and Duration);*/
+124        /**/
+125        /*ods graphics / reset attrpriority=color width=4in height=4in imagename="Waterfall_200";*/
+126        /*%WaterFall_3D_Macro (Data=tumor, Duration=duration, Response=response, Dropped=dropped, Group=Drug, Code=Code,*/
+127        /*          AttrMap=attrmap, Lblx=Subject, Lbly=Duration of Treatment in Days, Lblz=Tumor Lesion Best Change, */
+128        /*          xFac=2, Tilt=75, Rotate=-45, Title=Tumor Response and Duration);*/
+129        
+130        
+131        
+
+ERROR: Errors printed on page 4.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.10 seconds
+      user cpu time       0.25 seconds
+      system cpu time     0.46 seconds
+      memory              9523.37k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 11:25:15 AM
+      Step Count                        5  Switch Count  22
+      

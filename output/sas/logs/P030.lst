@@ -1,0 +1,20 @@
+                                                           The SAS System
+
+                                       V                                 V    V   V   V
+            S              U           S                             V   S    S   S   S
+            T     D        S           T              V              S   O    S   S   S
+            U     O        U       V   E              S              O   R    T   T   T       V            V          V     V
+            D     M        B       S   S              T              R   R    R   R   R       S            I          S     S
+      O     Y     A        J       S   T              E              R   E    E   E   E       D            S          P     T
+      b     I     I        I       E   C              S              E   S    S   S   S       T            I          O     D
+      s     D     N        D       Q   D              T              S   U    C   N   U       C            T          S     Y
+
+      1 ONCO-2026 VS ONCO-2026-101 1 SYSBP Systolic Blood Pressure  120 mmHg 120 120 mmHg 2026-01-02 SCREENING     SITTING  -3
+      2 ONCO-2026 VS ONCO-2026-101 2 DIABP Diastolic Blood Pressure 80  mmHg 80   80 mmHg 2026-01-02 SCREENING     SITTING  -3
+      3 ONCO-2026 VS ONCO-2026-101 3 SYSBP Systolic Blood Pressure  125 mmHg 125 125 mmHg 2026-01-15 CYCLE 1 DAY 1 SITTING  11
+      4 ONCO-2026 VS ONCO-2026-102 1 SYSBP Systolic Blood Pressure  130 mmHg 130 130 mmHg 2026-01-05 SCREENING     SUPINE   -3
+      5 ONCO-2026 VS ONCO-2026-103 1 SYSBP Systolic Blood Pressure  118 mmHg 118 118 mmHg 2026-01-05 SCREENING     SITTING  -5
+      6 ONCO-2026 VS ONCO-2026-103 2 DIABP Diastolic Blood Pressure 76  mmHg 76   76 mmHg 2026-01-05 SCREENING     SITTING  -5
+      7 ONCO-2026 VS ONCO-2026-103 3 SYSBP Systolic Blood Pressure  122 mmHg 122 122 mmHg 2026-01-15 CYCLE 1 DAY 1 SITTING   6
+      8 ONCO-2026 VS ONCO-2026-103 4 DIABP Diastolic Blood Pressure 80  mmHg 80   80 mmHg 2026-01-15 CYCLE 1 DAY 1 SITTING   6
+      9 ONCO-2026 VS ONCO-2026-105 1 SYSBP Systolic Blood Pressure  140 mmHg 140 140 mmHg 2026-01-12 SCREENING     SITTING  -3

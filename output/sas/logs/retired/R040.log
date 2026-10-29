@@ -1,0 +1,159 @@
+1                                                          The SAS System                            11:28 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.58 seconds
+      cpu time            0.45 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R040
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1160,
+      Last Modified=27Oct2026:11:27:17,
+      Create Time=27Oct2026:11:27:17
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:28:41 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R040 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          %let name=area3;
+2          
+                                                           The SAS System
+
+3          /*
+4          Set your current-working-directory (to read/write files), if you need to ...
+5          %let rc=%sysfunc(dlgcdir('c:\someplace\public_html'));
+6          */
+7          filename odsout '.';
+8          
+9          data my_data;
+10         input x y1 y2;
+11         x_total=y1+y2;
+12         datalines;
+
+NOTE: The data set WORK.MY_DATA has 5 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              729.21k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:28:41 AM
+      Step Count                        2  Switch Count  0
+      
+
+18         ;
+19         run;
+20         
+21         data my_data; set my_data;
+22         base1_pct=0; y1_pct=y1/x_total;
+23         base2_pct=y1_pct; y2_pct=y1_pct+(y2/x_total);
+24         run;
+
+NOTE: There were 5 observations read from the data set WORK.MY_DATA.
+NOTE: The data set WORK.MY_DATA has 5 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              884.03k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 11:28:41 AM
+      Step Count                        3  Switch Count  0
+      
+
+25         
+26         
+27         ODS LISTING CLOSE;
+28         ODS HTML path=odsout body="&name..htm"
+29          (title="SGplot 100% Stacked Area Plot")
+30          style=htmlblue;
+NOTE: Writing HTML Body file: area3.htm
+31         
+32         ods graphics / imagefmt=png imagename="&name"
+33          width=800px height=600px noborder;
+34         
+35         title1 color=gray33 ls=0.0 h=23pt "100% Stacked Area Plot";
+36         
+37         proc sgplot data=my_data noautolegend;
+38         styleattrs datacolors=(cx993366 cx9999ff);
+39         band x=x lower=base1_pct upper=y1_pct;
+                                                           The SAS System
+
+40         band x=x lower=base2_pct upper=y2_pct;
+41         yaxis
+42          values=(0 to 1 by .2) label='Y Axis'
+43          labelattrs=(size=16pt weight=bold color=gray33)
+44          valueattrs=(size=16pt weight=bold color=gray33)
+45          offsetmin=0 offsetmax=0 grid;
+46         xaxis
+47          values=(0 to 5 by 1) label='X Axis'
+48          labelattrs=(size=16pt weight=bold color=gray33)
+49          valueattrs=(size=16pt weight=bold color=gray33)
+50          offsetmin=0 offsetmax=0 grid;
+51         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           3.86 seconds
+      user cpu time       0.18 seconds
+      system cpu time     0.32 seconds
+      memory              7922.75k
+      OS Memory           21972.00k
+      Timestamp           10/27/2026 11:28:46 AM
+      Step Count                        4  Switch Count  0
+      
+NOTE: There were 5 observations read from the data set WORK.MY_DATA.
+
+52         
+53         quit;
+54         ODS HTML CLOSE;
+55         ODS LISTING;
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           7.41 seconds
+      user cpu time       0.62 seconds
+      system cpu time     0.95 seconds
+      memory              20081.20k
+      OS Memory           21972.00k
+      Timestamp           10/27/2026 11:28:46 AM
+      Step Count                        4  Switch Count  20
+      

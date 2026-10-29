@@ -1,0 +1,450 @@
+1                                                          The SAS System                            11:23 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.51 seconds
+      cpu time            0.87 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          %let gpath=\\sashq\root\dept\dvr\DVR_Knowledge_Center\sgf2019\Papers\A_Combined_Waterfall_and_Swimmer_Plot\Image;
+2          %let dpi=300;
+3          
+4          
+5          /*--Data for Swimmer Plot--*/
+6          data swimmer;
+7            label response='Change from Baseline (%)';
+8            input item stage $4-12 low high highcap $25-40 status $40-60 start end durable response;
+9            startline=start; endline=end;
+10           if status ne ' ' then do;
+11             if end eq . then endline=high-0.3;
+12             if start eq . then startline=low+0.3;
+13           end;
+14           if stage eq ' ' then durable=.;
+15           datalines;
+
+NOTE: The data set WORK.SWIMMER has 15 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1285.31k
+                                                           The SAS System
+
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:23:39 AM
+      Step Count                        1  Switch Count  0
+      
+
+31         ;
+32         run;
+33         /*ods html;*/
+34         /*proc print;run;*/
+35         /*Ods html close;*/
+36         
+37         /*--Attribute Map--*/
+38         data attrmap;
+39         length ID $ 9 linecolor markercolor fillcolor $ 10;
+40         input id $ value $10-30 linecolor $ markercolor $ fillcolor $;
+41         show='ATTRMAP';
+42         datalines;
+
+NOTE: The data set WORK.ATTRMAP has 6 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              729.21k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:23:39 AM
+      Step Count                        2  Switch Count  0
+      
+
+49         ;
+50         run;
+51         proc print;run;
+
+NOTE: There were 6 observations read from the data set WORK.ATTRMAP.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              490.70k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:23:39 AM
+      Step Count                        3  Switch Count  0
+      
+
+52         
+53         ods listing gpath="&gpath" image_dpi=&dpi;
+54         
+55         /*--Swimmer plot with Legend Items--*/
+56         ods graphics on / reset height=3.5in width=6in imagename='Swimmer_Only';
+57         title 'Subject Response Stage by Month';
+58         footnote  J=l h=0.8 'Each bar represents one subject in the study.';
+59         footnote2 J=l h=0.8 'A durable responder is a subject who has confirmed response for at least 183 days (6 months).';
+60         proc sgplot data= swimmer dattrmap=attrmap nocycleattrs noborder;
+61           legenditem type=marker name='ResStart' / markerattrs=(symbol=trianglefilled color=darkgray size=9)
+             __________
+             180
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+                                                           The SAS System
+
+62                      label='Response start';
+63           legenditem type=marker name='ResEnd' / markerattrs=(symbol=circlefilled color=darkgray size=9)
+             __________
+             180
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+64                      label='Response end';
+65           legenditem type=marker name='RightArrow' / markerattrs=(symbol=trianglerightfilled color=darkgray size=12)
+             __________
+             180
+ERROR 180-322: Statement is not valid or it is used out of proper order.
+66                      label='Continued response';
+67           highlow y=item low=low high=high / highcap=highcap type=bar group=stage fill nooutline dataskin=gloss
+68                   lineattrs=(color=black) name='stage' barwidth=1 nomissinggroup transparency=0.3 attrid=stage;
+69           highlow y=item low=startline high=endline / group=status lineattrs=(thickness=2 pattern=solid)
+70                   name='status' nomissinggroup attrid=status;
+71           scatter y=item x=durable / markerattrs=(symbol=squarefilled size=6 color=black) name='Durable' legendlabel='Durable
+71       ! responder';
+72           scatter y=item x=start / markerattrs=(symbol=trianglefilled size=8) group=status attrid=status;
+73           scatter y=item x=end / markerattrs=(symbol=circlefilled size=8) group=status attrid=status;
+74           xaxis display=(nolabel) values=(0 to 20 by 1) valueshint grid;
+75           yaxis reverse display=(noticks novalues noline) label='Subjects Received Study Drug' min=1;
+76           keylegend 'stage' / title='Disease Stage';
+77           keylegend 'status' 'Durable' 'ResStart' 'ResEnd'  'RightArrow' /
+78                     noborder location=inside position=bottomright across=1 linelength=20;
+79           run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              446.40k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 11:23:39 AM
+      Step Count                        4  Switch Count  0
+      
+80         footnote;
+81         
+
+
+82         proc sort data=swimmer out=swimmer_sort;
+83           by descending response;
+84         run;
+
+NOTE: There were 15 observations read from the data set WORK.SWIMMER.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SWIMMER_SORT has 15 observations and 12 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1210.31k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 11:23:39 AM
+      Step Count                        5  Switch Count  0
+      
+
+85         
+                                                           The SAS System
+
+86         data swimmer_sort_2;
+87           retain prev id 0;
+88           set swimmer_sort;
+89           if item ne prev then id+1;
+90           prev=item;
+91           durable=durable*2;
+92         run;
+
+NOTE: Missing values were generated as a result of performing an operation on missing values.
+      Each place is given by: (Number of times) at (Line):(Column).
+      9 at 91:18   
+NOTE: There were 15 observations read from the data set WORK.SWIMMER_SORT.
+NOTE: The data set WORK.SWIMMER_SORT_2 has 15 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              897.87k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 11:23:39 AM
+      Step Count                        6  Switch Count  0
+      
+
+93         ods html;
+NOTE: Writing HTML Body file: sashtml.htm
+94         proc print;
+95         var id item stage low high highcap status start end durable response startline endline;
+96         run;
+
+NOTE: There were 15 observations read from the data set WORK.SWIMMER_SORT_2.
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1469.96k
+      OS Memory           15956.00k
+      Timestamp           10/27/2026 11:23:40 AM
+      Step Count                        7  Switch Count  0
+      
+
+97         Ods html close;
+98         
+99         /*--Waterfall plot--*/
+100        ods graphics on / reset height=3.5in width=6in imagename='Waterfall_Only';
+101        title 'Change in Tumor Size';
+102        proc sgplot data= swimmer_sort_2 noborder;
+103          vbarparm category=id  response=response / dataskin=pressed;
+104          refline 20 -30 / lineattrs=(pattern=shortdash) ;
+105          xaxis display=none;
+106          yaxis label='Tumor Response';
+107          run;
+
+NOTE: Since no format is assigned, the numeric category variable will use the default of BEST6.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           10.36 seconds
+      user cpu time       0.29 seconds
+      system cpu time     0.43 seconds
+                                                           The SAS System
+
+      memory              11901.75k
+      OS Memory           22520.00k
+      Timestamp           10/27/2026 11:23:51 AM
+      Step Count                        8  Switch Count  0
+      
+WARNING: GPATH or PATH is not a writable directory. It will be ignored.
+WARNING: The data for a BARCHARTPARM statement are not appropriate. The BARCHARTPARM statement expects summarized data. The bar 
+         chart might not be drawn correctly.
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C024\Waterfall_Only.png.
+NOTE: There were 15 observations read from the data set WORK.SWIMMER_SORT_2.
+
+108        footnote;
+109        
+110        
+111        
+112        
+113        /*--Vertical Swimmer with Duration--*/
+114        proc template;
+115          define statgraph Swimmer_With_Response_Vertical;
+116            begingraph / axislineextent=data;
+117        	  entrytitle 'Tumor Response with Duration by Stage and Month';
+118        	  entryfootnote halign=left 'This graph uses simulated data for illustration only' /
+119                   textattrs=(size=7pt style=italic);
+120        
+121        	  legenditem type=marker name='ResStart' / markerattrs=(symbol=squarefilled color=darkgray size=7)
+122                     label='Response start';
+123              legenditem type=marker name='ResEnd' / markerattrs=(symbol=circlefilled color=darkgray size=7)
+124                     label='Response end';
+125              legenditem type=marker name='RightArrow' / markerattrs=(symbol=trianglefilled color=darkgray size=12)
+126                     label='Continued response';
+127        
+128        	  layout lattice / columndatarange=union rowweights=(0.6 0.4) rowgutter=0;
+129        	    columnaxes;
+130        		  columnaxis / display=none type=discrete discreteopts=(colorbands=odd colorbandsattrs=(transparency=0.1));
+131        		endcolumnaxes;
+132        	    layout overlay / yaxisopts=(griddisplay=on offsetmax=0.15 tickvalueattrs=(size=7)
+133                                            labelattrs=(size=8)  label='Duration of Treatment in Months') walldisplay=none;
+134        
+135                  highlowplot x=id low=low high=high / highcap=highcap type=bar group=stage dataskin=pressed
+136                      lineattrs=(color=black) name='stage' barwidth=0.8 includemissinggroup=false datatransparency=0.3;
+137                  highlowplot x=id low=startline high=endline / group=status lineattrs=(thickness=2 pattern=solid)
+138                    name='status' includemissinggroup=false;
+139                    scatterplot x=id y=durable / markerattrs=(symbol=squarefilled size=6 color=black) name='Durable'
+139      ! legendlabel='Durable responder';
+140                    scatterplot x=id y=start / markerattrs=(symbol=squarefilled size=8) group=status;
+141                    scatterplot x=id y=end / markerattrs=(symbol=circlefilled size=8) group=status;
+142        		    discretelegend 'stage' / title='Disease Stage' valign=top border=false title='Stage:';
+143                    discretelegend 'status' 'Durable' 'ResStart' 'ResEnd'  'RightArrow' / order=columnmajor
+144                             halign=left valign=top border=false location=inside down=3 itemsize=(linelength=20);
+145        
+146        		endlayout;
+147        	    layout overlay / yaxisopts=(griddisplay=on tickvalueattrs=(size=7) labelattrs=(size=8) offsetmax=0
+148                                            linearopts=(tickvaluepriority=true) label='Change from Baseline (%)')
+149                                            walldisplay=none;
+150        		  bandplot x=id limitupper=20 limitlower=-30 / extend=true display=(outline)
+151                               outlineattrs=graphdata1(pattern=dash thickness=1);
+152                  barchartparm category=id response=response / barwidth=0.5
+153                               datalabelattrs=(size=5) dataskin=pressed ;
+                                                           The SAS System
+
+154        		endlayout;
+155        	  endlayout;
+156        	endgraph;
+157          end;
+NOTE: STATGRAPH 'Swimmer_With_Response_Vertical' has been saved to: SASUSER.TEMPLAT
+158        run;
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              353.59k
+      OS Memory           16980.00k
+      Timestamp           10/27/2026 11:23:51 AM
+      Step Count                        9  Switch Count  0
+      
+
+159        
+160        ods graphics / reset width=5in height=5in imagename='Swimmer_Plus_Vertical';
+161        proc sgrender template=Swimmer_With_Response_Vertical data=swimmer_sort_2 dattrmap=attrmap;
+162        /*format duration 3.0;*/
+163        label response='Response';
+164        dattrvar stage='stage' status='status';
+165        run;
+
+WARNING: GPATH or PATH is not a writable directory. It will be ignored.
+WARNING: The data for a BARCHARTPARM statement are not appropriate. The BARCHARTPARM statement expects summarized data. The bar 
+         chart might not be drawn correctly.
+NOTE: TICKVALUEPRIORITY=TRUE is ignored since TICKVALUELIST and/or TICKVALUESEQUENCE options have not been specified.
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C024\Swimmer_Plus_Vertical.png.
+NOTE: There were 15 observations read from the data set WORK.SWIMMER_SORT_2.
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           1.90 seconds
+      user cpu time       0.14 seconds
+      system cpu time     0.06 seconds
+      memory              8611.31k
+      OS Memory           23832.00k
+      Timestamp           10/27/2026 11:23:53 AM
+      Step Count                        10  Switch Count  0
+      
+
+166        
+167        
+168        
+169        
+170        /*--Horizontal Swimmer with Duration--*/
+171        proc template;
+172          define statgraph Swimmer_Plus_Horizontal;
+173            begingraph / axislineextent=data;
+174        	  entrytitle 'Tumor Response with Duration by Stage and Month';
+175        	  entryfootnote halign=left 'This graph uses simulated data for illustration only' /
+176                   textattrs=(size=7pt style=italic);
+177        
+178        	  legenditem type=marker name='ResStart' / markerattrs=(symbol=squarefilled color=darkgray size=7)
+179                     label='Response start';
+180              legenditem type=marker name='ResEnd' / markerattrs=(symbol=circlefilled color=darkgray size=7)
+181                     label='Response end';
+182              legenditem type=marker name='RightArrow' / markerattrs=(symbol=trianglerightfilled color=darkgray size=9)
+183                     label='Continued response';
+                                                           The SAS System
+
+184        
+185        	  layout lattice / rowdatarange=union columnweights=(0.25 0.75) columngutter=0 columns=2;
+186        	    rowaxes;
+187        		  rowaxis / display=none type=discrete reverse=true discreteopts=(colorbands=odd colorbandsattrs=(transparency=0.1));
+188        		endrowaxes;
+189        
+190        	    layout overlay / xaxisopts=(griddisplay=on tickvalueattrs=(size=6) labelattrs=(size=7)
+191                                            linearopts=(tickvaluepriority=true) label='Change from Baseline (%)')
+192                                            walldisplay=none;
+193        		  bandplot y=id limitupper=20 limitlower=-30 / extend=true display=(outline)
+194                               outlineattrs=graphdata1(pattern=dash thickness=1);
+195                  barchartparm category=id response=response / barwidth=0.8 orient=horizontal
+196                               datalabelattrs=(size=5) dataskin=pressed ;
+197        		endlayout;
+198        
+199        	    layout overlay / xaxisopts=(griddisplay=on offsetmax=0.15 tickvalueattrs=(size=6)
+200                                            labelattrs=(size=7)  label='Duration of Treatment in Months') walldisplay=none;
+201        
+202                  highlowplot y=id low=low high=high / highcap=highcap type=bar group=stage dataskin=pressed
+203                      lineattrs=(color=black) name='stage' barwidth=1.0 includemissinggroup=false datatransparency=0.3;
+204                  highlowplot y=id low=startline high=endline / group=status lineattrs=(thickness=2 pattern=solid)
+205                    name='status' includemissinggroup=false;
+206                  scatterplot y=id x=durable / markerattrs=(symbol=squarefilled size=6 color=black) name='Durable'
+206      ! legendlabel='Durable responder';
+207                  scatterplot y=id x=start / markerattrs=(symbol=squarefilled size=8) group=status;
+208                  scatterplot y=id x=end / markerattrs=(symbol=circlefilled size=8) group=status;
+209        /*		  discretelegend 'stage' / valign=top title='Disease Stage' border=false title='Stage:';*/
+210                  discretelegend 'status' 'Durable' 'ResStart' 'ResEnd'  'RightArrow' / valueattrs=(size=6)
+211                             halign=right valign=top border=false location=inside across=1 itemsize=(linelength=20);
+212        
+213        		endlayout;
+214        		sidebar / align=top spacefill=true;
+215        		  discretelegend 'stage' / title='Disease Stage:' border=false;
+216        		endsidebar;
+217        	  endlayout;
+218        	endgraph;
+219          end;
+NOTE: STATGRAPH 'Swimmer_Plus_Horizontal' has been saved to: SASUSER.TEMPLAT
+220        run;
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              254.31k
+      OS Memory           17236.00k
+      Timestamp           10/27/2026 11:23:53 AM
+      Step Count                        11  Switch Count  0
+      
+
+221        
+222        ods graphics / reset width=5in height=3in imagename='Swimmer_Plus_Horizontal';
+223        proc sgrender template=Swimmer_Plus_Horizontal data=swimmer_sort_2 dattrmap=attrmap;
+224        /*format duration 3.0;*/
+225        label response='Response';
+226        dattrvar stage='stage' status='status';
+227        run;
+
+WARNING: GPATH or PATH is not a writable directory. It will be ignored.
+                                                           The SAS System
+
+WARNING: The data for a BARCHARTPARM statement are not appropriate. The BARCHARTPARM statement expects summarized data. The bar 
+         chart might not be drawn correctly.
+NOTE: TICKVALUEPRIORITY=TRUE is ignored since TICKVALUELIST and/or TICKVALUESEQUENCE options have not been specified.
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C024\Swimmer_Plus_Horizontal.png.
+NOTE: There were 15 observations read from the data set WORK.SWIMMER_SORT_2.
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           1.56 seconds
+      user cpu time       0.06 seconds
+      system cpu time     0.07 seconds
+      memory              5794.37k
+      OS Memory           21704.00k
+      Timestamp           10/27/2026 11:23:54 AM
+      Step Count                        12  Switch Count  0
+      
+
+228        
+
+ERROR: Errors printed on pages 2,3.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           18.63 seconds
+      user cpu time       1.26 seconds
+      system cpu time     1.59 seconds
+      memory              22575.79k
+      OS Memory           23832.00k
+      Timestamp           10/27/2026 11:23:54 AM
+      Step Count                        12  Switch Count  36
+      

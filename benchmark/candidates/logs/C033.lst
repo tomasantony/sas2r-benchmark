@@ -1,0 +1,35 @@
+                                                   CLASSTEST table before sorting
+
+                                                 Obs    Name       Subject    Score
+
+                                                   1    Judy       Reading      91 
+                                                   2    Judy       Math         79 
+                                                   3    Barbara    Math         90 
+                                                   4    Barbara    Reading      86 
+                                                   5    Barbara    Math         90 
+                                                   6    Louise     Math         72 
+                                                   7    Louise     Reading      65 
+                                                   8    William    Math         61 
+                                                   9    William    Reading      71 
+                                                  10    Henry      Math         62 
+                                                  11    Henry      Reading      75 
+                                                  12    Henry      Reading      84 
+                                                  13    Jane       Math         94 
+                                                  14    Jane       Reading      96 
+                                         CLASSTEST_SORT table with duplicated rows removed
+
+                                                 Obs    Name       Subject    Score
+
+                                                   1    Barbara    Math         90 
+                                                   2    Barbara    Reading      86 
+                                                   3    Henry      Math         62 
+                                                   4    Henry      Reading      75 
+                                                   5    Henry      Reading      84 
+                                                   6    Jane       Math         94 
+                                                   7    Jane       Reading      96 
+                                                   8    Judy       Math         79 
+                                                   9    Judy       Reading      91 
+                                                  10    Louise     Math         72 
+                                                  11    Louise     Reading      65 
+                                                  12    William    Math         61 
+                                                  13    William    Reading      71 

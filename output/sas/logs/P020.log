@@ -1,0 +1,50 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              212.34k
+      OS Memory           17000.00k
+      Timestamp           10/27/2026 03:58:45 PM
+      Step Count                        191  Switch Count  0
+      
+
+2355       %let pid = P020; %let outds = &root./output/sas/datasets/P020; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P020
+2356       %put NOTE: ===== pipeline c2c: P020 P020_tlf_figure1.sas =====;
+NOTE: ===== pipeline c2c: P020 P020_tlf_figure1.sas =====
+2357       %let _bench_t0 = %sysfunc(datetime());
+2358       %include "&root./programs/sas_run/P020_tlf_figure1.sas";
+NOTE: Writing RTF Body file: D:\meta_hackathon\sas2r-agent/data/derived/c2c/tlfs/tlf_figure1.rtf
+
+NOTE: The LOGLOG transform is used to compute the confidence limits for the quartiles of the survivor distribution. To suppress 
+      using this transform, specify CONFTYPE=LINEAR in the PROC LIFETEST statement.
+NOTE: The PROCEDURE LIFETEST printed pages 16-19.
+NOTE: PROCEDURE LIFETEST used (Total process time):
+      real time           4.16 seconds
+      user cpu time       0.43 seconds
+      system cpu time     0.89 seconds
+      memory              16488.00k
+      OS Memory           31344.00k
+      Timestamp           10/27/2026 03:58:50 PM
+      Step Count                        192  Switch Count  0
+      
+
+2393       %_bench_capture;
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+                                                           The SAS System
+
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5195.00k
+      OS Memory           31084.00k
+      Timestamp           10/27/2026 03:58:50 PM
+      Step Count                        193  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+2394       proc printto; run;
+

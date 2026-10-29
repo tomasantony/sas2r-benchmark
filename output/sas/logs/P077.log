@@ -1,0 +1,289 @@
+1                                                          The SAS System                            15:47 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.70 seconds
+      cpu time            0.65 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P077
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:47:08 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P077 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    l_death.sas
+3          * Purpose:    Listing 16.2.7.3 - Listing of Deaths
+4          * Study:      [STUDYID]
+5          * Author:     [Programmer Name]
+6          * Date:       [Date]
+7          * Input:      adam.adsl, adam.adae
+8          * Output:     l_death.rtf
+9          * Population: All Subjects
+10         *****************************************************************************/
+11         
+12         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:47:09
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+78         %include "&macpath./m_report.sas";
+150        %include "&pgmpath./utilities/u_titles.sas";
+312        
+313        /*--- Step 1: Identify deaths ---*/
+314        proc sql noprint;
+315            create table deaths as
+316            select a.USUBJID,
+317                   a.TRTA, a.AGE, a.SEX, a.RACE,
+318                   a.TRTSDT format=date9. as TRT_START,
+319                   a.TRTEDT format=date9. as TRT_END,
+320                   a.DTHDT format=date9. as DEATH_DATE,
+321                   a.DTHCAUS as CAUSE_OF_DEATH,
+322                   /* Days from last dose to death */
+323                   case when a.DTHDT ne . and a.TRTEDT ne .
+324                        then a.DTHDT - a.TRTEDT
+325                        else .
+326                   end as DAYS_LASTDOSE_DEATH,
+327                   /* Days from first dose to death */
+328                   case when a.DTHDT ne . and a.TRTSDT ne .
+329                        then a.DTHDT - a.TRTSDT + 1
+330                        else .
+331                   end as DAYS_FIRSTDOSE_DEATH
+332            from adam.adsl a
+333            where a.DTHFL = 'Y'
+334            order by a.TRTA, a.USUBJID;
+                                                           The SAS System
+
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.DEATHS created, with 11 rows and 11 columns.
+
+335        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              12772.96k
+      OS Memory           21316.00k
+      Timestamp           10/27/2026 03:47:08 PM
+      Step Count                        2  Switch Count  0
+      
+
+336        
+337        /*--- Step 2: Add fatal AE information ---*/
+338        proc sql noprint;
+339            create table death_ae as
+340            select distinct USUBJID,
+341                   AEBODSYS as FATAL_AE_SOC,
+342                   AEDECOD as FATAL_AE_PT,
+343                   AEREL as FATAL_AE_REL
+344            from adam.adae
+345            where AEOUT = 'FATAL'
+346            order by USUBJID;
+NOTE: Table WORK.DEATH_AE created, with 0 rows and 4 columns.
+
+347        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5398.06k
+      OS Memory           15196.00k
+      Timestamp           10/27/2026 03:47:08 PM
+      Step Count                        3  Switch Count  0
+      
+
+348        
+349        proc sql noprint;
+350            create table death_report as
+351            select a.*,
+352                   b.FATAL_AE_SOC, b.FATAL_AE_PT, b.FATAL_AE_REL
+353            from deaths a
+354            left join death_ae b on a.USUBJID = b.USUBJID
+355            order by a.TRTA, a.USUBJID;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.DEATH_REPORT created, with 11 rows and 14 columns.
+
+356        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              17988.93k
+      OS Memory           26788.00k
+      Timestamp           10/27/2026 03:47:08 PM
+      Step Count                        4  Switch Count  0
+                                                           The SAS System
+
+      
+
+357        
+358        /*--- Step 3: Format display ---*/
+359        data death_final;
+360            set death_report;
+361            length demog $40 days_display $20;
+362        
+363            demog = catx('/', strip(put(AGE, best.)), strip(SEX), strip(substr(RACE, 1, 1)));
+364        
+365            if DAYS_LASTDOSE_DEATH ne . then
+366                days_display = strip(put(DAYS_LASTDOSE_DEATH, 8.));
+367            else days_display = 'N/A';
+368        run;
+
+NOTE: There were 11 observations read from the data set WORK.DEATH_REPORT.
+NOTE: The data set WORK.DEATH_FINAL has 11 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              918.04k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:47:08 PM
+      Step Count                        5  Switch Count  0
+      
+
+369        
+370        /*--- Step 4: Generate listing ---*/
+371        %set_titles(output=L_DEATH, population=All Subjects);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+372        %ods_on(filename=l_death);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/l_death.rtf
+373        
+374        proc report data=death_final nowd split='~'
+375            style(report)=[outputwidth=9.5in font_size=8pt]
+376            style(header)=[just=center fontweight=bold font_size=8pt]
+377            style(column)=[just=left verticalalign=top font_size=8pt];
+378        
+                                                           The SAS System
+
+379            columns TRTA USUBJID demog TRT_START TRT_END DEATH_DATE
+380                    days_display CAUSE_OF_DEATH FATAL_AE_SOC FATAL_AE_PT FATAL_AE_REL;
+381        
+382            define TRTA           / order 'Treatment' style(column)=[width=0.8in];
+383            define USUBJID        / display 'Subject~ID' style(column)=[width=0.8in];
+384            define demog          / display 'Age/Sex/~Race' style(column)=[width=0.5in];
+385            define TRT_START      / display 'First~Dose' style(column)=[width=0.7in];
+386            define TRT_END        / display 'Last~Dose' style(column)=[width=0.7in];
+387            define DEATH_DATE     / display 'Death~Date' style(column)=[width=0.7in];
+388            define days_display   / display 'Days Last~Dose to~Death' style(column)=[width=0.6in just=center];
+389            define CAUSE_OF_DEATH / display 'Cause of~Death' style(column)=[width=1.2in];
+390            define FATAL_AE_SOC   / display 'Fatal AE~SOC' style(column)=[width=1.2in];
+391            define FATAL_AE_PT    / display 'Fatal AE~PT' style(column)=[width=1.0in];
+392            define FATAL_AE_REL   / display 'Relationship' style(column)=[width=0.8in];
+393        
+394        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 11 observations read from the data set WORK.DEATH_FINAL.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              8079.87k
+      OS Memory           19296.00k
+      Timestamp           10/27/2026 03:47:09 PM
+      Step Count                        6  Switch Count  0
+      
+
+395        
+396        %ods_off;
+397        %clear_titles;
+398        
+399        proc datasets lib=work nolist; delete deaths death_ae death_report death_final; quit;
+
+NOTE: Deleting WORK.DEATHS (memtype=DATA).
+NOTE: Deleting WORK.DEATH_AE (memtype=DATA).
+NOTE: Deleting WORK.DEATH_REPORT (memtype=DATA).
+NOTE: Deleting WORK.DEATH_FINAL (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.01 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.84k
+      OS Memory           12888.00k
+      Timestamp           10/27/2026 03:47:09 PM
+      Step Count                        7  Switch Count  0
+      
+
+400        
+401        %put NOTE: l_death.sas completed successfully.;
+NOTE: l_death.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.83 seconds
+      user cpu time       0.56 seconds
+      system cpu time     0.67 seconds
+      memory              25540.34k
+      OS Memory           26788.00k
+      Timestamp           10/27/2026 03:47:09 PM
+      Step Count                        7  Switch Count  26
+      

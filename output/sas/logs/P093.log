@@ -1,0 +1,173 @@
+1                                                          The SAS System                            10:55 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.77 seconds
+      cpu time            0.57 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P093
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:55:51 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P093 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /************************************************************************************************
+2           USING THE BY GROUPFORMAT STATEMENT TO PROCESS DATA
+                                                           The SAS System
+
+3               This program creates a format that can be used to group data. It shows the use of the groupformat option in the data
+3        !  step.
+4               Keywords: PROC FORMAT, FORMAT, VALUE, GROUPFORMAT
+5               SAS Versions: SAS 9, SAS Viya
+6               Documentation:
+6        ! https://documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=default&docsetId=proc&docsetTarget=p1xidhqypi0fnwn1if8opjpqpbmn
+6        ! .htm
+7               1. Create a data set on which to test the new format. The data is sorted by the value to be formatted.
+8               2. Use PROC FORMAT with a value statement. Provide ranges for which you want to assign different grouping levels.
+9               3. Use the groupformat option on the by statement to allow the data step to read the data by groups.
+10              4. Because the data is being read with a by statement the first. and last. variables are created. In this example,
+10       ! the
+11                 first.salary will be the lowest salary observation for a group and the last.salary observation will be the
+11       ! highest.
+12              5. In the PROC REPORT apply the format to see the results.
+13         ************************************************************************************************/
+14         data payroll; /*1*/
+15            infile cards;
+16            input EmployeeID Salary BirthDate : date9. HireDate : date9.;
+17            cards;
+
+NOTE: The data set WORK.PAYROLL has 45 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              731.25k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:55:51 AM
+      Step Count                        2  Switch Count  0
+      
+
+63         ;
+64         run;
+65         
+66         proc format;
+66       !              /*2*/
+67            value salgrp low-<30000='Under $30,000'
+68                         30000-<35000='$30,000 to $35,000'
+69         				35000-<50000='$35,000 to $50,000'
+70         				50000-high='Over $50,000';
+NOTE: Format SALGRP has been output.
+71         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              154.84k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:55:51 AM
+      Step Count                        3  Switch Count  0
+      
+
+72         
+73         data highlowsal;
+74            set payroll;
+75            by groupformat salary; /*3*/
+                                                           The SAS System
+
+76            format salary salgrp.;
+77            if first.salary then output; /*4*/
+78            if last.salary then output;
+79         run;
+
+NOTE: There were 45 observations read from the data set WORK.PAYROLL.
+NOTE: The data set WORK.HIGHLOWSAL has 8 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              907.28k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 10:55:51 AM
+      Step Count                        4  Switch Count  0
+      
+
+80         
+81         proc report data=highlowsal nowd; /*5*/
+82            columns EmployeeID Salary Salary=SalGrp HireDate;
+83            define salary / display format=dollar12.;
+84            define hiredate / format=date9.;
+85            define salgrp / format=salgrp. 'Salary Group';
+86            title 'Lowest and Highest Salary by Salary Group';
+87         run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 8 observations read from the data set WORK.HIGHLOWSAL.
+NOTE: The PROCEDURE REPORT printed page 1.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              8818.62k
+      OS Memory           18800.00k
+      Timestamp           10/27/2026 10:55:51 AM
+      Step Count                        5  Switch Count  0
+      
+
+88         
+89         title;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.05 seconds
+      user cpu time       0.32 seconds
+      system cpu time     0.39 seconds
+      memory              17362.82k
+      OS Memory           18800.00k
+      Timestamp           10/27/2026 10:55:51 AM
+      Step Count                        5  Switch Count  22
+      

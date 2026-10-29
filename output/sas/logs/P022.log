@@ -1,0 +1,147 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              211.90k
+      OS Memory           13656.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        28  Switch Count  0
+      
+
+332        %let pid = P022; %let outds = &root./output/sas/datasets/P022; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P022
+333        %put NOTE: ===== pipeline faijal: P022 P022_ae.sas =====;
+NOTE: ===== pipeline faijal: P022 P022_ae.sas =====
+                                                           The SAS System
+
+334        %let _bench_t0 = %sysfunc(datetime());
+335        %include "&root./programs/sas_run/P022_ae.sas";
+
+NOTE: There were 5 observations read from the data set WORK.SDTM_DM.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.DM_FOR_AE has 5 observations and 2 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1240.37k
+      OS Memory           14432.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        29  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.EDC_AE.
+NOTE: The data set WORK.AE_PREP has 4 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              930.28k
+      OS Memory           13400.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        30  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.AE_PREP.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.AE_PREP has 4 observations and 14 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              682.21k
+      OS Memory           13660.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        31  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.AE_PREP.
+NOTE: There were 5 observations read from the data set WORK.DM_FOR_AE.
+NOTE: The data set WORK.SDTM_AE1 has 4 observations and 30 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1084.87k
+      OS Memory           13656.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        32  Switch Count  0
+      
+
+
+                                                           The SAS System
+
+NOTE: There were 4 observations read from the data set WORK.SDTM_AE1.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SDTM_AE1 has 4 observations and 30 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              719.43k
+      OS Memory           13660.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        33  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.SDTM_AE1.
+NOTE: The data set WORK.SDTM_AE has 4 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              930.65k
+      OS Memory           13400.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        34  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.SDTM_AE.
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              490.03k
+      OS Memory           13144.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        35  Switch Count  0
+      
+
+
+NOTE: The export data set has 4 observations and 16 variables.
+NOTE: "D:\ae.xlsx" file was successfully created.
+NOTE: PROCEDURE EXPORT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1395.59k
+      OS Memory           13144.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        36  Switch Count  0
+      
+
+583        %_bench_capture;
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+                                                           The SAS System
+
+      memory              5193.90k
+      OS Memory           18268.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        37  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+584        proc printto; run;
+

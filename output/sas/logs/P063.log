@@ -1,0 +1,287 @@
+1                                                          The SAS System                            15:59 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           0.88 seconds
+      cpu time            0.45 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P063
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.28k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:59:23 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P063 family=morioka
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*** HELP START ***//*
+2          
+                                                           The SAS System
+
+3          Macro Name        : %event_gant_excel
+4          
+5          Description       :
+6              This macro generates a Gantt chart in Excel format based on user-specified event data.
+7              Given a dataset containing event start and end days, the macro builds a day-wise array
+8              and visually highlights the event duration using colored cells via ODS EXCEL and
+9              SAS RWI (Report Writing Interface)
+10         
+11         Main Features     :
+12             - Automatically calculates the time range based on event dates
+13             - Distinguishes ongoing events (with missing end date) using separate cell styling
+14             - Displays events per subject along a horizontal timeline
+15             - All input elements (dataset, variable names, output path, etc.) are configurable
+16         
+17         Input Parameters  :
+18             outpath             - Output directory path for the Excel file
+19             outfile             - Output file name (e.g., gant.xlsx)
+20             target_dataest      - Input dataset (e.g., work.ae)
+21             target_id           - Subject identifier variable (e.g., SUBJID)
+22             target_event_name   - Event name variable (e.g., AETERM)
+23             target_st           - Event start day variable (e.g., AESTDY)
+24             target_en           - Event end day variable (e.g., AEENDY)
+25         
+26         Assumptions       :
+27             - Event start and end values are integers (typically study day numbers)
+28             - Missing end date indicates an ongoing event
+29         
+30         Limitations       :
+31             - Large time spans or a high number of subjects may lead to excessive memory use,
+32               potentially resulting in runtime errors
+33         
+34         Author            : Yutaka Morioka
+35         
+36         Usage Example     :
+37             %event_gant_excel(
+38                 outpath=F:\Project\output,
+39                 outfile=ae_gant.xlsx,
+40                 target_dataest=work.ae,
+41                 target_id=SUBJID,
+42                 target_event_name=AETERM,
+43                 target_st=AESTDY,
+44                 target_en=AEENDY
+45             );
+46         
+47         *//*** HELP END ***/
+48         
+49         %macro event_gant_excel(
+50         outpath = ./
+51         ,outfile =gant.xlsx
+52         ,target_dataest=dummy
+53         ,target_id = SUBJID
+54         ,target_event_name = AETERM
+55         ,target_st = AESTDY
+56         ,target_en = AEENDY);
+57         
+58         /*test_dummy_data*/
+59         data dummy;
+60            SUBJID="AAA";AETERM="Adverse Event1"; AESTDY=1;AEENDY=5;output;
+                                                           The SAS System
+
+61            SUBJID="AAA";AETERM="Adverse Event2"; AESTDY=3;AEENDY=8;output;
+62            SUBJID="BBB";AETERM="Adverse Event1"; AESTDY=2;AEENDY=30;output;
+63            SUBJID="BBB";AETERM="Adverse Event2"; AESTDY=-2;AEENDY=3;output;
+64            SUBJID="BBB";AETERM="Adverse Event3"; AESTDY=4;AEENDY=.;output;
+65            SUBJID="CCC";AETERM="Adverse Event1"; AESTDY=15;AEENDY=20;output;
+66         run;
+67         
+68         proc sql noprint;
+69          select min(min(&target_st,1)) into:min trimmed from &target_dataest;
+70          select max(max(&target_st,&target_en)) into:max trimmed from &target_dataest;
+71         quit;
+72         %put &=min;
+73         %put &=max;
+74         %let range =%eval( %sysfunc(range(&min,&max))+ (0<&min));
+75         %put &=range;
+76         
+77         data __wk1;
+78          set &target_dataest;
+79          array ar{&range.} $1.;
+80          if &min < 1 then do;
+81             st = &target_st - &min + (&target_st<1);
+82             if ^missing(&target_en) then en = &target_en - &min + (&target_en<1);
+83          end;
+84          else do;
+85             st=&target_st;
+86             en=&target_en;
+87          end;
+88          do i = 1 to &range;
+89             if st <=i <=en then ar{i}="Y";
+90             else if st=i and missing(en) then ar{i}="Y";
+91             else if st<=i and missing(en) then ar{i}="O";
+92          end;
+93         keep st en &target_id &target_event_name &target_st &target_en ar:;
+94         run;
+95         
+96         %macro hed();
+97          %do i = &min %to &max;
+98             if &i ne 0 then ob.format_cell(data: "&i",  style_attr: "background=blue color=white");
+99          %end;
+100        %mend;
+101        
+102        %macro row();
+103         %do i = 1 %to %eval(&range);
+104           if ar&i="Y" then  ob.format_cell(data: ar&i,  style_attr: "background=red color=red");
+105           else if ar&i="O" then  ob.format_cell(data: ar&i,  style_attr: "background=pink color=pink");
+106           else ob.format_cell(data: ar&i,  style_attr: "background=white color=white");
+107         %end;
+108        %mend;
+109        
+110        ods excel file="&outpath\&outfile." options( sheet_name= "GANT" );
+111        data _NULL_;
+112        
+113           set __wk1 end=EOF;
+114        
+115           if _N_=1 then do;
+116               dcl odsout ob();
+117               ob.table_start();
+118        
+                                                           The SAS System
+
+119            *** header ;
+120               ob.head_start();
+121               ob.row_start();
+122                    ob.format_cell(data: "ID",  style_attr: "background=darkblue color=white");
+123                    ob.format_cell(data: "Event",  style_attr: "background=darkblue color=white");
+124                    ob.format_cell(data: "STDY",  style_attr: "background=darkblue color=white");
+125                    ob.format_cell(data: "ENDY",  style_attr: "background=darkblue color=white");
+126                    %hed();
+127               ob.row_end();
+128               ob.head_end();
+129        
+130           end;
+131        
+132           *** report ;
+133           ob.row_start();
+134                ob.format_cell(data: &target_id);
+135                ob.format_cell(data: &target_event_name);
+136                ob.format_cell(data: &target_st);
+137                ob.format_cell(data: &target_en);
+138                 %row();
+139           ob.row_end();
+140        
+141           if EOF then ob.table_end();
+142        run;
+143        ods excel close;
+144        %mend;
+145        
+146        /* benchmark driver: the program only defines %event_gant_excel; run it with its built-in test data */
+147        %event_gant_excel(outpath=&outds., outfile=gant.xlsx);
+
+NOTE: The data set WORK.DUMMY has 6 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              742.46k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 03:59:23 PM
+      Step Count                        2  Switch Count  0
+      
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5742.62k
+      OS Memory           15452.00k
+      Timestamp           10/27/2026 03:59:23 PM
+      Step Count                        3  Switch Count  0
+      
+
+MIN=-2
+MAX=30
+RANGE=32
+
+NOTE: There were 6 observations read from the data set WORK.DUMMY.
+NOTE: The data set WORK.__WK1 has 6 observations and 38 variables.
+NOTE: DATA statement used (Total process time):
+                                                           The SAS System
+
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              922.59k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:59:23 PM
+      Step Count                        4  Switch Count  0
+      
+
+
+NOTE: DATA statement used (Total process time):
+      real time           0.18 seconds
+      user cpu time       0.09 seconds
+      system cpu time     0.04 seconds
+      memory              4682.12k
+      OS Memory           23420.00k
+      Timestamp           10/27/2026 03:59:26 PM
+      Step Count                        5  Switch Count  0
+      
+NOTE: There were 6 observations read from the data set WORK.__WK1.
+
+NOTE: Writing EXCEL file: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P063\gant.xlsx
+
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5220.18k
+      OS Memory           19036.00k
+      Timestamp           10/27/2026 03:59:26 PM
+      Step Count                        6  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.71 seconds
+      user cpu time       0.70 seconds
+      system cpu time     1.03 seconds
+      memory              22330.96k
+      OS Memory           23420.00k
+      Timestamp           10/27/2026 03:59:26 PM
+      Step Count                        6  Switch Count  24
+      

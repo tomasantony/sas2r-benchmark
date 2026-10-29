@@ -1,0 +1,150 @@
+1                                                          The SAS System                            15:58 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.56 seconds
+      cpu time            0.45 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Library OUTDS was created.
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\own-adam
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=own-adam family=own-adam
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* pipeline driver for family own-adam: each program builds its ADaM dataset in WORK from inline data; copy it to outds,
+1        ! then clear WORK */
+2          %let family = own-adam;
+3          proc printto log="&outlog./P083.log" print="&outlog./P083.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              7.00k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 03:58:59 PM
+      Step Count                        15  Switch Count  0
+      
+
+436        proc printto log="&outlog./P084.log" print="&outlog./P084.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              7.15k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 03:59:00 PM
+      Step Count                        30  Switch Count  0
+      
+
+865        proc printto log="&outlog./P085.log" print="&outlog./P085.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              6.68k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 03:59:00 PM
+      Step Count                        54  Switch Count  0
+      
+
+1367       proc printto log="&outlog./P086.log" print="&outlog./P086.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              6.68k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:59:01 PM
+      Step Count                        77  Switch Count  0
+      
+
+2063       proc printto log="&outlog./P087.log" print="&outlog./P087.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              6.68k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:59:01 PM
+      Step Count                        103  Switch Count  0
+      
+
+2943       proc printto log="&outlog./P088.log" print="&outlog./P088.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              7.25k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        132  Switch Count  0
+      
+
+3530       proc printto log="&outlog./P089.log" print="&outlog./P089.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              7.06k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 03:59:03 PM
+      Step Count                        154  Switch Count  0
+      
+
+4051       proc printto log="&outlog./P090.log" print="&outlog./P090.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              7.06k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 03:59:03 PM
+      Step Count                        167  Switch Count  0
+      
+
+4484       
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           5.96 seconds
+      user cpu time       1.26 seconds
+      system cpu time     1.51 seconds
+      memory              17145.00k
+      OS Memory           18604.00k
+      Timestamp           10/27/2026 03:59:03 PM
+      Step Count                        167  Switch Count  346
+      

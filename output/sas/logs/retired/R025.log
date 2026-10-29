@@ -1,0 +1,483 @@
+1                                                          The SAS System                            10:55 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.66 seconds
+      cpu time            0.60 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R025
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R025 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*This is for the Life Tables for the Texas Vital Statistics Annual Report Table 24*/
+2          
+                                                           The SAS System
+
+3          /*started by A. Vincent 11/15/2016*/
+4          /*some information from a very old SAS paper named "SAS Macros for Generating Abridged and Cause-Eliminated Life
+4        ! Tables"*/
+5          /*by Zhao Yang, Xuezheng Sun. */
+6          /******************************************************************************************************/
+7          
+8          /*put in the year that is needed for the final output*/
+9          %let year=2014;
+10         /*the #byval() prints the values of the column in the by group section of the report*/
+11         %let title1="Abridged Life Tables*** for AR Table 24 by #byval(sexRace) for &year";
+12         /*footnotes can be added or not depending on how you use the output report*/
+13         %let footnote1="*Life expectancy at birth.";
+14         %let footnote2="**Includes other and unknown race/ethnicity.";
+15         %let footnote3="Life tables prepared using SAS.";
+16         %let footnote4="See Technical Appendix for Life Table Construction.";
+17         
+18         /*this can imputted in the order below. There should only be one space between columns*/
+19         /*of course one can change the space to any delimiter.*/
+20         data tests;
+21            length sexRace $2. years agegroup population deaths births ax 8.;
+22            input sexRace $ years agegroup population deaths births ax ;
+23            datalines;
+
+NOTE: The data set WORK.TESTS has 51 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              741.50k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        2  Switch Count  0
+      
+
+75         ;
+76         run;
+77         
+78         /**********FORMATS********************************************/
+79         
+80         proc format;
+81         value $agef '0'='< 1' '1'='1-4' '5'='5-9'  '10'='10-14'  '15'='15-19'  '20'='20-24'  '25'='25-29'  '30'='30-34'
+82         				'35'='35=39'  '40'='40-44'  '45'='45-49' '50'='50-54'  '55'='55-59' '60'='60-64'  '65'='65-69'
+83         				'70'='70-74' '75'='75+';
+NOTE: Format $AGEF has been output.
+84         value $sexf 'at'='All Texas'
+85         			'bt'='All Blacks'
+86         			'ht'='All Hispanics'
+87         			'wt'='All Whites**'
+88         			'ft'='All Females'
+89         			'mt'='All Males'
+90         			'bf'='Black Females'
+91         			'bm'='Black Males'
+92         			'hf'='Hispanic Females'
+93         			'hm'='Hispanic Males'
+94         			'wf'='White Females**'
+95         			'wm'='White Males**'
+96         ;
+NOTE: Format $SEXF has been output.
+                                                           The SAS System
+
+97         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              171.21k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        3  Switch Count  0
+      
+
+98         
+99         /*******************************************************/
+100        /*here we are creating the qx of our table. We must be sure that it loops around the years column*/
+101        /*if you change the years to include some groups over the age of 75, increase the do loop*/
+102        
+103        * 2. Check to see if all the tables are here;
+104        Proc Freq Data=tests;
+105           Tables sexRace/Nocol Norow Nopercent Nocum;
+106        Title 'check to see if there are 12 sexRace groups';
+107        Run;
+
+NOTE: There were 51 observations read from the data set WORK.TESTS.
+NOTE: The PROCEDURE FREQ printed page 1.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1027.92k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        4  Switch Count  0
+      
+
+108        
+109        *3. Calculate qx dr p [qx=Proportion dying
+110                               dr=death rate
+111                                p=1-qx];
+112        Data test1;	
+113           Set tests;
+114           Length qx dr p 8;
+115           If Years=1 then Do;
+116             dr=deaths/births;
+117        	 qx=deaths/births;
+118           End;
+119           Else Do;
+120             dr=deaths/population;
+121             If agegroup=1 then qx=2*4*dr/(2+4*dr);
+122        	 Else If agegroup=75 then qx=1.000000;
+123             Else qx=2*5*dr/(2+5*dr);
+124             End;
+125           p=1-qx;
+126           Format qx dr p 8.5;
+127        Run;
+
+NOTE: There were 51 observations read from the data set WORK.TESTS.
+NOTE: The data set WORK.TEST1 has 51 observations and 10 variables.
+                                                           The SAS System
+
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              915.90k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        5  Switch Count  0
+      
+
+128        
+129        Proc Print Data= test1;
+130        Title 'Test1: calculating qx dr p';
+131        Run;
+
+NOTE: There were 51 observations read from the data set WORK.TEST1.
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              391.84k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        6  Switch Count  0
+      
+
+132        
+133        *4. Calculate Ix= number of people living at the begining of each age interval;
+134        Data test2;
+135           Set test1;
+136           Length x xx Ix 8;
+137           If years=1 then Do;
+138                x=1;
+139        		x=x*p;
+140        		xx=1;
+141        		Ix=100000;
+142           End;
+143           Else do;
+144           		Retain x;
+145                xx=x;
+146        		Ix=100000*xx;
+147        	    x=x*p;	
+148        
+149           End;
+150        Format Ix comma8.0;
+151        run;
+
+NOTE: There were 51 observations read from the data set WORK.TEST1.
+NOTE: The data set WORK.TEST2 has 51 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              912.90k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        7  Switch Count  0
+                                                           The SAS System
+
+      
+
+152        
+153        Proc Print Data=test2;
+154        Title 'Test2: Calculating lx';
+155        Run;
+
+NOTE: There were 51 observations read from the data set WORK.TEST2.
+NOTE: The PROCEDURE PRINT printed page 3.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              412.50k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        8  Switch Count  0
+      
+
+156        
+157        *5. Calculate dx Lx [dx=Expected number of death in each agegroup
+158                             Lx=Number of Person Year Lived];
+159        Proc Sort Data=test2;
+160           by sexRace descending Agegroup;
+161        Run;
+
+NOTE: There were 51 observations read from the data set WORK.TEST2.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TEST2 has 51 observations and 13 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              682.53k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        9  Switch Count  0
+      
+
+162        
+163        Data test3;
+164           Set test2;
+165           Length LagIx dx Lx 8;
+166           LagIx=lag(Ix);
+167           if Agegroup=75 then LagIx=0;
+168           dx = Ix -LagIx;
+169           Lx=years*lagIx + dx*ax;
+170           Format LagIx dx Lx comma8.0;
+171        Run;
+
+NOTE: There were 51 observations read from the data set WORK.TEST2.
+NOTE: The data set WORK.TEST3 has 51 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              922.90k
+      OS Memory           11096.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        10  Switch Count  0
+      
+
+172        
+173        Proc Print data=test3;
+174        title ' Test3: Calculate dx and Lx ';
+175        Run;
+
+NOTE: There were 51 observations read from the data set WORK.TEST3.
+NOTE: The PROCEDURE PRINT printed pages 4-5.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              434.53k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        11  Switch Count  0
+      
+
+176        
+177        *6. Calculate Tx Ex [Tx=Person years lived in each age interval and all subsequent age intervals
+178                             Ex=Expectation of life ];
+179        Data Final;
+180           Do j= 1 to 12;
+181           Tx = 0;
+182              Do i = 1 to 17;
+183              Set Test3;
+184              Tx + Lx;
+185        	  Ex=Tx/Ix;
+186              output;
+187        	  End;
+188           End;
+189        Drop Tx j i;
+190        Format Tx 8.0 Ex 8.2;
+191        Run;
+
+NOTE: There were 51 observations read from the data set WORK.TEST3.
+NOTE: The data set WORK.FINAL has 51 observations and 17 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              918.03k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        12  Switch Count  0
+      
+
+192        
+193        /*************************************************************/
+194        /*final sort*/
+195        proc sort data=Final;
+196        by sexRace;
+197        run;
+
+NOTE: There were 51 observations read from the data set WORK.FINAL.
+                                                           The SAS System
+
+NOTE: SAS sort was used.
+NOTE: The data set WORK.FINAL has 51 observations and 17 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              679.84k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        13  Switch Count  0
+      
+
+198        
+199        /*this creates a template for the output file. You don't have to use, but it looks nice*/
+200        proc template;
+201        	define style self.border;
+202        		parent=styles.SansPrinter;
+203        			style Table /
+204        				rules = groups
+205        				frame=hsides
+206        				cellpadding = 3pt
+207        				cellspacing = 0pt
+208        				borderwidth = 2pt;
+209        			style header /
+210        				font_weight=bold
+211        				background=white
+212        				font_size=3;
+213        		end;
+NOTE: Overwriting existing template/link: Self.Border
+NOTE: STYLE 'Self.Border' has been saved to: SASUSER.TEMPLAT
+214        run;
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              85.46k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        14  Switch Count  0
+      
+
+215        
+216        /*options nobyline stops SAS from printing the "by" section of the report */
+217        options nodate noBYLINE;
+218        
+219        /*we can print this out to any output that SAS has or just run the proc report section*/
+220        
+221        ods listing close;
+222        /* put the output where you want it.*/
+223        ods pdf file="&outtlf.\R025_t_life_tables.pdf" style=self.border;
+NOTE: Writing ODS PDF output to DISK destination "D:\meta_hackathon\sas2r-agent\output\sas\tlf\R025_t_life_tables.pdf", 
+      printer "PDF".
+224        
+225        Proc report data=final headline headskip nowd spacing=2 split='-' center ;
+226        by sexRace ;
+227        format sexRace $sexf. ;
+228        
+229        columns agegroup years deaths population qx Ix dx ax Lx ex ;
+                                                           The SAS System
+
+230        
+231        define agegroup /display f=agef. "Age-Group" width=5 center;
+ERROR: The format AGEF was not found or could not be loaded.
+232        define years /display "-Years" width=5 center;
+233        define deaths /display f=comma12.0 "Number-of Deaths" width=9 center;
+234        define population /display f=comma12.0 "Estimated-Population" width=10 center;
+235        define qx /display f=12.5 "-(qx)" width=11 center;
+236        define Ix /display f=comma12.0 "-(Ix)" width=11 center;
+237        define dx /display f=comma12.0 "-(dx)" width=14 center;
+238        define ax / display f=8.2 "-(ax)" width=6 center;
+239        define Lx /display f=comma12.0 "-(Lx)" width=14 center;
+240        define ex /display f=12.2 "-(ex)" width=18 center;
+241        
+242        title &title1;
+243        footnote1 &footnote1;
+244        footnote2 &footnote2;
+245        footnote3 &footnote3;
+246        footnote4 &footnote4;
+247        
+248        run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              441.50k
+      OS Memory           12636.00k
+      Timestamp           10/27/2026 10:55:56 AM
+      Step Count                        15  Switch Count  0
+      
+249        
+250        ods pdf close;
+NOTE: ODS PDF printed no output. 
+      (This sometimes results from failing to place a RUN statement before the ODS PDF CLOSE statement.)
+251        ods listing;
+252        
+253        /*clear the titles and footnotes*/
+254        title ;
+255        footnote1 ;
+256        footnote2 ;
+257        footnote3 ;
+258        footnote4 ;
+259        
+260        /*end of syntax*/
+261        
+
+
+ERROR: Errors printed on page 8.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.16 seconds
+      user cpu time       0.39 seconds
+      system cpu time     0.50 seconds
+      memory              11670.34k
+      OS Memory           12636.00k
+      Timestamp           10/27/2026 10:55:56 AM
+                                                           The SAS System
+
+      Step Count                        15  Switch Count  43
+      

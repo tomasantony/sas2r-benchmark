@@ -1,0 +1,258 @@
+1                                                          The SAS System                            11:28 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.64 seconds
+      cpu time            0.65 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R039
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1160,
+      Last Modified=27Oct2026:11:27:17,
+      Create Time=27Oct2026:11:27:17
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:28:32 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R039 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the article
+2             "Avoid alphabetical order for a categorical axes in a statistical graph"
+                                                           The SAS System
+
+3             by Rick Wicklin, published 13NOV2023 on The DO Loop blog:
+4             https://blogs.sas.com/content/iml/2023/11/13/avoid-alphabetical-order.html
+5          
+6             This program shows why you should avoid using alphabetical ordering for bar charts, or
+7             "Why 'Alabama first' is not always the best way to display data"
+8             Avoiding 'Alabama first' was often advocated by Howard Wainer.
+9          
+10            For a different example see how sorting affects lasagna plots:
+11            https://blogs.sas.com/content/iml/2016/06/08/lasagna-plot-in-sas.html
+12         
+13            Data from
+14            https://www.census.gov/data/tables/time-series/demo/popest/2020s-state-total.html
+15            https://en.wikipedia.org/wiki/List_of_U.S._states_and_territories_by_area
+16         
+17            Lessons:
+18            1. For many categories, use tall graphs an horizontal bar charts.
+19            2. Set FITPOLICY=NONE, then increase graph height and/or decrease label font.
+20            3. Almost always, use the CATEGORYORDER= option to display the categories in a meaningful order.
+21            4. If the graph type is not a traditional bar chart, use the COLORBANDS= option to
+22               guide the viewer's eyes to the data.
+23            5. For other category orders, sort data and use CATEGORYORDER=DATA on XAXIS or YAXIS stmts.
+24         */
+25         
+26         data StatePop;
+27         infile datalines delimiter = ","	missover dsd;
+28         length StateName $20;
+29         input StateID StateName Pop2020 PopChange2020 LandArea;
+30         PopM = Pop2020 / 1E6;
+31         label PopM = "Population (Millions)"
+32               PopChange2020 = "Population Change (2020)"
+33               LandArea = "Land Area (km^2)";
+34         format PopChange2020 comma7.;
+35         datalines;
+
+NOTE: The data set WORK.STATEPOP has 50 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              743.50k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:28:32 AM
+      Step Count                        2  Switch Count  0
+      
+
+86         ;
+87         ods graphics/reset;
+88         
+89         /* allow 12-15 px per category, plus top and bottom matter */
+90         ods graphics / push width=480px height=720px;
+91         title "State Populations (2020)";
+92         title2 "Ordered by State Name (Alabama First)";
+93         proc sgplot data=StatePop;
+94            hbar StateName / response=PopM;
+95            yaxis display=(nolabel) valueattrs=(size=8) /* small font for values */
+96                                    fitpolicy=none;     /* do not thin labels */
+97            xaxis grid;
+98         run;
+                                                           The SAS System
+
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           3.83 seconds
+      user cpu time       0.23 seconds
+      system cpu time     0.28 seconds
+      memory              7465.45k
+      OS Memory           17484.00k
+      Timestamp           10/27/2026 11:28:36 AM
+      Step Count                        3  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R039\SGPlot.png.
+NOTE: There were 50 observations read from the data set WORK.STATEPOP.
+
+99         
+100        title2 "Ordered by Population";
+101        proc sgplot data=StatePop;
+102           hbar StateName / response=PopM categoryorder=respdesc; /* or respasc */
+103           yaxis display=(nolabel) valueattrs=(size=8) /* small font for values */
+104                                   fitpolicy=none;     /* do not thin labels */
+105           xaxis grid;
+106        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.66 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.03 seconds
+      memory              2904.93k
+      OS Memory           18784.00k
+      Timestamp           10/27/2026 11:28:37 AM
+      Step Count                        4  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R039\SGPlot1.png.
+NOTE: There were 50 observations read from the data set WORK.STATEPOP.
+
+107        
+108        title "Change in State Populations (2020)";
+109        proc sgplot data=StatePop;
+110           hbar StateName / response=PopChange2020 categoryorder=respasc; /* or respdesc */
+111           yaxis display=(nolabel) colorbands=even     /* faint alternating bands */
+112                                   valueattrs=(size=8) /* small font for values */
+113                                   fitpolicy=none;     /* do not thin labels */
+114           xaxis grid;
+115        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.68 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.07 seconds
+      memory              2751.21k
+      OS Memory           18784.00k
+      Timestamp           10/27/2026 11:28:37 AM
+      Step Count                        5  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R039\SGPlot2.png.
+NOTE: There were 50 observations read from the data set WORK.STATEPOP.
+
+116        
+117        ods graphics / pop;
+                                                           The SAS System
+
+118        
+119        /* Sort by any variable and display by using DISCRETEORDER=DATA */
+120        proc sort data=StatePop out=State2;
+121           by PopM;
+122        run;
+
+NOTE: There were 50 observations read from the data set WORK.STATEPOP.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.STATE2 has 50 observations and 6 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1202.59k
+      OS Memory           18016.00k
+      Timestamp           10/27/2026 11:28:37 AM
+      Step Count                        6  Switch Count  0
+      
+
+123        
+124        ods graphics / push width=480px height=640px;
+125        title2 "States Ordered by Population Size";
+126        proc sgplot data=State2;
+127           hbar StateName / response=PopChange2020;
+128           yaxis display=(nolabel) discreteorder=data  /* display in data order */
+129                                   colorbands=even     /* faint alternating bands */
+130                                   valueattrs=(size=8) /* small font for values */
+131                                   fitpolicy=none;     /* do not thin labels */
+132           xaxis grid;
+133        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.50 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.06 seconds
+      memory              2143.50k
+      OS Memory           18268.00k
+      Timestamp           10/27/2026 11:28:38 AM
+      Step Count                        7  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R039\SGPlot3.png.
+NOTE: There were 50 observations read from the data set WORK.STATE2.
+
+134        ods graphics / pop;
+135        
+136        /* Note: It is often better to use a scatter plot if you want to directly compare two variables */
+137        title "Population vs Land Area";
+138        proc sgplot data=StatePop;
+139           scatter x=PopChange2020 y=PopM / datalabel=StateName;
+140           xaxis grid;
+141           yaxis grid;
+142        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.55 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1768.98k
+                                                           The SAS System
+
+      OS Memory           18144.00k
+      Timestamp           10/27/2026 11:28:38 AM
+      Step Count                        8  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R039\SGPlot4.png.
+NOTE: There were 50 observations read from the data set WORK.STATEPOP.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           8.08 seconds
+      user cpu time       0.64 seconds
+      system cpu time     0.93 seconds
+      memory              16658.67k
+      OS Memory           18784.00k
+      Timestamp           10/27/2026 11:28:38 AM
+      Step Count                        8  Switch Count  28
+      

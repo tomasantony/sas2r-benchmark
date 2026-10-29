@@ -1,0 +1,1140 @@
+1                                           The SAS System             10:27 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.21 seconds
+      cpu time            0.57 seconds
+      
+1          /* One-time: load every CDISC pilot xpt into SAS libraries so programs can use plain
+1        ! librefs. */
+2          %let root = D:\meta_hackathon\sas2r-agent;
+3          libname padam "&root.\data\derived\cdisc-pilot\adam";
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+3        !                                                       libname psdtm
+3        ! "&root.\data\derived\cdisc-pilot\sdtm"; libname psplit
+3        ! "&root.\data\derived\cdisc-pilot\adam-split";
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: Libref PSPLIT was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split
+4          %macro loaddir(dir, lib);
+5            filename d "&dir."; data _n; did=dopen('d'); do i=1 to dnum(did); f=dread(did,i); if
+5        ! lowcase(scan(f,-1,'.'))='xpt' then do; ds=scan(f,1,'.'); output; end; end; rc=dclose(did);
+5        ! run;
+6            data _null_; set _n; call execute(cats('libname _x xport "', "&dir.\", f, '"; proc copy
+6        ! in=_x out=&lib.; run; libname _x clear;')); run;
+7          %mend;
+8          %loaddir(&root.\data\raw\cdisc-pilot\adam, padam);
+
+NOTE: The data set WORK._N has 15 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.12 seconds
+      cpu time            0.07 seconds
+      
+
+
+NOTE: There were 15 observations read from the data set WORK._N.
+NOTE: DATA statement used (Total process time):
+2                                           The SAS System             10:27 Tuesday, October 27, 2026
+
+      real time           0.03 seconds
+      cpu time            0.00 seconds
+      
+
+NOTE: CALL EXECUTE generated line.
+1         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adae.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adae.xpt
+1         +                                                                                      proc 
+copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADAE to PADAM.ADAE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 1191 observations read from the data set _X.ADAE.
+NOTE: The data set PADAM.ADAE has 1191 observations and 55 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.12 seconds
+      cpu time            0.09 seconds
+      
+1         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+2         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adcm.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adcm.xpt
+2         +                                                                                      proc 
+copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADCM to PADAM.ADCM (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 7510 observations read from the data set _X.ADCM.
+NOTE: The data set PADAM.ADCM has 7510 observations and 42 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.07 seconds
+      cpu time            0.01 seconds
+      
+2         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+3         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adlbc.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adlbc.xpt
+3         +                                                                                       
+proc copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADLBC to PADAM.ADLBC (memtype=DATA).
+3                                           The SAS System             10:27 Tuesday, October 27, 2026
+
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 74264 observations read from the data set _X.ADLBC.
+NOTE: The data set PADAM.ADLBC has 74264 observations and 46 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.20 seconds
+      cpu time            0.17 seconds
+      
+3         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+4         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adlbh.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adlbh.xpt
+4         +                                                                                       
+proc copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADLBH to PADAM.ADLBH (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 49932 observations read from the data set _X.ADLBH.
+NOTE: The data set PADAM.ADLBH has 49932 observations and 46 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.13 seconds
+      cpu time            0.09 seconds
+      
+4         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+5         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adlbhy.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adlbhy.xpt
+5         +                                                                                        
+proc copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADLBHY to PADAM.ADLBHY (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 9954 observations read from the data set _X.ADLBHY.
+NOTE: The data set PADAM.ADLBHY has 9954 observations and 44 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.01 seconds
+      
+5         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+6         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adpc.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+4                                           The SAS System             10:27 Tuesday, October 27, 2026
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adpc.xpt
+6         +                                                                                      proc 
+copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADPC to PADAM.ADPC (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 2463 observations read from the data set _X.ADPC.
+NOTE: The data set PADAM.ADPC has 2463 observations and 200 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.08 seconds
+      cpu time            0.03 seconds
+      
+6         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+7         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adpp.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adpp.xpt
+7         +                                                                                      proc 
+copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADPP to PADAM.ADPP (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 5403 observations read from the data set _X.ADPP.
+NOTE: The data set PADAM.ADPP has 5403 observations and 157 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.15 seconds
+      cpu time            0.12 seconds
+      
+7         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+8         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adqsadas.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adqsadas.xpt
+8         +                                                                                          
+proc copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADQSADAS to PADAM.ADQSADAS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 12463 observations read from the data set _X.ADQSADAS.
+NOTE: The data set PADAM.ADQSADAS has 12463 observations and 40 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.07 seconds
+      cpu time            0.04 seconds
+      
+8         +
+5                                           The SAS System             10:27 Tuesday, October 27, 2026
+
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+9         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adqscibc.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adqscibc.xpt
+9         +                                                                                          
+proc copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADQSCIBC to PADAM.ADQSCIBC (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 730 observations read from the data set _X.ADQSCIBC.
+NOTE: The data set PADAM.ADQSCIBC has 730 observations and 36 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.03 seconds
+      
+9         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+10        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adqsnpix.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adqsnpix.xpt
+10        +                                                                                          
+proc copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADQSNPIX to PADAM.ADQSNPIX (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 31140 observations read from the data set _X.ADQSNPIX.
+NOTE: The data set PADAM.ADQSNPIX has 31140 observations and 41 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.10 seconds
+      cpu time            0.07 seconds
+      
+10        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+11        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+11        +                                                                                      proc 
+copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADSL to PADAM.ADSL (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 254 observations read from the data set _X.ADSL.
+6                                           The SAS System             10:27 Tuesday, October 27, 2026
+
+NOTE: The data set PADAM.ADSL has 254 observations and 48 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+11        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+12        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adtte.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adtte.xpt
+12        +                                                                                       
+proc copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADTTE to PADAM.ADTTE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 254 observations read from the data set _X.ADTTE.
+NOTE: The data set PADAM.ADTTE has 254 observations and 26 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.00 seconds
+      
+12        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+13        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advs.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advs.xpt
+13        +                                                                                      proc 
+copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADVS to PADAM.ADVS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 32139 observations read from the data set _X.ADVS.
+NOTE: The data set PADAM.ADVS has 32139 observations and 44 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.09 seconds
+      cpu time            0.07 seconds
+      
+13        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+14        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advsmax.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advsmax.xpt
+14        +                                                                                         
+7                                           The SAS System             10:27 Tuesday, October 27, 2026
+
+proc copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADVSMAX to PADAM.ADVSMAX (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 32139 observations read from the data set _X.ADVSMAX.
+NOTE: The data set PADAM.ADVSMAX has 32139 observations and 44 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.09 seconds
+      cpu time            0.09 seconds
+      
+14        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+15        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advsmin.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advsmin.xpt
+15        +                                                                                         
+proc copy in=_x out=padam; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADVSMIN to PADAM.ADVSMIN (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 32139 observations read from the data set _X.ADVSMIN.
+NOTE: The data set PADAM.ADVSMIN has 32139 observations and 44 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.14 seconds
+      cpu time            0.12 seconds
+      
+15        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+9          %loaddir(&root.\data\raw\cdisc-pilot\sdtm, psdtm);
+
+NOTE: The data set WORK._N has 22 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.04 seconds
+      
+
+
+NOTE: There were 22 observations read from the data set WORK._N.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.01 seconds
+      
+
+NOTE: CALL EXECUTE generated line.
+1         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ae.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+8                                           The SAS System             10:27 Tuesday, October 27, 2026
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ae.xpt
+1         +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.AE to PSDTM.AE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 1191 observations read from the data set _X.AE.
+NOTE: The data set PSDTM.AE has 1191 observations and 35 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.01 seconds
+      
+1         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+2         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\cm.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\cm.xpt
+2         +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.CM to PSDTM.CM (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 7510 observations read from the data set _X.CM.
+NOTE: The data set PSDTM.CM has 7510 observations and 21 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.03 seconds
+      
+2         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+3         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\dm.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\dm.xpt
+3         +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.DM to PSDTM.DM (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 306 observations read from the data set _X.DM.
+NOTE: The data set PSDTM.DM has 306 observations and 25 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.00 seconds
+      
+3         +
+9                                           The SAS System             10:27 Tuesday, October 27, 2026
+
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+4         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ds.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ds.xpt
+4         +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.DS to PSDTM.DS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 596 observations read from the data set _X.DS.
+NOTE: The data set PSDTM.DS has 596 observations and 13 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.01 seconds
+      
+4         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+5         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ex.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ex.xpt
+5         +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.EX to PSDTM.EX (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 591 observations read from the data set _X.EX.
+NOTE: The data set PSDTM.EX has 591 observations and 17 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.00 seconds
+      
+5         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+6         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\lb.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\lb.xpt
+6         +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.LB to PSDTM.LB (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 59580 observations read from the data set _X.LB.
+10                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+NOTE: The data set PSDTM.LB has 59580 observations and 23 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.22 seconds
+      cpu time            0.17 seconds
+      
+6         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+7         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\mh.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\mh.xpt
+7         +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.MH to PSDTM.MH (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 1818 observations read from the data set _X.MH.
+NOTE: The data set PSDTM.MH has 1818 observations and 19 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.01 seconds
+      
+7         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+8         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\qs.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\qs.xpt
+8         +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.QS to PSDTM.QS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 121749 observations read from the data set _X.QS.
+NOTE: The data set PSDTM.QS has 121749 observations and 20 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.24 seconds
+      cpu time            0.21 seconds
+      
+8         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+9         + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\relrec.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\relrec.xpt
+9         +                                                                                        
+11                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+proc copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.RELREC to PSDTM.RELREC (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 234 observations read from the data set _X.RELREC.
+NOTE: The data set PSDTM.RELREC has 234 observations and 7 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.00 seconds
+      
+9         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+10        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\sc.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\sc.xpt
+10        +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.SC to PSDTM.SC (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 254 observations read from the data set _X.SC.
+NOTE: The data set PSDTM.SC has 254 observations and 14 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.00 seconds
+      
+10        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+11        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\se.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\se.xpt
+11        +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.SE to PSDTM.SE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 752 observations read from the data set _X.SE.
+NOTE: The data set PSDTM.SE has 752 observations and 9 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.00 seconds
+      
+11        +
+ libname _x clear;
+
+12                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+NOTE: Libref _X has been deassigned.
+12        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\suppae.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\suppae.xpt
+12        +                                                                                        
+proc copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.SUPPAE to PSDTM.SUPPAE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 1191 observations read from the data set _X.SUPPAE.
+NOTE: The data set PSDTM.SUPPAE has 1191 observations and 10 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.01 seconds
+      
+12        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+13        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\suppdm.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\suppdm.xpt
+13        +                                                                                        
+proc copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.SUPPDM to PSDTM.SUPPDM (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 1197 observations read from the data set _X.SUPPDM.
+NOTE: The data set PSDTM.SUPPDM has 1197 observations and 10 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.01 seconds
+      
+13        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+14        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\suppds.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\suppds.xpt
+14        +                                                                                        
+proc copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.SUPPDS to PSDTM.SUPPDS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 3 observations read from the data set _X.SUPPDS.
+NOTE: The data set PSDTM.SUPPDS has 3 observations and 10 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+13                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+      real time           0.01 seconds
+      cpu time            0.00 seconds
+      
+14        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+15        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\supplb.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\supplb.xpt
+15        +                                                                                        
+proc copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.SUPPLB to PSDTM.SUPPLB (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 64403 observations read from the data set _X.SUPPLB.
+NOTE: The data set PSDTM.SUPPLB has 64403 observations and 10 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.30 seconds
+      cpu time            0.23 seconds
+      
+15        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+16        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\sv.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\sv.xpt
+16        +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.SV to PSDTM.SV (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 3559 observations read from the data set _X.SV.
+NOTE: The data set PSDTM.SV has 3559 observations and 8 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.00 seconds
+      
+16        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+17        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ta.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ta.xpt
+17        +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+14                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.TA to PSDTM.TA (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 8 observations read from the data set _X.TA.
+NOTE: The data set PSDTM.TA has 8 observations and 10 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.00 seconds
+      
+17        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+18        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\te.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\te.xpt
+18        +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.TE to PSDTM.TE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 7 observations read from the data set _X.TE.
+NOTE: The data set PSDTM.TE has 7 observations and 7 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.00 seconds
+      
+18        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+19        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ti.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ti.xpt
+19        +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.TI to PSDTM.TI (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 31 observations read from the data set _X.TI.
+NOTE: The data set PSDTM.TI has 31 observations and 6 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.01 seconds
+      
+19        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+20        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ts.xpt";
+15                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ts.xpt
+20        +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.TS to PSDTM.TS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 33 observations read from the data set _X.TS.
+NOTE: The data set PSDTM.TS has 33 observations and 6 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.01 seconds
+      
+20        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+21        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\tv.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\tv.xpt
+21        +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.TV to PSDTM.TV (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 21 observations read from the data set _X.TV.
+NOTE: The data set PSDTM.TV has 21 observations and 9 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.00 seconds
+      
+21        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+22        + libname _x xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\vs.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\vs.xpt
+22        +                                                                                    proc 
+copy in=_x out=psdtm; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.VS to PSDTM.VS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 29643 observations read from the data set _X.VS.
+NOTE: The data set PSDTM.VS has 29643 observations and 24 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.12 seconds
+      cpu time            0.07 seconds
+16                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+      
+22        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+10         %loaddir(&root.\data\derived\cdisc-pilot\adam-split, psplit);
+
+NOTE: The data set WORK._N has 12 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+
+NOTE: There were 12 observations read from the data set WORK._N.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+NOTE: CALL EXECUTE generated line.
+1         + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adae.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adae.xpt
+1         +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADAE to PSPLIT.ADAE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 1191 observations read from the data set _X.ADAE.
+NOTE: The data set PSPLIT.ADAE has 1191 observations and 55 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+1         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+2         + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adlbc.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adlbc.xpt
+2         +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADLBC to PSPLIT.ADLBC (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 74264 observations read from the data set _X.ADLBC.
+17                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+NOTE: The data set PSPLIT.ADLBC has 74264 observations and 46 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.28 seconds
+      cpu time            0.21 seconds
+      
+2         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+3         + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adlbh.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adlbh.xpt
+3         +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADLBH to PSPLIT.ADLBH (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 49932 observations read from the data set _X.ADLBH.
+NOTE: The data set PSPLIT.ADLBH has 49932 observations and 46 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.16 seconds
+      cpu time            0.12 seconds
+      
+3         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+4         + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adlbhy.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adlbhy.xpt
+4         +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADLBHY to PSPLIT.ADLBHY (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 9954 observations read from the data set _X.ADLBHY.
+NOTE: The data set PSPLIT.ADLBHY has 9954 observations and 44 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.04 seconds
+      cpu time            0.03 seconds
+      
+4         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+5         + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adqsadas.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+18                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adqsadas.xpt
+5         +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADQSADAS to PSPLIT.ADQSADAS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 12463 observations read from the data set _X.ADQSADAS.
+NOTE: The data set PSPLIT.ADQSADAS has 12463 observations and 40 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.06 seconds
+      cpu time            0.03 seconds
+      
+5         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+6         + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adqscibc.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adqscibc.xpt
+6         +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADQSCIBC to PSPLIT.ADQSCIBC (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 730 observations read from the data set _X.ADQSCIBC.
+NOTE: The data set PSPLIT.ADQSCIBC has 730 observations and 36 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+6         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+7         + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adqsnpix.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adqsnpix.xpt
+7         +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADQSNPIX to PSPLIT.ADQSNPIX (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 31140 observations read from the data set _X.ADQSNPIX.
+NOTE: The data set PSPLIT.ADQSNPIX has 31140 observations and 41 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.10 seconds
+19                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+      cpu time            0.09 seconds
+      
+7         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+8         + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adsl.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adsl.xpt
+8         +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADSL to PSPLIT.ADSL (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 254 observations read from the data set _X.ADSL.
+NOTE: The data set PSPLIT.ADSL has 254 observations and 48 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      cpu time            0.00 seconds
+      
+8         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+9         + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adtte.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\adtte.xpt
+9         +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADTTE to PSPLIT.ADTTE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 254 observations read from the data set _X.ADTTE.
+NOTE: The data set PSPLIT.ADTTE has 254 observations and 26 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+9         +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+10        + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\advs.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\advs.xpt
+10        +
+20                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADVS to PSPLIT.ADVS (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 32139 observations read from the data set _X.ADVS.
+NOTE: The data set PSPLIT.ADVS has 32139 observations and 44 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.11 seconds
+      cpu time            0.11 seconds
+      
+10        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+11        + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\advsmax.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\advsmax.xpt
+11        +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADVSMAX to PSPLIT.ADVSMAX (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 32139 observations read from the data set _X.ADVSMAX.
+NOTE: The data set PSPLIT.ADVSMAX has 32139 observations and 44 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.11 seconds
+      cpu time            0.09 seconds
+      
+11        +
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+12        + libname _x xport 
+"D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\advsmin.xpt";
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split\advsmin.xpt
+12        +
+proc copy in=_x out=psplit; run;
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADVSMIN to PSPLIT.ADVSMIN (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+NOTE: There were 32139 observations read from the data set _X.ADVSMIN.
+NOTE: The data set PSPLIT.ADVSMIN has 32139 observations and 44 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.12 seconds
+      cpu time            0.12 seconds
+      
+12        +
+21                                          The SAS System             10:27 Tuesday, October 27, 2026
+
+ libname _x clear;
+
+NOTE: Libref _X has been deassigned.
+11         proc datasets lib=padam nolist; contents data=_all_ nodetails short; run;
+
+11       !                                                                           quit;
+
+NOTE: The PROCEDURE DATASETS printed pages 1-16.
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.06 seconds
+      cpu time            0.03 seconds
+      
+
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           5.95 seconds
+      cpu time            3.73 seconds
+      

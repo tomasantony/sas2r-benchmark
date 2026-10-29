@@ -1,0 +1,315 @@
+1                                                          The SAS System                            10:56 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.93 seconds
+      cpu time            0.64 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P096
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:56:09 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P096 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the article
+2             "Round to even"
+                                                           The SAS System
+
+3             by Rick Wicklin, published 11NOV2019 on The DO Loop blog:
+4             https://blogs.sas.com/content/iml/2019/11/11/round-to-even.html
+5          
+6             This program shows how to use the round-half-to-even method in SAS.
+7             Data from the documentation for PROC UNIVARIATE
+8             "Creating a One-Way Comparative Histogram"
+9             https://bit.ly/36Byroe
+10         
+11            "The effective channel length (in microns) is measured for 1225 field effect
+12             transistors."  This data uses only the subset where Lot = 'Lot 1'
+13         */
+14         
+15         /* Create a step plot of the round-half-to-even function */
+16         data Series;
+17         do x = 0 to 6 by 0.05;
+18            y = rounde(x);
+19            group = y;
+20            output;
+21         end;
+22         
+
+NOTE: The data set WORK.SERIES has 121 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              750.28k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:09 AM
+      Step Count                        2  Switch Count  0
+      
+
+23         data Scatter1;   /* The closed endpoints of the intervale. Use a filled marker */
+24         do x1 = 0.5 to 5.5 by 1;
+25            y1 = rounde(x1);
+26            output;
+27         end;
+28         
+
+NOTE: The data set WORK.SCATTER1 has 6 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              750.28k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:09 AM
+      Step Count                        3  Switch Count  0
+      
+
+29         data Scatter2;   /* The open endpoints of the intervale. Use an unfilled marker */
+30         do x2 = 0.5 to 5.5 by 1;
+31            y2 = rounde(x2+1) - 1;
+32            output;
+33         end;
+
+NOTE: The data set WORK.SCATTER2 has 6 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+                                                           The SAS System
+
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              750.28k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:56:09 AM
+      Step Count                        4  Switch Count  0
+      
+
+34         data RoundToEven;
+35         set Series Scatter1 Scatter2;
+36         run;
+
+NOTE: There were 121 observations read from the data set WORK.SERIES.
+NOTE: There were 6 observations read from the data set WORK.SCATTER1.
+NOTE: There were 6 observations read from the data set WORK.SCATTER2.
+NOTE: The data set WORK.ROUNDTOEVEN has 133 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1222.28k
+      OS Memory           11092.00k
+      Timestamp           10/27/2026 10:56:09 AM
+      Step Count                        5  Switch Count  0
+      
+
+37         
+38         Title "The Round-To-Even Function";
+39         proc sgplot data=RoundToEven noautolegend;
+40            series x=x y=y / group=group lineattrs=GraphFit;
+41            scatter x=x1 y=y1 / markerattrs=(symbol=circlefilled) FILLEDOUTLINEDMARKERS
+42          markerfillattrs=(color=cx445694);
+43            scatter x=x2 y=y2 / markerattrs=(symbol=circlefilled) FILLEDOUTLINEDMARKERS
+44          markerfillattrs=(color=white);
+45            yaxis grid label='RoundE(x)';
+46            xaxis grid label='x';
+47         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           4.25 seconds
+      user cpu time       0.25 seconds
+      system cpu time     0.32 seconds
+      memory              7398.15k
+      OS Memory           16860.00k
+      Timestamp           10/27/2026 10:56:13 AM
+      Step Count                        6  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P096\SGPlot.png.
+NOTE: There were 133 observations read from the data set WORK.ROUNDTOEVEN.
+
+48         
+49         /* Create a table that compares the ROUND and RONDE (round-to-even) functions */
+50         data Seq;
+51         keep x Round RoundEven;
+52         label Round = "Round(x)" RoundEven="RoundE(x)";
+53         do x = 0 to 3.5 by 0.25;
+54            Round     = round(x);    /* traditional: half-integers rounded away from 0 */
+                                                           The SAS System
+
+55            RoundEven = rounde(x);   /* round half-integers to the nearest even integer */
+56            output;
+57         end;
+58         run;
+
+NOTE: The data set WORK.SEQ has 15 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              776.96k
+      OS Memory           16212.00k
+      Timestamp           10/27/2026 10:56:13 AM
+      Step Count                        7  Switch Count  0
+      
+
+59         
+60         proc print data=Seq noobs label;
+61         run;
+
+NOTE: There were 15 observations read from the data set WORK.SEQ.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              410.18k
+      OS Memory           16212.00k
+      Timestamp           10/27/2026 10:56:13 AM
+      Step Count                        8  Switch Count  0
+      
+
+62         
+63         /* Data from the documentation for PROC UNIVARIATE
+64            "Creating a One-Way Comparative Histogram"
+65            https://bit.ly/36Byroe
+66         */
+67         /* Lengths of circuit boards for 'Lot 1'. Data from PROC UNIVARIATE example */
+68         data Channel1;
+69         label Length = 'Length (microns)';
+70         input Length @@;
+71         datalines;
+
+NOTE: SAS went to a new line when INPUT statement reached past the end of a line.
+NOTE: The data set WORK.CHANNEL1 has 425 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              764.50k
+      OS Memory           16212.00k
+      Timestamp           10/27/2026 10:56:13 AM
+      Step Count                        9  Switch Count  0
+      
+
+115        ;
+116        
+117        /* round real data to the nearest 0.1 unit */
+                                                           The SAS System
+
+118        data Round;
+119        set Channel1;
+120           Round     = round(Length, 0.1);    /* traditional: round to nearest tenth */
+121           RoundEven = rounde(Length, 0.1);   /* use round-to-even method to round to nearest tenth */
+122           /* create a binary indicator variable: Was x rounded up or down? */
+123           RoundUp     = (Round > Length);    /* 1 if rounded up; 0 if rounded down */
+124           RoundEvenUp = (RoundEven > Length);
+125        run;
+
+NOTE: There were 425 observations read from the data set WORK.CHANNEL1.
+NOTE: The data set WORK.ROUND has 425 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              937.06k
+      OS Memory           16468.00k
+      Timestamp           10/27/2026 10:56:13 AM
+      Step Count                        10  Switch Count  0
+      
+
+126        
+127        /* compare estimates that use full data and rounded data */
+128        proc means data=Round sum mean ndec=3;
+129           label Length="True values" Round ="Rounded values" RoundEven="Round-to-even values";
+130           var Length Round RoundEven;
+131        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 425 observations read from the data set WORK.ROUND.
+NOTE: The PROCEDURE MEANS printed page 2.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              6734.12k
+      OS Memory           22376.00k
+      Timestamp           10/27/2026 10:56:13 AM
+      Step Count                        11  Switch Count  0
+      
+
+132        
+133        /* how many obserations were rounded up or down? */
+134        proc means data=Round mean ndec=3;
+135           label RoundUp    = "Proportion rounded up for ROUND"
+136                 RoundEvenUp= "Proportion rounded up for ROUNDE";
+137           var RoundUp RoundEvenUp;
+138        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 425 observations read from the data set WORK.ROUND.
+NOTE: The PROCEDURE MEANS printed page 3.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              6926.31k
+      OS Memory           22376.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 10:56:13 AM
+      Step Count                        12  Switch Count  0
+      
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           6.58 seconds
+      user cpu time       0.46 seconds
+      system cpu time     1.03 seconds
+      memory              20666.50k
+      OS Memory           22376.00k
+      Timestamp           10/27/2026 10:56:13 AM
+      Step Count                        12  Switch Count  36
+      

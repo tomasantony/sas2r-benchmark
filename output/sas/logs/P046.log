@@ -1,0 +1,176 @@
+1                                                          The SAS System                            11:02 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.86 seconds
+      cpu time            0.68 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P046
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:02:12 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P046 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          %* modification 2019-12-23 - update path as data has been moved;
+2          
+3          filename source "&rawadam./advs.xpt";
+4          libname source xport;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advs.xpt
+5          data advs;
+6          	keep USUBJID SAFFL PARAMCD TRTPN TRTP AVAL AVISIT AVISITN ATPT;
+7          	set source.advs;
+8          	where SAFFL='Y' and PARAMCD in ('DIABP', 'PULSE')
+9          		and ATPT='AFTER LYING DOWN FOR 5 MINUTES' and AVISITN=99;
+10         run;
+
+NOTE: There were 454 observations read from the data set SOURCE.ADVS.
+      WHERE (SAFFL='Y') and PARAMCD in ('DIABP', 'PULSE') and (ATPT='AFTER LYING DOWN FOR 5 MINUTES') and (AVISITN=99);
+NOTE: The data set WORK.ADVS has 454 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.07 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.06 seconds
+      memory              880.62k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 11:02:12 AM
+      Step Count                        2  Switch Count  0
+      
+
+11         data advs1;
+12         	set advs;
+13         	if PARAMCD = 'DIABP' then PARAMCD_NUM=0;
+14         	else PARAMCD_NUM=1;
+15         run;
+
+NOTE: There were 454 observations read from the data set WORK.ADVS.
+NOTE: The data set WORK.ADVS1 has 454 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              911.12k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 11:02:12 AM
+      Step Count                        3  Switch Count  0
+      
+
+16         /*fitting a linear model with DIABP and PULSE
+17         	I'm not quite sure the ourcome and independent variables are, so I will pick what I
+18         	think could be interesting y=AVAL x=PARAMCD and focus more on the code*/
+19         proc sgplot data=advs1;
+20         	scatter y=AVAL x=PARAMCD_NUM;
+21         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           3.89 seconds
+      user cpu time       0.25 seconds
+      system cpu time     0.39 seconds
+                                                           The SAS System
+
+      memory              7266.50k
+      OS Memory           16860.00k
+      Timestamp           10/27/2026 11:02:16 AM
+      Step Count                        4  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P046\SGPlot.png.
+NOTE: There were 454 observations read from the data set WORK.ADVS1.
+
+22         proc reg data=advs1;
+23         	model AVAL=PARAMCD_NUM;
+24         	output out=regout p=fitted_value r=residuals j;
+25         run;
+
+WARNING: Extra name on the RESIDUAL list ignored.
+
+NOTE: The data set WORK.REGOUT has 454 observations and 12 variables.
+NOTE: The PROCEDURE REG printed page 1.
+NOTE: PROCEDURE REG used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              2070.53k
+      OS Memory           18260.00k
+      Timestamp           10/27/2026 11:02:16 AM
+      Step Count                        5  Switch Count  1
+      
+
+26         proc sgplot data=regout;
+27         	scatter x=fitted_value y=residuals;
+28         	loess x=fitted_value y=residuals;
+29         	refline 0;
+30         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.72 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.03 seconds
+      memory              2004.25k
+      OS Memory           18652.00k
+      Timestamp           10/27/2026 11:02:16 AM
+      Step Count                        6  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P046\SGPlot1.png.
+NOTE: There were 454 observations read from the data set WORK.REGOUT.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           6.78 seconds
+      user cpu time       0.73 seconds
+      system cpu time     0.87 seconds
+      memory              15854.71k
+      OS Memory           18652.00k
+      Timestamp           10/27/2026 11:02:16 AM
+      Step Count                        6  Switch Count  27
+      

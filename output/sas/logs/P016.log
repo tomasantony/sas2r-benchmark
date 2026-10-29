@@ -1,0 +1,160 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+                                                           The SAS System
+
+      system cpu time     0.00 seconds
+      memory              213.50k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        62  Switch Count  0
+      
+
+902        %let pid = P016; %let outds = &root./output/sas/datasets/P016; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P016
+903        %put NOTE: ===== pipeline c2c: P016 P016_sdtm_mh.sas =====;
+NOTE: ===== pipeline c2c: P016 P016_sdtm_mh.sas =====
+904        %let _bench_t0 = %sysfunc(datetime());
+905        %include "&root./programs/sas_run/P016_sdtm_mh.sas";
+
+916         /**********************************************************************
+917         *   PRODUCT:   SAS
+918         *   VERSION:   9.4
+919         *   CREATOR:   External File Interface
+920         *   DATE:      27OCT26
+921         *   DESC:      Generated SAS Datastep Code
+922         *   TEMPLATE SOURCE:  (None Specified.)
+923         ***********************************************************************/
+924            data WORK.RAW_MH    ;
+925            %let _EFIERR_ = 0; /* set the ERROR detection macro variable */
+926            infile 'D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_mh.csv' delimiter = ',' MISSOVER DSD lrecl=32767
+926      ! firstobs=2 ;
+927               informat SUBJECT $7. ;
+928               informat CONDITION $15. ;
+929               informat DIAGNOSIS_DATE yymmdd10. ;
+930               format SUBJECT $7. ;
+931               format CONDITION $15. ;
+932               format DIAGNOSIS_DATE yymmdd10. ;
+933            input
+934                        SUBJECT $
+935                        CONDITION $
+936                        DIAGNOSIS_DATE
+937            ;
+938            if _ERROR_ then call symputx('_EFIERR_',1);  /* set ERROR detection macro variable */
+939            run;
+
+NOTE: The infile 'D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_mh.csv' is:
+      Filename=D:\meta_hackathon\sas2r-agent\data\derived\c2c\data\raw\raw_mh.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1740,
+      Last Modified=27Oct2026:10:26:07,
+      Create Time=27Oct2026:10:26:07
+
+NOTE: 53 records were read from the infile 'D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_mh.csv'.
+      The minimum record length was 25.
+      The maximum record length was 34.
+NOTE: The data set WORK.RAW_MH has 53 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              8410.00k
+      OS Memory           20584.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        63  Switch Count  0
+      
+
+53 rows created in WORK.RAW_MH from D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_mh.csv.
+  
+  
+  
+NOTE: WORK.RAW_MH data set was successfully created.
+NOTE: The data set WORK.RAW_MH has 53 observations and 3 variables.
+NOTE: PROCEDURE IMPORT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              8410.00k
+      OS Memory           20840.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        63  Switch Count  7
+      
+
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      953:29   
+NOTE: There were 53 observations read from the data set WORK.RAW_MH.
+NOTE: The data set SDTM.MH has 53 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              918.34k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        64  Switch Count  0
+      
+
+
+NOTE: There were 53 observations read from the data set SDTM.MH.
+NOTE: SAS sort was used.
+NOTE: The data set SDTM.MH has 53 observations and 5 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              675.25k
+      OS Memory           16740.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        65  Switch Count  0
+      
+
+
+NOTE: There were 53 observations read from the data set SDTM.MH.
+NOTE: The data set SDTM.MH has 53 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              901.78k
+      OS Memory           16480.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        66  Switch Count  0
+      
+
+974        %_bench_capture;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5190.62k
+      OS Memory           21348.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        67  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying SDTM.MH to OUTDS.MH (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 53 observations read from the data set SDTM.MH.
+NOTE: The data set OUTDS.MH has 53 observations and 6 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              605.59k
+      OS Memory           16736.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        68  Switch Count  0
+      
+
+NOTE: benchmark capture: 1 permanent dataset(s) copied to outds (SDTM MH)
+975        proc printto; run;
+

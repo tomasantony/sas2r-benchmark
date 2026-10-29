@@ -1,0 +1,187 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              213.12k
+      OS Memory           15200.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        8  Switch Count  0
+      
+
+169        %let pid = P009; %let outds = &root./output/sas/datasets/P009; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P009
+170        %put NOTE: ===== pipeline c2c: P009 P009_sdtm_ae.sas =====;
+NOTE: ===== pipeline c2c: P009 P009_sdtm_ae.sas =====
+171        %let _bench_t0 = %sysfunc(datetime());
+172        %include "&root./programs/sas_run/P009_sdtm_ae.sas";
+
+191         /**********************************************************************
+192         *   PRODUCT:   SAS
+193         *   VERSION:   9.4
+194         *   CREATOR:   External File Interface
+195         *   DATE:      27OCT26
+196         *   DESC:      Generated SAS Datastep Code
+197         *   TEMPLATE SOURCE:  (None Specified.)
+198         ***********************************************************************/
+199            data WORK.RAW_AE    ;
+200            %let _EFIERR_ = 0; /* set the ERROR detection macro variable */
+201            infile 'D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_ae.csv' delimiter = ',' MISSOVER DSD lrecl=32767
+201      ! firstobs=2 ;
+202               informat ID $7. ;
+203               informat AE_TERM $25. ;
+204               informat START ddmmyy10. ;
+205               informat END ddmmyy10. ;
+206               informat SEV $8. ;
+207               informat RELATED $1. ;
+208               informat SERIOUS $1. ;
+209               format ID $7. ;
+210               format AE_TERM $25. ;
+211               format START ddmmyy10. ;
+212               format END ddmmyy10. ;
+213               format SEV $8. ;
+214               format RELATED $1. ;
+215               format SERIOUS $1. ;
+216            input
+217                        ID $
+218                        AE_TERM $
+219                        START
+220                        END
+221                        SEV $
+222                        RELATED $
+223                        SERIOUS $
+224            ;
+225            if _ERROR_ then call symputx('_EFIERR_',1);  /* set ERROR detection macro variable */
+226            run;
+
+NOTE: The infile 'D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_ae.csv' is:
+      Filename=D:\meta_hackathon\sas2r-agent\data\derived\c2c\data\raw\raw_ae.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=2750,
+                                                           The SAS System
+
+      Last Modified=27Oct2026:10:26:07,
+      Create Time=27Oct2026:10:26:07
+
+NOTE: 54 records were read from the infile 'D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_ae.csv'.
+      The minimum record length was 35.
+      The maximum record length was 68.
+NOTE: The data set WORK.RAW_AE has 54 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              8525.25k
+      OS Memory           20584.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        9  Switch Count  0
+      
+
+54 rows created in WORK.RAW_AE from D:\meta_hackathon\sas2r-agent/data/derived/c2c/data/raw/raw_ae.csv.
+  
+  
+  
+NOTE: WORK.RAW_AE data set was successfully created.
+NOTE: The data set WORK.RAW_AE has 54 observations and 7 variables.
+NOTE: PROCEDURE IMPORT used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.01 seconds
+      memory              8525.25k
+      OS Memory           20840.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        9  Switch Count  7
+      
+
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      263:57   267:53   
+NOTE: There were 54 observations read from the data set WORK.RAW_AE.
+NOTE: The data set WORK.AE_MAPPED has 54 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              932.12k
+      OS Memory           16224.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        10  Switch Count  0
+      
+
+
+NOTE: There were 54 observations read from the data set WORK.AE_MAPPED.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.AE_MAPPED has 54 observations and 11 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              676.56k
+      OS Memory           16484.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        11  Switch Count  0
+      
+
+
+NOTE: There were 54 observations read from the data set WORK.AE_MAPPED.
+NOTE: The data set SDTM.AE has 54 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              912.28k
+      OS Memory           16224.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        12  Switch Count  0
+      
+
+
+NOTE: There were 12 observations read from the data set SDTM.AE.
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              434.06k
+      OS Memory           15968.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        13  Switch Count  0
+      
+
+307        %_bench_capture;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5190.87k
+      OS Memory           21092.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        14  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying SDTM.AE to OUTDS.AE (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 54 observations read from the data set SDTM.AE.
+NOTE: The data set OUTDS.AE has 54 observations and 12 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              612.53k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:43 PM
+      Step Count                        15  Switch Count  0
+      
+
+                                                           The SAS System
+
+NOTE: benchmark capture: 1 permanent dataset(s) copied to outds (SDTM AE)
+308        proc printto; run;
+

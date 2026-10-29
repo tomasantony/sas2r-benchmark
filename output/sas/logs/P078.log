@@ -1,0 +1,210 @@
+1                                                          The SAS System                            15:47 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.46 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P078
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:47:11 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P078 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    l_dv.sas
+3          * Purpose:    Listing 16.2.2 - Listing of Protocol Deviations
+4          * Study:      [STUDYID]
+5          * Author:     [Programmer Name]
+6          * Date:       [Date]
+7          * Input:      sdtm.dv, adam.adsl
+8          * Output:     l_dv.rtf
+9          * Population: All Randomized Subjects
+10         *****************************************************************************/
+11         
+12         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:47:12
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+78         %include "&macpath./m_report.sas";
+150        %include "&pgmpath./utilities/u_titles.sas";
+312        
+313        /*--- Step 1: Prepare data ---*/
+314        proc sql noprint;
+315            create table dv_list as
+316            select a.USUBJID,
+317                   b.TRTA,
+318                   b.SITEID as SITE,
+319                   a.DVCAT as CATEGORY,
+320                   a.DVSCAT as SUBCATEGORY,
+321                   a.DVTERM as DESCRIPTION,
+322                   a.DVSTDTC as START_DATE,
+323                   a.DVENDTC as END_DATE,
+324                   a.EPOCH,
+325                   /* Major/Minor classification if available */
+326                   a.DVSEV as SEVERITY
+327            from sdtm.dv a
+328            inner join adam.adsl b on a.USUBJID = b.USUBJID
+329            where b.RANDFL = 'Y'
+330            order by b.TRTA, b.SITEID, a.USUBJID, a.DVSTDTC;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.DV_LIST created, with 58 rows and 10 columns.
+
+331        quit;
+                                                           The SAS System
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              13728.93k
+      OS Memory           22024.00k
+      Timestamp           10/27/2026 03:47:11 PM
+      Step Count                        2  Switch Count  0
+      
+
+332        
+333        /*--- Step 2: Generate listing ---*/
+334        %set_titles(output=L_DV, population=All Randomized Subjects);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+335        %ods_on(filename=l_dv);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/l_dv.rtf
+336        
+337        proc report data=dv_list nowd split='~'
+338            style(report)=[outputwidth=9.5in font_size=8pt]
+339            style(header)=[just=center fontweight=bold font_size=8pt]
+340            style(column)=[just=left verticalalign=top font_size=8pt];
+341        
+342            columns TRTA SITE USUBJID CATEGORY SUBCATEGORY DESCRIPTION
+343                    START_DATE END_DATE EPOCH SEVERITY;
+344        
+345            define TRTA        / order 'Treatment' style(column)=[width=0.8in];
+346            define SITE        / order 'Site' style(column)=[width=0.5in];
+347            define USUBJID     / order 'Subject~ID' style(column)=[width=0.8in];
+348            define CATEGORY    / display 'Deviation~Category' style(column)=[width=1.2in];
+349            define SUBCATEGORY / display 'Sub-~category' style(column)=[width=1.0in];
+350            define DESCRIPTION / display 'Description' style(column)=[width=2.0in];
+351            define START_DATE  / display 'Start~Date' style(column)=[width=0.7in];
+352            define END_DATE    / display 'End~Date' style(column)=[width=0.7in];
+353            define EPOCH       / display 'Epoch' style(column)=[width=0.8in];
+354            define SEVERITY    / display 'Severity' style(column)=[width=0.6in];
+355        
+356            break after TRTA / page;
+357        
+358        run;
+                                                           The SAS System
+
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 58 observations read from the data set WORK.DV_LIST.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.01 seconds
+      memory              8536.17k
+      OS Memory           19824.00k
+      Timestamp           10/27/2026 03:47:12 PM
+      Step Count                        3  Switch Count  0
+      
+
+359        
+360        %ods_off;
+361        %clear_titles;
+362        
+363        proc datasets lib=work nolist; delete dv_list; quit;
+
+NOTE: Deleting WORK.DV_LIST (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              230.98k
+      OS Memory           13144.00k
+      Timestamp           10/27/2026 03:47:12 PM
+      Step Count                        4  Switch Count  0
+      
+
+364        
+365        %put NOTE: l_dv.sas completed successfully.;
+NOTE: l_dv.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.43 seconds
+      user cpu time       0.45 seconds
+      system cpu time     0.56 seconds
+      memory              20869.31k
+      OS Memory           22024.00k
+      Timestamp           10/27/2026 03:47:12 PM
+                                                           The SAS System
+
+      Step Count                        4  Switch Count  20
+      

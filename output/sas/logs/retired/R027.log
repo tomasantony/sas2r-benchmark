@@ -1,0 +1,225 @@
+1                                                          The SAS System                            11:27 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.25 seconds
+      cpu time            0.79 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R027
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1160,
+      Last Modified=27Oct2026:11:27:17,
+      Create Time=27Oct2026:11:27:17
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:27:48 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R027 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*
+2           * University: Universidad de Valladolid
+                                                           The SAS System
+
+3           * Degree: Grado en EstadÃƒÂ­stica
+4           * Subject: RegresiÃƒÂ³n y ANOVA
+5           * Year: 2017/18
+6           * Teacher: Lourdes Barba EscribaÃŒÂ
+7           * Author: Sergio GarcÃƒÂ­a Prado (garciparedes.me)
+8           * Name: PrÃƒÂ¡ctica Pulgones
+9          
+10          */
+11         data pulgones;
+12         	do semana=1 to 6;
+13         
+14         		do repet=1 to 40;
+15         			input recuento @@;
+16         			output;
+17         		end;
+18         	end;
+19         	datalines;
+
+NOTE: SAS went to a new line when INPUT statement reached past the end of a line.
+NOTE: The data set WORK.PULGONES has 240 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              744.00k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:27:48 AM
+      Step Count                        2  Switch Count  0
+      
+
+28         ;
+29         
+30         
+31         proc print data=pulgones (obs=8);
+32         run;
+
+NOTE: There were 8 observations read from the data set WORK.PULGONES.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              451.43k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:27:48 AM
+      Step Count                        3  Switch Count  0
+      
+
+33         
+34         proc univariate data=pulgones plot;
+35         	by semana;
+36         	var recuento;
+37         	qqplot recuento / normal;
+38         run;
+
+NOTE: Formatted values of BY variable semana truncated to 8 characters in side-by-side box plots.
+NOTE: 9716 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R027\sasgraph.png.
+NOTE: The above message was for the following BY group:
+                                                           The SAS System
+
+      semana=1
+NOTE: 10550 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R027\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      semana=2
+NOTE: 10907 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R027\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      semana=3
+NOTE: 9431 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R027\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      semana=4
+NOTE: 9511 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R027\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      semana=5
+NOTE: 9242 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R027\sasgraph.png.
+NOTE: The above message was for the following BY group:
+      semana=6
+NOTE: The PROCEDURE UNIVARIATE printed pages 2-14.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           1.46 seconds
+      user cpu time       0.62 seconds
+      system cpu time     0.32 seconds
+      memory              7445.78k
+      OS Memory           17352.00k
+      Timestamp           10/27/2026 11:27:50 AM
+      Step Count                        4  Switch Count  0
+      
+
+39         
+40         proc glm data=pulgones;
+41         	class semana;
+42         	model recuento=semana;
+43         	output out= resal p=pred r=res student=rst;
+
+NOTE: The data set WORK.RESAL has 240 observations and 6 variables.
+NOTE: The PROCEDURE GLM printed pages 15-16.
+NOTE: PROCEDURE GLM used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1525.78k
+      OS Memory           14424.00k
+      Timestamp           10/27/2026 11:27:50 AM
+      Step Count                        5  Switch Count  0
+      
+
+44         proc print data=resal;run;
+
+NOTE: There were 240 observations read from the data set WORK.RESAL.
+NOTE: The PROCEDURE PRINT printed pages 17-21.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              357.62k
+      OS Memory           13912.00k
+      Timestamp           10/27/2026 11:27:50 AM
+      Step Count                        6  Switch Count  0
+      
+                                                           The SAS System
+
+
+45         
+46         proc univariate plot normal data=resal;
+47         	var res;
+48         run;
+
+NOTE: The PROCEDURE UNIVARIATE printed pages 22-23.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              568.15k
+      OS Memory           13656.00k
+      Timestamp           10/27/2026 11:27:50 AM
+      Step Count                        7  Switch Count  0
+      
+
+49         
+50         proc glm data=pulgones;
+51         	class semana;
+52         	model recuento=semana;
+53         run;
+
+NOTE: The PROCEDURE GLM printed pages 24-25.
+NOTE: PROCEDURE GLM used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1181.40k
+      OS Memory           14424.00k
+      Timestamp           10/27/2026 11:27:50 AM
+      Step Count                        8  Switch Count  0
+      
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           4.09 seconds
+      user cpu time       1.09 seconds
+      system cpu time     0.90 seconds
+      memory              15775.09k
+      OS Memory           17352.00k
+      Timestamp           10/27/2026 11:27:50 AM
+      Step Count                        8  Switch Count  29
+      

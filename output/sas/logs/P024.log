@@ -1,0 +1,168 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              213.12k
+      OS Memory           13144.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        39  Switch Count  0
+      
+
+586        %let pid = P024; %let outds = &root./output/sas/datasets/P024; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P024
+587        %put NOTE: ===== pipeline faijal: P024 P024_ds.sas =====;
+NOTE: ===== pipeline faijal: P024 P024_ds.sas =====
+588        %let _bench_t0 = %sysfunc(datetime());
+589        %include "&root./programs/sas_run/P024_ds.sas";
+
+NOTE: There were 5 observations read from the data set WORK.SDTM_DM.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.DM_FOR_DS has 5 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1243.71k
+      OS Memory           14432.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        40  Switch Count  0
+      
+
+
+NOTE: There were 5 observations read from the data set WORK.EDC_DS.
+NOTE: The data set WORK.EDC_DS_PREP has 5 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              906.31k
+      OS Memory           13400.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        41  Switch Count  0
+      
+
+
+NOTE: There were 5 observations read from the data set WORK.EDC_DS_PREP.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.EDC_DS_PREP has 5 observations and 5 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              688.81k
+      OS Memory           13660.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        42  Switch Count  0
+      
+
+
+NOTE: Input data set is already sorted, no sorting done.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              263.81k
+      OS Memory           13144.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        43  Switch Count  0
+      
+
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      683:22   685:22   687:21   
+NOTE: Variable TERM is uninitialized.
+NOTE: Variable DECOD is uninitialized.
+NOTE: Variable CAT is uninitialized.
+NOTE: Variable STDT is uninitialized.
+INFO: The variable SUBJID on data set WORK.EDC_DS_PREP will be overwritten by data set WORK.DM_FOR_DS.
+WARNING: Multiple lengths were specified for the variable SUBJID by input data set(s). This can cause truncation of data.
+WARNING: Date mismatch! DS=   DM=2026-04-05
+NOTE: There were 5 observations read from the data set WORK.EDC_DS_PREP.
+NOTE: There were 5 observations read from the data set WORK.DM_FOR_DS.
+NOTE: The data set WORK.SDTM_DS1 has 5 observations and 21 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1080.21k
+      OS Memory           13656.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        44  Switch Count  0
+      
+
+
+                                                           The SAS System
+
+NOTE: There were 5 observations read from the data set WORK.SDTM_DS1.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SDTM_DS1 has 5 observations and 21 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              683.12k
+      OS Memory           13660.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        45  Switch Count  0
+      
+
+
+NOTE: There were 5 observations read from the data set WORK.SDTM_DS1.
+NOTE: The data set WORK.SDTM_DS has 5 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              922.34k
+      OS Memory           13400.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        46  Switch Count  0
+      
+
+
+NOTE: There were 5 observations read from the data set WORK.SDTM_DS.
+NOTE: The PROCEDURE PRINT printed page 3.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              435.68k
+      OS Memory           13144.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        47  Switch Count  0
+      
+
+
+NOTE: The export data set has 5 observations and 10 variables.
+NOTE: "D:\ds.xlsx" file was successfully created.
+NOTE: PROCEDURE EXPORT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              1388.81k
+      OS Memory           13144.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        48  Switch Count  0
+      
+
+805        %_bench_capture;
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+                                                           The SAS System
+
+      memory              5194.03k
+      OS Memory           18268.00k
+      Timestamp           10/27/2026 03:58:52 PM
+      Step Count                        49  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+806        proc printto; run;
+

@@ -1,0 +1,482 @@
+1                                                          The SAS System                            10:54 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.86 seconds
+      cpu time            0.64 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P057
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:54:31 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P057 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          *------------------------------------------------------------------------------*;
+2          *                                                                              *;
+3          * Program Name    :  Target13.sas                                              *;
+4          * Program Type    :  Figure                                                    *;
+5          * Author          :  Adrienne M Bonwick                                        *;
+6          * Date            :  17 March 2014                                             *;
+7          *------------------------------------------------------------------------------*;
+8          * Purpose: SAS program to produce the PhUSE target 13.                         *;
+9          *------------------------------------------------------------------------------*;
+10         * Input : http://phuse-scripts.googlecode.com/svn/trunk/scriptathon2014/       *;
+11         *                data/adsl.xpt                                                 *;
+12         *                                                                              *;
+13         * Output:  Generated output plot AB_check.rtf                                  *;
+14         *------------------------------------------------------------------------------*;
+15         * Operating system: Windows/Citrix                                             *;
+16         *                   SAS 9.3                                                    *;
+17         *------------------------------------------------------------------------------*;
+18         * Modification Log                                                             *;
+19         *   Programmers Name:                                                          *;
+20         *   Date:                                                                      *;
+21         *   Description:                                                               *;
+22         ********************************************************************************;
+23         
+24         filename source clear;
+WARNING: No logical assign for filename SOURCE.
+25         libname source clear;
+WARNING: Libref SOURCE is not assigned.
+26         %* modification 2019-12-23 - update path as data has been moved;
+27         
+28         filename source "&rawadam./adpc.xpt";
+29         libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adpc.xpt
+30         
+31         data work.orig_adpc ;
+32         set source.adpc;
+33         run;
+
+NOTE: There were 2463 observations read from the data set SOURCE.ADPC.
+NOTE: The data set WORK.ORIG_ADPC has 2463 observations and 200 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.01 seconds
+      memory              1266.00k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:54:31 AM
+      Step Count                        2  Switch Count  0
+      
+
+34         
+35         %let syscc=0;
+36         options mprint;
+37         
+38         %macro target13(PCTESTCD=, Meantype=A, SD=Y);
+                                                           The SAS System
+
+39         %if %upcase("&PCTESTCD") = " " %then
+40           %put %str(E)RROR: Need to specify a variable to test;;
+41         %if %upcase("&meantype") ne "G" and %upcase("&meantype") ne "A" %then
+42           %put %str(E)RROR: Need to specify either Geometric or Arithmetic option;;
+43         %if %upcase("&SD") ne "UPPER" and %upcase("&SD") ne "BOTH" and %upcase("&SD") ne "N"  %then
+44           %put %str(E)RROR: Need to specify Upper, Both or No Bars;;
+45         
+46         
+47         data work.adpc ;
+48         set source.adpc(keep=ANLPRNT TRTAN ANLPRNT PCSPEC PCTESTL TRTA DOSREFID PCTESTCD
+49                              PCORRESU PCORRES USUBJID  PCORRESN EPLTM);
+50         
+51           where PCTESTCD="&PCTESTCD";
+52           PCTPT=input(EPLTM,best10.);
+53           ORDERBY=compress( ANLPRNT||PCSPEC||PCTESTL||TRTAN); 	
+54           BYVAL6=compbl(propcase(pctestcd)||' Conc '||' ('||PCORRESU||')');
+55         run ;
+56         
+57         proc sort data=ADPC;
+58          by TRTAN TRTA PCTPT;
+59         run;
+60         
+61         %if &meantype=A %then %do;
+62         
+63           proc univariate data=ADPC noprint;
+64              by TRTAN TRTA PCTPT;
+65              var PCORRESN;
+66         	 output out=PCMEANS mean=PCmean STD=PCSD ;
+67           run;
+68         
+69           data MeanData;
+70             set PCMEANS;
+71         	if PCMEAN=0 then do;
+72         	   PCMEAN=.;
+73         	   PCSD=.;
+74         	end;
+75           run;
+76         %end;
+77         
+78         %if &meantype=G %then %do;
+79         
+80           data LOGPC;
+81             set ADPC;
+82         	if PCORRESN ne . then LOGORRES=log(PCORRESN);
+83           run;
+84         
+85           proc univariate data=LOGPC noprint;
+86              by TRTAN TRTA PCTPT;
+87              var PCORRESN;
+88         	 output out=LogMEANS mean=Logmean STD=logSD ;
+89           run;
+90         
+91           data MeanData;
+92             set LogMEANS;
+93             PCMEAN=EXP(LogMEANS);
+94             PCSD=EXP(logSD);
+95           run;
+96         %end;
+                                                           The SAS System
+
+97         
+98            proc template;
+99            define statgraph temp_pksum;
+100           DYNAMIC _XMAX _YMAX _XLABEL _YLABEL _SD TICKS VIEW GSTAT _LEGENDSIZE;
+101           MVAR SCALE1 SCALE2 TRTLBL ;
+102           begingraph / designwidth=2500px designheight=1400px;
+103           layout lattice / columns=2 rows=2 ROWWEIGHTS= (.9 .1) ;
+104           cell;
+105           cellheader;
+106           entry "Linear view" / textattrs=(size=9pt) ;
+107           endcellheader;
+108           *layout for linear scale;
+109           layout overlay /XAXISOPTS =( LABEL=_XLABEL LABELATTRS=GRAPHVALUETEXT(SIZE=10pt)
+110                                        tickvalueattrs=(size=9) Linearopts=( viewmin=0 viewmax=_XMAX tickvaluelist=ticks
+110      ! tickvaluefitpolicy=NONE))
+111                           YAXISOPTS =(LABEL=_YLABEL LABELATTRS=GRAPHVALUETEXT(SIZE=10pt) tickvalueattrs=(size=9) Linearopts=(
+111      ! viewmin=0 viewmax = _YMAX ));
+112        
+113           if (_SD = 'BOTH'  )
+114        
+115                scatterplot x=PCTPT y=PCMEAN / yerrorlower=eval(PCMEAN - PCSD)
+116                      yerrorupper=eval(PCMEAN + PCSD) group=TRTAN MARKERATTRS=(color=black )
+117                      yerrorupper=eval(PCMEAN + PCSD) group=TRTAN MARKERATTRS=(color=black ) name="s2" ;
+118           seriesplot x=PCTPT y=PCMEAN /group=TRTAN LINEATTRS=(color=black) name="s1";
+119        
+120        				
+121           endif;
+122        
+123           if (_SD = 'UPPER'  )
+124                 scatterplot x=PCTPT y=PCMEAN /  yerrorlower=eval(PCMEAN)
+125                                     yerrorupper=eval(PCMEAN + PCSD)
+126                                     group=TRTAN MARKERATTRS=(color=black )
+127                                     MARKERATTRS=(color=black ) name="s2" ;
+128                 seriesplot x=PCTPT y=PCMEAN /group=TRTAN LINEATTRS=(color=black) name="s1";
+129        		
+130           endif;
+131           if ( _SD = 'N' )
+132                  scatterplot x=PCTPT y=PCMEAN / group=TRTAN MARKERATTRS=(color=black ) name="s2" ;
+133                  seriesplot x=PCTPT y=PCMEAN /group=TRTAN LINEATTRS=(color=black) name="s1";
+134           endif;
+135           endlayout;
+136           endcell;
+137           cell;
+138           cellheader;
+139           entry "Semilogarithmic view" / textattrs=(size=9pt) ;
+140           endcellheader;
+141           *layout for semi logarithmic scale;
+142           layout overlay / YAXISOPTS =( LABEL=_YLABEL tickvalueattrs=(size=9)
+143                              LABELATTRS=GRAPHVALUETEXT(SIZE=10pt)
+144                              TYPE=LOG LOGOPTS=( BASE=10 viewmax = _YMAX ))
+145                            XAXISOPTS =( LABEL=_XLABEL tickvalueattrs=(size=9)
+146                              LABELATTRS=GRAPHVALUETEXT(SIZE=10pt)
+147                              Linearopts=( viewmin=0 viewmax=_XMAX tickvaluelist=TICKS
+148                              tickvaluefitpolicy=NONE)) ;
+149              scatterplot x=PCTPT y=PCMEAN / group=TRTAN MARKERATTRS=(color=black ) name="s2" ;
+150              seriesplot x=PCTPT y=PCMEAN /group=TRTAN LINEATTRS=(color=black) name="s1";
+151           *endif;
+152           endlayout;
+                                                           The SAS System
+
+153           endcell;
+154           sidebar / align=bottom;
+155           *discretelegend; MERGEDLEGEND "s1" "s2"/ /*MERGE=true*/  border=false valueattrs=(size=_LEGENDSIZE);
+156           endsidebar;
+157           endlayout;
+158           endgraph;
+159           end;
+160           run;
+161        
+162        ods graphics on / width=22.87cm noborder height=12cm ;
+163        ods tagsets.RTF nogtitle nogfootnote FILE = "target13.rtf" ;
+164        ods listing close;
+165        
+166        title J=L "SPONSOR/PROTOCOL/PRODUCT INFO" j=R "page x of y";
+167        title3 "Figure 14.2-x.x Arithmetic/Geometric Mean concentration-time plot per [analyte] (overlaying) and analyte
+167      ! separately";
+168        title4 "Analysis set: PK analysis set";
+169        footnote j=l "PATH DATA/PROGRAM/OUTPUT";
+170        
+171           proc sgrender data=Meandata template="temp_pksum";
+172           dynamic _sd="&SD"
+173                   _XLABEL="Time (h)"
+174                   SCALE="LINEAR"
+175                   _YLABEL="Arithmetic mean (SD) Anal2 Conc (ng/mL )"
+176                   _XMAX=100
+177                   _LEGENDSIZE="11pt"
+178                   TICKS= "0 4 8 12 24 36 48 72 96" ;
+179           **by byval1 byval2 byval3 byval4 byval5 page;
+180           run;quit;
+181        
+182           title;
+183           footnote;
+184        
+185        ods graphics off;
+186        ods tagsets.RTF  close;
+187        ods listing;
+188        %mend;
+189        
+190        %TARGET13(pctestcd=ANAL1, MEANTYPE=A, SD=BOTH);
+MPRINT(TARGET13):   ;
+MPRINT(TARGET13):  ;
+MPRINT(TARGET13):  ;
+MPRINT(TARGET13):   data work.adpc ;
+MPRINT(TARGET13):   set source.adpc(keep=ANLPRNT TRTAN ANLPRNT PCSPEC PCTESTL TRTA DOSREFID PCTESTCD PCORRESU PCORRES USUBJID 
+PCORRESN EPLTM);
+MPRINT(TARGET13):   where PCTESTCD="ANAL1";
+MPRINT(TARGET13):   PCTPT=input(EPLTM,best10.);
+MPRINT(TARGET13):   ORDERBY=compress( ANLPRNT||PCSPEC||PCTESTL||TRTAN);
+MPRINT(TARGET13):   BYVAL6=compbl(propcase(pctestcd)||' Conc '||' ('||PCORRESU||')');
+MPRINT(TARGET13):   run ;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      190:28   
+NOTE: There were 821 observations read from the data set SOURCE.ADPC.
+      WHERE PCTESTCD='ANAL1';
+NOTE: The data set WORK.ADPC has 821 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+                                                           The SAS System
+
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              964.75k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:54:31 AM
+      Step Count                        3  Switch Count  0
+      
+
+MPRINT(TARGET13):   proc sort data=ADPC;
+MPRINT(TARGET13):   by TRTAN TRTA PCTPT;
+MPRINT(TARGET13):   run;
+
+NOTE: There were 821 observations read from the data set WORK.ADPC.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADPC has 821 observations and 15 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1827.46k
+      OS Memory           12128.00k
+      Timestamp           10/27/2026 10:54:31 AM
+      Step Count                        4  Switch Count  0
+      
+
+MPRINT(TARGET13):   proc univariate data=ADPC noprint;
+MPRINT(TARGET13):   by TRTAN TRTA PCTPT;
+MPRINT(TARGET13):   var PCORRESN;
+MPRINT(TARGET13):   output out=PCMEANS mean=PCmean STD=PCSD ;
+MPRINT(TARGET13):   run;
+
+NOTE: The data set WORK.PCMEANS has 31 observations and 5 variables.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1005.31k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:54:32 AM
+      Step Count                        5  Switch Count  0
+      
+
+MPRINT(TARGET13):   data MeanData;
+MPRINT(TARGET13):   set PCMEANS;
+MPRINT(TARGET13):   if PCMEAN=0 then do;
+MPRINT(TARGET13):   PCMEAN=.;
+MPRINT(TARGET13):   PCSD=.;
+MPRINT(TARGET13):   end;
+MPRINT(TARGET13):   run;
+NOTE: There were 31 observations read from the data set WORK.PCMEANS.
+NOTE: The data set WORK.MEANDATA has 31 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              896.81k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:54:32 AM
+                                                           The SAS System
+
+      Step Count                        6  Switch Count  0
+      
+
+MPRINT(TARGET13):   proc template;
+MPRINT(TARGET13):   define statgraph temp_pksum;
+MPRINT(TARGET13):   DYNAMIC _XMAX _YMAX _XLABEL _YLABEL _SD TICKS VIEW GSTAT _LEGENDSIZE;
+MPRINT(TARGET13):   MVAR SCALE1 SCALE2 TRTLBL ;
+MPRINT(TARGET13):   begingraph / designwidth=2500px designheight=1400px;
+MPRINT(TARGET13):   layout lattice / columns=2 rows=2 ROWWEIGHTS= (.9 .1) ;
+MPRINT(TARGET13):   cell;
+MPRINT(TARGET13):   cellheader;
+MPRINT(TARGET13):   entry "Linear view" / textattrs=(size=9pt) ;
+MPRINT(TARGET13):   endcellheader;
+MPRINT(TARGET13):   *layout for linear scale;
+MPRINT(TARGET13):   layout overlay /XAXISOPTS =( LABEL=_XLABEL LABELATTRS=GRAPHVALUETEXT(SIZE=10pt) tickvalueattrs=(size=9) 
+Linearopts=( viewmin=0 viewmax=_XMAX tickvaluelist=ticks tickvaluefitpolicy=NONE)) YAXISOPTS =(LABEL=_YLABEL 
+LABELATTRS=GRAPHVALUETEXT(SIZE=10pt) tickvalueattrs=(size=9) Linearopts=( viewmin=0 viewmax = _YMAX ));
+MPRINT(TARGET13):   if (_SD = 'BOTH' ) scatterplot x=PCTPT y=PCMEAN / yerrorlower=eval(PCMEAN - PCSD) yerrorupper=eval(PCMEAN + 
+PCSD) group=TRTAN MARKERATTRS=(color=black ) yerrorupper=eval(PCMEAN + PCSD) group=TRTAN MARKERATTRS=(color=black ) name="s2" ;
+MPRINT(TARGET13):   seriesplot x=PCTPT y=PCMEAN /group=TRTAN LINEATTRS=(color=black) name="s1";
+MPRINT(TARGET13):   endif;
+MPRINT(TARGET13):   if (_SD = 'UPPER' ) scatterplot x=PCTPT y=PCMEAN / yerrorlower=eval(PCMEAN) yerrorupper=eval(PCMEAN + PCSD) 
+group=TRTAN MARKERATTRS=(color=black ) MARKERATTRS=(color=black ) name="s2" ;
+MPRINT(TARGET13):   seriesplot x=PCTPT y=PCMEAN /group=TRTAN LINEATTRS=(color=black) name="s1";
+MPRINT(TARGET13):   endif;
+MPRINT(TARGET13):   if ( _SD = 'N' ) scatterplot x=PCTPT y=PCMEAN / group=TRTAN MARKERATTRS=(color=black ) name="s2" ;
+MPRINT(TARGET13):   seriesplot x=PCTPT y=PCMEAN /group=TRTAN LINEATTRS=(color=black) name="s1";
+MPRINT(TARGET13):   endif;
+MPRINT(TARGET13):   endlayout;
+MPRINT(TARGET13):   endcell;
+MPRINT(TARGET13):   cell;
+MPRINT(TARGET13):   cellheader;
+MPRINT(TARGET13):   entry "Semilogarithmic view" / textattrs=(size=9pt) ;
+MPRINT(TARGET13):   endcellheader;
+MPRINT(TARGET13):   *layout for semi logarithmic scale;
+MPRINT(TARGET13):   layout overlay / YAXISOPTS =( LABEL=_YLABEL tickvalueattrs=(size=9) LABELATTRS=GRAPHVALUETEXT(SIZE=10pt) 
+TYPE=LOG LOGOPTS=( BASE=10 viewmax = _YMAX )) XAXISOPTS =( LABEL=_XLABEL tickvalueattrs=(size=9) 
+LABELATTRS=GRAPHVALUETEXT(SIZE=10pt) Linearopts=( viewmin=0 viewmax=_XMAX tickvaluelist=TICKS tickvaluefitpolicy=NONE)) ;
+MPRINT(TARGET13):   scatterplot x=PCTPT y=PCMEAN / group=TRTAN MARKERATTRS=(color=black ) name="s2" ;
+MPRINT(TARGET13):   seriesplot x=PCTPT y=PCMEAN /group=TRTAN LINEATTRS=(color=black) name="s1";
+MPRINT(TARGET13):   *endif;
+MPRINT(TARGET13):   endlayout;
+MPRINT(TARGET13):   endcell;
+MPRINT(TARGET13):   sidebar / align=bottom;
+MPRINT(TARGET13):   *discretelegend;
+MPRINT(TARGET13):   MERGEDLEGEND "s1" "s2"/ border=false valueattrs=(size=_LEGENDSIZE);
+MPRINT(TARGET13):   endsidebar;
+MPRINT(TARGET13):   endlayout;
+MPRINT(TARGET13):   endgraph;
+MPRINT(TARGET13):   end;
+NOTE: Overwriting existing template/link: Temp_pksum
+NOTE: STATGRAPH 'Temp_pksum' has been saved to: SASUSER.TEMPLAT
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              409.34k
+      OS Memory           11096.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 10:54:32 AM
+      Step Count                        7  Switch Count  0
+      
+
+MPRINT(TARGET13):   run;
+MPRINT(TARGET13):   ods graphics on / width=22.87cm noborder height=12cm ;
+MPRINT(TARGET13):   ods tagsets.RTF nogtitle nogfootnote FILE = "target13.rtf" ;
+NOTE: Writing TAGSETS.RTF Body file: target13.rtf
+MPRINT(TARGET13):   ods listing close;
+MPRINT(TARGET13):   title J=L "SPONSOR/PROTOCOL/PRODUCT INFO" j=R "page x of y";
+MPRINT(TARGET13):   title3 "Figure 14.2-x.x Arithmetic/Geometric Mean concentration-time plot per [analyte] (overlaying) and 
+analyte separately";
+MPRINT(TARGET13):   title4 "Analysis set: PK analysis set";
+MPRINT(TARGET13):   footnote j=l "PATH DATA/PROGRAM/OUTPUT";
+MPRINT(TARGET13):   proc sgrender data=Meandata template="temp_pksum";
+MPRINT(TARGET13):   dynamic _sd="BOTH" _XLABEL="Time (h)" SCALE="LINEAR" _YLABEL="Arithmetic mean (SD) Anal2 Conc (ng/mL )" 
+_XMAX=100 _LEGENDSIZE="11pt" TICKS= "0 4 8 12 24 36 48 72 96" ;
+MPRINT(TARGET13):   **by byval1 byval2 byval3 byval4 byval5 page;
+MPRINT(TARGET13):   run;
+
+WARNING: WIDTH exceeds available space for TAGSETS.RTF destination. Setting WIDTH=20.32cm.
+NOTE: There were 31 observations read from the data set WORK.MEANDATA.
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           6.15 seconds
+      user cpu time       0.51 seconds
+      system cpu time     0.65 seconds
+      memory              8229.68k
+      OS Memory           22364.00k
+      Timestamp           10/27/2026 10:54:40 AM
+      Step Count                        8  Switch Count  0
+      
+
+MPRINT(TARGET13):  quit;
+MPRINT(TARGET13):   title;
+MPRINT(TARGET13):   footnote;
+MPRINT(TARGET13):   ods graphics off;
+MPRINT(TARGET13):   ods tagsets.RTF close;
+MPRINT(TARGET13):   ods listing;
+191        *%TARGET13(pctestcd=ANAL1, MEANTYPE=G);
+192        /*
+193        
+                                                           The SAS System
+
+194        
+195        
+196        */
+197        
+198        %put syscc=&syscc.;
+syscc=0
+199        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           10.44 seconds
+      user cpu time       1.23 seconds
+      system cpu time     1.42 seconds
+      memory              21208.76k
+      OS Memory           22364.00k
+      Timestamp           10/27/2026 10:54:40 AM
+      Step Count                        8  Switch Count  29
+      

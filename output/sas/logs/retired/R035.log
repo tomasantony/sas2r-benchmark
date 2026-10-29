@@ -1,0 +1,205 @@
+1                                                          The SAS System                            11:28 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.75 seconds
+      cpu time            0.67 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R035
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1160,
+      Last Modified=27Oct2026:11:27:17,
+      Create Time=27Oct2026:11:27:17
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:28:14 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R035 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*--------------------------------------------------*/
+2          /* SAS Programming for R Users - code for exercises */
+                                                           The SAS System
+
+3          /* Copyright 2016 SAS Institute Inc.                */
+4          /*--------------------------------------------------*/
+5          
+6          /*SP4R05d05*/
+7          
+8          /*Part A*/
+9          %macro mymac(dist,param1,param2=,n=100,stats=no,plot=no);
+10         
+11         /*Part B*/
+12         %if &dist= %then %do;
+13            %put Dist is a required argument;
+14            %return;
+15         %end;
+16         
+17         %if &param1= %then %do;
+18            %put Param1 is a required argument;
+19            %return;
+20         %end;
+21         
+22         /*Part C*/
+23         %if &param2= %then %do;
+24            data random (drop=i);
+25               do i=1 to &n;
+26                  y=rand("&dist",&param1);
+27         	     x+1;
+28         	     output;
+29               end;
+30            run;
+31         %end;
+32         
+33         %else %do;
+34            data random (drop=i);
+35               do i=1 to &n;
+36                  y=rand("&dist",&param1,&param2);
+37         	     x+1;
+38         	     output;
+39               end;
+40            run;
+41         %end;
+42         
+43         /*Part D*/
+44         %if %upcase(&stats)=YES %then %do;
+45            proc means data=random mean std;
+46               var y;
+47            run;
+48         %end;
+49         
+50         /*Part E*/
+51         %if %upcase(&plot)=YES %then %do;
+52            proc sgplot data=random;
+53               histogram y / binwidth=1;
+54         	  density y / type=kernel;
+55            run;
+56         %end;
+57         
+58         %mend;
+59         
+60         /*Part F*/
+                                                           The SAS System
+
+61         %mymac(param1=0.2,stats=yes)
+Dist is a required argument
+62         
+63         /*Part G*/
+64         %mymac(dist=Geometric,param1=0.2,param2=,stats=yes)
+
+NOTE: The data set WORK.RANDOM has 100 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              751.56k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:28:14 AM
+      Step Count                        2  Switch Count  0
+      
+
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 100 observations read from the data set WORK.RANDOM.
+NOTE: The PROCEDURE MEANS printed page 1.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.01 seconds
+      memory              7450.25k
+      OS Memory           17280.00k
+      Timestamp           10/27/2026 11:28:14 AM
+      Step Count                        3  Switch Count  0
+      
+
+65         
+66         /*Part H*/
+67         options mprint;
+68         %mymac(dist=Normal,param1=100,param2=10,n=1000,plot=yes)
+MPRINT(MYMAC):   data random (drop=i);
+MPRINT(MYMAC):   do i=1 to 1000;
+MPRINT(MYMAC):   y=rand("Normal",100,10);
+MPRINT(MYMAC):   x+1;
+MPRINT(MYMAC):   output;
+MPRINT(MYMAC):   end;
+MPRINT(MYMAC):   run;
+
+NOTE: The data set WORK.RANDOM has 1000 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              759.43k
+      OS Memory           10836.00k
+      Timestamp           10/27/2026 11:28:14 AM
+      Step Count                        4  Switch Count  0
+      
+
+MPRINT(MYMAC):   proc sgplot data=random;
+MPRINT(MYMAC):   histogram y / binwidth=1;
+MPRINT(MYMAC):   density y / type=kernel;
+MPRINT(MYMAC):   run;
+                                                           The SAS System
+
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           3.90 seconds
+      user cpu time       0.26 seconds
+      system cpu time     0.42 seconds
+      memory              7622.46k
+      OS Memory           17372.00k
+      Timestamp           10/27/2026 11:28:18 AM
+      Step Count                        5  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\R035\SGPlot.png.
+NOTE: There were 1000 observations read from the data set WORK.RANDOM.
+
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           5.87 seconds
+      user cpu time       0.62 seconds
+      system cpu time     0.87 seconds
+      memory              16020.53k
+      OS Memory           17372.00k
+      Timestamp           10/27/2026 11:28:18 AM
+      Step Count                        5  Switch Count  22
+      

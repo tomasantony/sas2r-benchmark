@@ -1,0 +1,90 @@
+                                                                ===== P001_ADSL: base=shipped ship1.adsl  compare=ours ours1.adsl =====
+
+                                                                                         The COMPARE Procedure
+                                                                                Comparison of SHIP1.ADSL with OURS1.ADSL
+                                                                            (Method=RELATIVE(0.00000222), Criterion=1.0E-08)
+
+NOTE: Values of the following 3 variables compare unequal: TRTSDTM TRTEDTM EFFFL
+
+
+                                                                                 Value Comparison Results for Variables
+
+                                                                 ______________________________________________________________________
+                                                                                        ||  Datetime of First Exposure
+                                                                                        ||       Base    Compare
+                                                                  USUBJID               ||    TRTSDTM    TRTSDTM      Diff.     % Diff
+                                                                  ____________________  ||  _________  _________  _________  _________
+                                                                                        ||
+                                                                  01-701-1015           ||  *********  *********          .          .
+                                                                  01-701-1023           ||  *********  *********          .          .
+                                                                  01-701-1028           ||  *********  *********          .          .
+                                                                  01-701-1033           ||  *********  *********          .          .
+                                                                  01-701-1034           ||  *********  *********          .          .
+                                                                  01-701-1047           ||  *********  *********          .          .
+                                                                  01-701-1097           ||  *********  *********          .          .
+                                                                  01-701-1111           ||  *********  *********          .          .
+                                                                  01-701-1115           ||  *********  *********          .          .
+                                                                  01-701-1118           ||  *********  *********          .          .
+
+NOTE: The MAXPRINT=10 printing limit has been reached for the variable TRTSDTM. No more values will be printed for this comparison.
+                                                                 ______________________________________________________________________
+
+
+                                                                 ______________________________________________________________________
+                                                                                        ||  Datetime of Last Exposure
+                                                                                        ||       Base    Compare
+                                                                  USUBJID               ||    TRTEDTM    TRTEDTM      Diff.     % Diff
+                                                                  ____________________  ||  _________  _________  _________  _________
+                                                                                        ||
+                                                                  01-701-1015           ||  *********  *********          .          .
+                                                                  01-701-1023           ||  *********  *********          .          .
+                                                                  01-701-1028           ||  *********  *********          .          .
+                                                                  01-701-1033           ||  *********  *********          .          .
+                                                                  01-701-1034           ||  *********  *********          .          .
+                                                                  01-701-1047           ||  *********  *********          .          .
+                                                                  01-701-1097           ||  *********  *********          .          .
+                                                                  01-701-1111           ||  *********  *********          .          .
+                                                                  01-701-1115           ||  *********  *********          .          .
+                                                                  01-701-1118           ||  *********  *********          .          .
+
+NOTE: The MAXPRINT=10 printing limit has been reached for the variable TRTEDTM. No more values will be printed for this comparison.
+                                                                 ______________________________________________________________________
+
+
+                                                                 ______________________________________________________________________
+                                                                                        ||  Efficacy Population Flag
+                                                                                        ||  Base Value           Compare Value
+                                                                  USUBJID               ||  EFFFL                 EFFFL
+                                                                  ____________________  ||  _                     _
+                                                                                        ||
+                                                                  01-701-1047           ||  N                     Y
+                                                                  01-704-1025           ||  N                     Y
+                                                                 ______________________________________________________________________
+                                                                ===== P003_ADAE: base=shipped ship3.adae  compare=ours ours3.adae =====
+
+                                                                                         The COMPARE Procedure
+                                                                                Comparison of SHIP3.ADAE with OURS3.ADAE
+                                                                            (Method=RELATIVE(0.00000222), Criterion=1.0E-08)
+
+NOTE: No unequal values were found. All values compared are exactly equal.
+                                                              ===== P087_ADLB: base=shipped shipw_a.adlb  compare=ours oursw_a.adlb =====
+
+                                                                                         The COMPARE Procedure
+                                                                              Comparison of SHIPW_A.ADLB with OURSW_A.ADLB
+                                                                            (Method=RELATIVE(0.00000222), Criterion=1.0E-08)
+
+NOTE: No unequal values were found. All values compared are exactly equal.
+                                                          ===== P088_ADLB_QC: base=shipped shipw_a.adlb_qc  compare=ours oursw_a.adlb_qc =====
+
+                                                                                         The COMPARE Procedure
+                                                                           Comparison of SHIPW_A.ADLB_QC with OURSW_A.ADLB_QC
+                                                                            (Method=RELATIVE(0.00000222), Criterion=1.0E-08)
+
+NOTE: No unequal values were found. All values compared are exactly equal.
+                                                                 ===== P090_AE: base=shipped shipw_s.ae  compare=ours oursw_s.ae =====
+
+                                                                                         The COMPARE Procedure
+                                                                                Comparison of SHIPW_S.AE with OURSW_S.AE
+                                                                            (Method=RELATIVE(0.00000222), Criterion=1.0E-08)
+
+NOTE: No unequal values were found. All values compared are exactly equal.

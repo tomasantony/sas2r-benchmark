@@ -1,0 +1,277 @@
+1                                                          The SAS System                            11:25 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.79 seconds
+      cpu time            0.60 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the article
+2             "Smokestack plots: A visualization technique for comparing cumulative curves"
+3             by Rick Wicklin, published 30MAR2020 on The DO Loop blog:
+4             https://blogs.sas.com/content/iml/2020/03/30/smokestack-plots-cumulative-curves.html
+5          
+6             This program shows how to create a "smokestack plot," which is a plot of
+7             multiple cumulative curves.
+8          
+9             To generate the data, run the file smokestackDATA.sas.
+10         */
+11         
+12         proc contents data=Have short varnum; run;
+ERROR: File WORK.HAVE.DATA does not exist.
+
+NOTE: Statements not processed because of errors noted above.
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              231.28k
+      OS Memory           8776.00k
+      Timestamp           10/27/2026 11:25:17 AM
+                                                           The SAS System
+
+      Step Count                        1  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+13         
+
+
+14         proc freq data=Have order=freq;
+ERROR: File WORK.HAVE.DATA does not exist.
+15         table ID;
+ERROR: No data set open to look up variables.
+16         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              29.75k
+      OS Memory           8776.00k
+      Timestamp           10/27/2026 11:25:17 AM
+      Step Count                        2  Switch Count  0
+      
+17         
+18         /* Compute cumulative quantities */
+
+
+19         data Cumul;
+20         set Have;                  /* assume sorted by Date for each ID variable */
+ERROR: File WORK.HAVE.DATA does not exist.
+21         by ID notsorted;           /* use NOTSORTED option if not sorted by ID */
+22         if first.ID then do;
+23            Cumul=0;                /* initialize the cumulative count */
+24            output;                 /* Optional: to display 0, include the OUTPUT statements */
+25         end;
+26         Cumul + Value;             /* increment the cumulative count */
+27         output;
+28         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+WARNING: The data set WORK.CUMUL may be incomplete.  When this step was stopped there were 0 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              867.53k
+      OS Memory           9292.00k
+      Timestamp           10/27/2026 11:25:17 AM
+      Step Count                        3  Switch Count  0
+      
+
+29         
+30         ods graphics / reset width=640px height=200px;
+31         title "Events versus Time";
+32         title2 "Views for Blog Post ID=25559";
+33         proc sgplot data=Cumul;
+34            where ID=25559;
+ERROR: Variable ID is not on file WORK.CUMUL.
+                                                           The SAS System
+
+35            needle x=Date y=Value / lineattrs=(thickness=5);;
+ERROR: Variable DATE not found.
+36            xaxis display=(nolabel);
+37            yaxis grid label="New Views";
+38         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              237.40k
+      OS Memory           9292.00k
+      Timestamp           10/27/2026 11:25:17 AM
+      Step Count                        4  Switch Count  0
+      
+39         
+40         
+41         /* with < 10 groups, you can panel these. At 150 pixels
+42            per plot, you need 150*numGroups pixels */
+43         ods graphics / width=640px height=800px;
+44         title "Events versus Time";
+45         title2 "Views for Blog Posts, excluding ID=25559";
+
+
+46         proc sgpanel data=cumul;
+47            where ID^=25559;
+ERROR: Variable ID is not on file WORK.CUMUL.
+48            panelby ID / layout=rowlattice onepanel sort=data;
+ERROR: Variable ID not found.
+49            needle x=Date y=Value/ lineattrs=(thickness=5);
+ERROR: Variable DATE not found.
+50            colaxis display=(nolabel);
+51            rowaxis grid label="New Views";
+52         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPANEL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.34k
+      OS Memory           9292.00k
+      Timestamp           10/27/2026 11:25:17 AM
+      Step Count                        5  Switch Count  0
+      
+53         
+54         ods graphics / width=640px height=480px;
+55         title "Smokestack Plot";
+56         title2 "Overlay Multiple Cumulative Curves";
+
+
+57         proc sgplot data=Cumul;
+58         *   where ID^=25559;
+59            series x=Date y=Cumul / group=ID lineattrs=(pattern=solid) curvelabel;
+ERROR: Variable DATE not found.
+ERROR: Variable ID not found.
+60            xaxis grid display=(nolabel);
+                                                           The SAS System
+
+61            yaxis grid label="Cumulative Views" values=(0 to 1000 by 100) valueshint;
+62         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              222.00k
+      OS Memory           9292.00k
+      Timestamp           10/27/2026 11:25:17 AM
+      Step Count                        6  Switch Count  0
+      
+63         
+
+
+64         data Origin;
+65         retain BaseDate;
+66         set Cumul;                 /* start with the cumulative data */
+67         by ID notsorted;           /* use the NOTSORTED option if not sorted by ID */
+68         if first.ID then           /* remember the first day for this ID */
+69            BaseDate = Date;
+70         Day = Date - BaseDate;     /* days since first day */
+71         drop BaseDate;
+72         run;
+
+NOTE: The data set WORK.ORIGIN has 0 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              609.68k
+      OS Memory           10060.00k
+      Timestamp           10/27/2026 11:25:17 AM
+      Step Count                        7  Switch Count  0
+      
+
+73         
+74         title2 "Cumulative Curves with a Common Origin";
+75         proc sgplot data=Origin;
+76            series x=Day y=Cumul / group=ID lineattrs=(pattern=solid) curvelabel;
+ERROR: Variable ID not found.
+77            xaxis grid label="Days Since Publication" values=(0 to 100 by 10) valueshint;
+78            yaxis grid label="Cumulative Views" values=(0 to 1000 by 100) valueshint;
+79         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              220.00k
+      OS Memory           10060.00k
+      Timestamp           10/27/2026 11:25:17 AM
+      Step Count                        8  Switch Count  0
+      
+80         
+81         title2 "Cumulative Curves (log scale)";
+                                                           The SAS System
+
+
+
+82         proc sgplot data=Origin;
+83            where Cumul > 0;
+84            series x=Day y=Cumul / group=ID lineattrs=(pattern=solid) curvelabel;
+ERROR: Variable ID not found.
+85            xaxis grid label="Days Since Publication" values=(0 to 100 by 10) valueshint;
+86            yaxis grid type=log logbase=10     /* LOG10 transformation of axis */
+87                  label="Cumulative Views" values=(100 to 1000 by 100) valueshint;
+88         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              374.46k
+      OS Memory           10060.00k
+      Timestamp           10/27/2026 11:25:17 AM
+      Step Count                        9  Switch Count  0
+      
+89         
+
+
+ERROR: Errors printed on pages 1,2,3,4,5.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.02 seconds
+      user cpu time       0.31 seconds
+      system cpu time     0.40 seconds
+      memory              8572.71k
+      OS Memory           10060.00k
+      Timestamp           10/27/2026 11:25:17 AM
+      Step Count                        9  Switch Count  30
+      

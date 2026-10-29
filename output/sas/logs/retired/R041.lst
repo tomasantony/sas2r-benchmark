@@ -1,0 +1,24 @@
+                                                 Data Read using a Custom Informat
+
+                                                                       Value Read
+                                                          Original        with
+                                                   ID     Value         Informat
+
+                                                  2355    Good              3    
+                                                  5889    2                 2    
+                                                  3878    Excellent         4    
+                                                  4409    Poor              1    
+                                                  0740    Fair              2    
+                                                  2398    Excellent         4    
+                                                  4421    3                 3    
+                                                  7385    Good              3    
+                                                 Data Read using a Custom Informat
+
+                                                        The MEANS Procedure
+
+                                                  Analysis Variable : Evaluation 
+ 
+                                 N            Mean         Std Dev         Minimum         Maximum
+                                 ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                 8       2.7500000       1.0350983       1.0000000       4.0000000
+                                 ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ

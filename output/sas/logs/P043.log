@@ -1,0 +1,329 @@
+1                                                          The SAS System                            11:02 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.84 seconds
+      cpu time            0.56 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P043
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P043 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          
+2          *Form ADaM
+3          Specify Test.
+4          Specify Treatment Variable.
+5          
+6          Flag for Minimal Baseline Value per Subject per Test.
+7          Flag for Maximum Post Baseline Value per Subject per Test.
+8          ULN and LLN ensure ANRLO and ANLHI are unique per Test.
+9          
+10         *Concern: White Paper currently wants both the SI and Conventional Unit Displayed
+11         Option to only show SI or show both SI and CN (Need Multiple Rows per Test)
+12         ;
+13         
+14         data test;
+15         USUBJID = "1"; TRT = "PL"; Base = 10; Post = 30; ULN = 55; LLN =15; output;
+16         USUBJID = "2"; TRT = "PL"; Base = 30; Post = 20; ULN = 55; LLN =15; output;
+17         USUBJID = "3"; TRT = "PL"; Base = 40; Post = 30; ULN = 55; LLN =15; output;
+18         USUBJID = "4"; TRT = "T1"; Base = 60; Post = 50; ULN = 55; LLN =15; output;
+19         USUBJID = "5"; TRT = "T1"; Base = 30; Post = 22; ULN = 55; LLN =15; output;
+20         USUBJID = "6"; TRT = "T1"; Base = 22; Post = 12; ULN = 55; LLN =15; output;
+21         USUBJID = "7"; TRT = "T2"; Base = 39; Post = 38; ULN = 55; LLN =15; output;
+22         USUBJID = "8"; TRT = "T2"; Base = 49; Post = 44; ULN = 55; LLN =15; output;
+23         USUBJID = "9"; TRT = "T2"; Base = 12; Post = 60; ULN = 55; LLN =15; output;
+24         run;
+
+NOTE: The data set WORK.TEST has 9 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              743.50k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        2  Switch Count  0
+      
+
+25         
+26         
+27         libname adam "&root./data/derived/cdisc-pilot/adam-split";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam-split
+28         
+29         DATA ADLBC; SET ADAM.ADLBC;
+30         	WHERE PARAMCD = "SODIUM";
+31         RUN;
+
+NOTE: There were 2052 observations read from the data set ADAM.ADLBC.
+      WHERE PARAMCD='SODIUM';
+NOTE: The data set WORK.ADLBC has 2052 observations and 46 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              983.15k
+      OS Memory           10580.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        3  Switch Count  0
+      
+
+32         DATA START; SET ADLBC;
+33         	*ONLY SUBSET LAST POST BASELINE OBSERVATION;
+34         	WHERE AENTMTFL = "Y" AND AVISITN NE 99;
+35         	KEEP USUBJID TRTAN TRTA PARAMCD PARAM AVAL BASE A1LO A1HI;
+36         RUN;
+
+NOTE: There were 246 observations read from the data set WORK.ADLBC.
+      WHERE (AENTMTFL='Y') and (AVISITN not = 99);
+NOTE: The data set WORK.START has 246 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              996.96k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        4  Switch Count  0
+      
+
+37         
+38         PROC FREQ DATA = START NOPRINT;
+39         	TABLES PARAMCD * A1LO / OUT = LOW;
+40         	TABLES PARAMCD * A1HI / OUT = HIGH;
+41         RUN;
+
+NOTE: There were 246 observations read from the data set WORK.START.
+NOTE: The data set WORK.LOW has 2 observations and 4 variables.
+NOTE: The data set WORK.HIGH has 2 observations and 4 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.08 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1522.87k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        5  Switch Count  0
+      
+
+42         
+43         PROC SORT DATA = LOW; BY PARAMCD DESCENDING COUNT; RUN;
+
+NOTE: There were 2 observations read from the data set WORK.LOW.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.LOW has 2 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              696.62k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        6  Switch Count  0
+      
+
+                                                           The SAS System
+
+44         DATA LOW; SET LOW;
+45         BY PARAMCD DESCENDING COUNT;
+46         IF FIRST.PARAMCD;
+47         CALL SYMPUTX("LLN", A1LO);
+48         RUN;
+
+NOTE: There were 2 observations read from the data set WORK.LOW.
+NOTE: The data set WORK.LOW has 1 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              906.09k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        7  Switch Count  0
+      
+
+49         
+50         PROC SORT DATA = HIGH; BY PARAMCD DESCENDING COUNT; RUN;
+
+NOTE: There were 2 observations read from the data set WORK.HIGH.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.HIGH has 2 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              696.62k
+      OS Memory           11100.00k
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        8  Switch Count  0
+      
+
+51         DATA HIGH; SET HIGH;
+52         BY PARAMCD DESCENDING COUNT;
+53         IF FIRST.PARAMCD;
+54         CALL SYMPUTX("ULN", A1HI);
+55         RUN;
+
+NOTE: There were 2 observations read from the data set WORK.HIGH.
+NOTE: The data set WORK.HIGH has 1 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              901.09k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        9  Switch Count  0
+      
+
+56         
+57         %PUT &LLN;
+135
+58         %PUT &ULN;
+145
+59         
+                                                           The SAS System
+
+60         
+61         *Goal for now is to just do a Single Unit SI or CV as a start;
+62         
+63         proc template;
+64         define statgraph sgdesign;
+65         dynamic _BASE _POST _TRT;
+66         begingraph / designwidth=951 designheight=689 dataskin=none
+67         			DataSymbols = (PLUS circlefilled trianglefilled)
+68         			DataColors=(CXFFA53D CXF7DF54 CXEF6B48 CX61A6E7 CXCB79C8 CX85CE79 CX967CD0 CXDD6475 CX9DAA2D CX6C69D9 CX2EA64A
+68       ! CXC17D35);
+69            entrytitle halign=center 'Figure 11.1 Scatterplot';
+70            entryfootnote halign=left 'LLN ULN ....';
+71         
+72            layout lattice / rowdatarange=data columndatarange=data rowgutter=10 columngutter=10;
+73            layout overlay / wallcolor=CXFFFFFF
+74         						xaxisopts=( griddisplay=on /*linearopts=( viewmin=0.0 viewmax=65.0)*/ label=('Min. Baseline'))
+75         						yaxisopts=( griddisplay=on /*linearopts=( viewmin=0.0 viewmax=65.0)*/ label=('Min. Post Baseline'));
+76         
+77                  scatterplot x=_BASE y=_POST / group=_TRT name='scatter';* markerattrs=(symbol=PLUS  weight=bold);
+78         
+79         		*This will draw 45 Degree Refeence Line;
+80         		drawline x1=0 y1=0 x2=100 y2=100 /
+81                           x1space=wallpercent y1space=wallpercent
+82                           x2space=wallpercent y2space=wallpercent
+83                           lineattrs=GraphReference ;
+84         
+85                  discretelegend 'scatter' / title="Treatment" opaque=false border=false halign=right valign=center
+85       ! displayclipped=true across=1 order=rowmajor location=outside;
+86         
+87                  referenceline y=&ULN / name='href'  yaxis=Y curvelabel='ULN' curvelabelposition=min lineattrs=(color=CX0000FF
+87       ! pattern=SHORTDASH );
+88         		 referenceline y=&LLN / name='href2' yaxis=Y curvelabel='LLN' curvelabelposition=min lineattrs=(color=CXFF0000
+88       ! pattern=SHORTDASH );
+89                  referenceline x=&LLN / name='vref'  xaxis=X curvelabel='LLN' curvelabelposition=min lineattrs=(color=CXFF0000
+89       ! pattern=SHORTDASH );
+90                  referenceline x=&ULN / name='vref2' xaxis=X curvelabel='ULN' curvelabelposition=min lineattrs=(color=CX0000FF
+90       ! pattern=SHORTDASH );
+91         
+92         		
+93               endlayout;
+94            endlayout;
+95         endgraph;
+96         end;
+NOTE: Overwriting existing template/link: Sgdesign
+NOTE: STATGRAPH 'Sgdesign' has been saved to: SASUSER.TEMPLAT
+97         
+98         run;
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              351.84k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 11:02:05 AM
+      Step Count                        10  Switch Count  0
+      
+
+99         
+                                                           The SAS System
+
+100        proc sgrender data=WORK.START template=sgdesign;
+101        dynamic _BASE="BASE" _POST="AVAL" _TRT="TRTA";
+102        run;
+
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P043\SGRender.png.
+NOTE: There were 246 observations read from the data set WORK.START.
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           4.05 seconds
+      user cpu time       0.15 seconds
+      system cpu time     0.34 seconds
+      memory              8847.37k
+      OS Memory           18648.00k
+      Timestamp           10/27/2026 11:02:09 AM
+      Step Count                        11  Switch Count  0
+      
+
+103        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           6.30 seconds
+      user cpu time       0.39 seconds
+      system cpu time     0.90 seconds
+      memory              17300.18k
+      OS Memory           18648.00k
+      Timestamp           10/27/2026 11:02:09 AM
+      Step Count                        11  Switch Count  34
+      

@@ -1,0 +1,194 @@
+/*****************************************************************************
+* Program:    t_lb_shift.sas
+* Purpose:    Table 14.3.4 - Shift Table for Laboratory Parameters
+*             (Baseline to Worst Post-Baseline by NCI-CTCAE Grade)
+* Study:      [STUDYID]
+* Author:     [Programmer Name]
+* Date:       [Date]
+* Input:      adam.adlb, adam.adsl
+* Output:     t_lb_shift.rtf
+* Population: Safety Analysis Set (SAFFL='Y')
+* Notes:      Shift from baseline grade to worst post-baseline grade
+*             Grades: Normal (0), Grade 1, Grade 2, Grade 3, Grade 4
+*****************************************************************************/
+
+%include "&pgmpath./utilities/u_setup.sas";
+%include "&macpath./m_counts.sas";
+%include "&macpath./m_report.sas";
+%include "&pgmpath./utilities/u_titles.sas";
+
+/*--- Step 1: Get Big N ---*/
+%m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+
+/*--- Step 2: Derive baseline and worst post-baseline grades ---*/
+proc sql noprint;
+    create table lb as
+    select a.USUBJID, a.TRTA, a.TRTAN, a.PARAMCD, a.PARAM,
+           a.AVISIT, a.AVISITN,
+           a.ATOXGR,     /* Toxicity grade */
+           a.BTOXGR,     /* Baseline toxicity grade */
+           a.ABLFL, a.ANL01FL
+    from adam.adlb a
+    inner join adam.adsl b on a.USUBJID = b.USUBJID
+    where b.SAFFL = 'Y'
+          and a.PARAMCD in ('ALT', 'AST', 'BILI', 'CREAT', 'HGB', 'WBC', 'PLAT', 'NEUT')
+    order by a.TRTAN, a.PARAMCD, a.USUBJID, a.AVISITN;
+quit;
+
+/*--- Step 3: Get baseline grade per subject per parameter ---*/
+proc sql noprint;
+    create table bl_grade as
+    select distinct USUBJID, TRTA, TRTAN, PARAMCD, PARAM,
+           BTOXGR as bl_grade
+    from lb
+    where ABLFL = 'Y' and BTOXGR ne '';
+quit;
+
+/*--- Step 4: Get worst post-baseline grade ---*/
+proc sql noprint;
+    create table worst_grade as
+    select USUBJID, TRTA, TRTAN, PARAMCD,
+           max(input(ATOXGR, best.)) as worst_grade_n
+    from lb
+    where ABLFL ne 'Y' and ATOXGR ne '' and AVISITN > 0
+    group by USUBJID, TRTA, TRTAN, PARAMCD;
+quit;
+
+data worst_grade2;
+    set worst_grade;
+    length worst_grade $2;
+    worst_grade = strip(put(worst_grade_n, best.));
+    if worst_grade_n = 0 then worst_grade = '0';
+run;
+
+/*--- Step 5: Merge baseline and worst post-baseline ---*/
+proc sql noprint;
+    create table shift as
+    select a.*, b.worst_grade
+    from bl_grade a
+    inner join worst_grade2 b
+    on a.USUBJID = b.USUBJID 
+       and a.PARAMCD = b.PARAMCD
+       and a.TRTA = b.TRTA
+    order by a.TRTAN, a.PARAMCD, a.bl_grade, b.worst_grade;
+quit;
+
+/*--- Step 6: Count subjects in each shift cell ---*/
+proc sql noprint;
+    create table shift_cnt as
+    select TRTA, TRTAN, PARAMCD, PARAM,
+           bl_grade, worst_grade,
+           count(distinct USUBJID) as cnt
+    from shift
+    group by TRTA, TRTAN, PARAMCD, PARAM, bl_grade, worst_grade;
+quit;
+
+/*--- Step 7: Create shift display (one parameter at a time) ---*/
+/* Generate all possible combinations of bl_grade x worst_grade */
+
+data grades;
+    length grade $2;
+    do i = 0 to 4;
+        grade = strip(put(i, best.));
+        output;
+    end;
+    drop i;
+run;
+
+/* Cross-join for all cells */
+proc sql noprint;
+    create table all_cells as
+    select distinct a.TRTA, a.TRTAN, a.PARAMCD, a.PARAM,
+           b.grade as bl_grade,
+           c.grade as worst_grade
+    from shift_cnt a
+    cross join grades b
+    cross join grades c;
+quit;
+
+/* Merge actual counts */
+proc sql noprint;
+    create table shift_full as
+    select a.*, coalesce(b.cnt, 0) as cnt
+    from all_cells a
+    left join shift_cnt b
+    on a.TRTA = b.TRTA and a.PARAMCD = b.PARAMCD
+       and a.bl_grade = b.bl_grade and a.worst_grade = b.worst_grade
+    order by a.TRTAN, a.PARAMCD, a.bl_grade, a.worst_grade;
+quit;
+
+/*--- Step 8: Format and transpose for display ---*/
+/* Transpose worst_grade into columns */
+proc transpose data=shift_full out=shift_t(drop=_name_) prefix=wg;
+    by TRTA TRTAN PARAMCD PARAM bl_grade;
+    id worst_grade;
+    var cnt;
+run;
+
+data report;
+    length bl_label $20;
+    set shift_t;
+    
+    /* Label baseline grades */
+    select(bl_grade);
+        when('0') bl_label = 'Normal';
+        when('1') bl_label = 'Grade 1';
+        when('2') bl_label = 'Grade 2';
+        when('3') bl_label = 'Grade 3';
+        when('4') bl_label = 'Grade 4';
+        otherwise bl_label = bl_grade;
+    end;
+
+    /* Replace missing with 0 */
+    array wgs{*} wg:;
+    do i = 1 to dim(wgs);
+        if wgs{i} = . then wgs{i} = 0;
+    end;
+    
+    /* Row total */
+    total = sum(of wg:);
+    drop i;
+run;
+
+/*--- Step 9: Generate output ---*/
+%set_titles(output=T_LB_SHIFT, population=Safety Analysis Set);
+%ods_on(filename=t_lb_shift);
+
+/* Generate one page per treatment group and parameter */
+%macro print_shift;
+    %do t = 1 %to &ntrt.;
+        proc report data=report(where=(TRTAN=&t.)) nowd split='~'
+            style(report)=[outputwidth=9in]
+            style(header)=[just=center fontweight=bold];
+
+            columns PARAMCD PARAM bl_label wg0 wg1 wg2 wg3 wg4 total;
+
+            define PARAMCD  / order noprint;
+            define PARAM    / order 'Parameter' style(column)=[width=2in fontweight=bold];
+            define bl_label / display 'Baseline~Grade' style(column)=[width=1in];
+            define wg0      / display 'Normal' style(column)=[width=0.8in just=center];
+            define wg1      / display 'Grade 1' style(column)=[width=0.8in just=center];
+            define wg2      / display 'Grade 2' style(column)=[width=0.8in just=center];
+            define wg3      / display 'Grade 3' style(column)=[width=0.8in just=center];
+            define wg4      / display 'Grade 4' style(column)=[width=0.8in just=center];
+            define total    / display 'Total' style(column)=[width=0.8in just=center];
+
+            break after PARAMCD / page;
+
+        run;
+    %end;
+%mend print_shift;
+%print_shift;
+
+footnote4 j=l "Grades based on NCI-CTCAE v[X.X]";
+footnote5 j=l "Shift from baseline grade to worst post-baseline grade.";
+
+%ods_off;
+%clear_titles;
+
+proc datasets lib=work nolist;
+    delete lb bl_grade worst_grade: shift shift_cnt all_cells grades 
+           shift_full shift_t report;
+quit;
+
+%put NOTE: t_lb_shift.sas completed successfully.;

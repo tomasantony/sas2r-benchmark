@@ -1,0 +1,74 @@
+1                                           The SAS System             11:41 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.50 seconds
+      cpu time            0.54 seconds
+      
+1          libname ours1 "D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001";
+NOTE: Libref OURS1 was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001
+2          libname ship1 xport "D:\meta_hackathon\sas2r-agent\output\sas\shipped\P001\adsl.xpt";
+NOTE: Libref SHIP1 was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\shipped\P001\adsl.xpt
+3          options ls=160 ps=300 nodate nonumber;
+4          proc compare base=ship1.adsl compare=ours1.adsl criterion=1e-8 maxprint=(5,50); id USUBJID; run;
+
+WARNING: The requested format could not be applied successfully because the Value Comparison Results report restricts the variable's column width to 9 and this 
+         format requires a larger minimum width.
+WARNING: The requested format could not be applied successfully because the Value Comparison Results report restricts the variable's column width to 9 and this 
+         format requires a larger minimum width.
+NOTE: There were 306 observations read from the data set SHIP1.ADSL.
+NOTE: There were 306 observations read from the data set OURS1.ADSL.
+NOTE: The PROCEDURE COMPARE printed page 1.
+NOTE: PROCEDURE COMPARE used (Total process time):
+      real time           0.06 seconds
+      cpu time            0.04 seconds
+      
+
+5          title "TRTSDTM/TRTEDTM differences in seconds (shipped minus ours)";
+6          data d; merge ship1.adsl(keep=usubjid trtsdtm trtedtm efffl rename=(trtsdtm=s1 trtedtm=e1 efffl=f1)) ours1.adsl(keep=usubjid trtsdtm trtedtm efffl);
+6        ! by usubjid; ds=s1-trtsdtm; de=e1-trtedtm; fdiff=(f1 ne efffl); run;
+
+NOTE: Missing values were generated as a result of performing an operation on missing values.
+      Each place is given by: (Number of times) at (Line):(Column).
+      306 at 6:167   306 at 6:182   
+NOTE: There were 306 observations read from the data set SHIP1.ADSL.
+NOTE: There were 306 observations read from the data set OURS1.ADSL.
+NOTE: The data set WORK.D has 306 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.08 seconds
+      cpu time            0.01 seconds
+      
+
+7          proc freq data=d; tables ds de fdiff / missing; run;
+
+NOTE: There were 306 observations read from the data set WORK.D.
+NOTE: The PROCEDURE FREQ printed page 2.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.06 seconds
+      cpu time            0.00 seconds
+      
+
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.80 seconds
+      cpu time            0.67 seconds
+      

@@ -1,0 +1,307 @@
+1                                                          The SAS System                            10:53 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.75 seconds
+      cpu time            0.59 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R023
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:53:48 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R023 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*----------------------------------------------------------------------------;
+2          Target 32: Subjects who Discontinue
+3          
+4          Annotations
+5          
+6          Dataset: ADSL
+7           Variables: USUBJID, TRTAN, DSREASCD, DSTERM, ITTFL
+8           Record Selection: WHERE ITTFL=Ã¯Â¿Â½YÃ¯Â¿Â½
+9          
+10         Subject ID = USUBJID.
+11          Reason for Discontinuation = DSREASCD.
+12          Textual Reason = DSTERM
+13          Sort by STUDYID and USUBJID.
+14         **---------------------------------------------------------------------------*/
+15         
+16         %let _dd=adsl;
+17         options mlogic mprint;
+18         
+19         
+20         **----------------------------------------------------------------------------;
+21         ** phuse scripathon standard access code;
+22         **----------------------------------------------------------------------------;
+23         *filename source "&rawadam./adsl.xpt" ;
+24         
+25         %* modification 2019-12-23 - update path as data has been moved, still not working as variables are not in ADSL;
+26         
+27         filename source "&rawadam./&_dd..xpt";
+28         libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+29         
+30         
+31         **----------------------------------------------------------------------------;
+32         ** test print;
+33         **----------------------------------------------------------------------------;
+34         proc contents data=source.&_dd;
+35         run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              686.40k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:48 AM
+      Step Count                        2  Switch Count  0
+      
+NOTE: The PROCEDURE CONTENTS printed pages 1-2.
+
+36         
+37         data work.adsl ;
+38         set source.adsl ;
+39         keep usubjid ;
+40         run ;
+
+                                                           The SAS System
+
+NOTE: There were 254 observations read from the data set SOURCE.ADSL.
+NOTE: The data set WORK.ADSL has 254 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              856.81k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:53:48 AM
+      Step Count                        3  Switch Count  0
+      
+
+41         proc print data=work.adsl ;
+42         title1 "A test of accessing datasets from the PhUSE Code Repository" ;
+43         run ;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: The PROCEDURE PRINT printed pages 3-7.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              323.65k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:53:48 AM
+      Step Count                        4  Switch Count  0
+      
+
+44         
+45         
+46         %macro stdrep;
+47         
+48         
+49         
+50         
+51         
+52         **----------------------------------------------------------------------------;
+53         ** input patient population;
+54         **----------------------------------------------------------------------------;
+55         %let _it = Y /*Y=Randomized*/ /*blank=Enrolled*/;
+56         %if "%upcase(&_it)"="Y"
+57            %then %let _pp = Randomized;
+58            %else %let _pp = Enrolled;
+59         
+60         
+61         **----------------------------------------------------------------------------;
+62         ** input user specified titles;
+63         **----------------------------------------------------------------------------;
+64         %let _tt1 = %str(Listing 7.1  &_pp Subjects who Discontinue due to Physician Decision,);
+65         %let _tt2 = %str(Withdrawal by Subject, Withdrawal by Parent/Guardian, or Other);
+66         %let _tt3 = %str(Study: London 2014 Script-athon);
+67         
+68         
+69         **----------------------------------------------------------------------------;
+70         ** select and sort data for reporting;
+71         **----------------------------------------------------------------------------;
+72         proc sql;
+73            create table _rp as
+                                                           The SAS System
+
+74            select USUBJID
+75                  ,TRTAN
+76                  ,DSREASCD
+77                  ,DSTERM
+78                  ,ITTFL
+79            from source.&_dd
+80            %if "%upcase(&_it)"="Y" %then %do; where ITTFL='Y'; %end;
+81            ;
+82         run;
+83         quit;
+84         
+85         
+86         **----------------------------------------------------------------------------;
+87         ** report;
+88         **----------------------------------------------------------------------------;
+89         options missing=''  formchar='|____|+|___+=|_/\<>*';
+90         
+91         proc report data=_rp nowd headline headskip missing split='?' spacing=2 list;
+92         
+93            column TRTAN USUBJID DSREASCD DSTERM;
+94            by TRTAN;
+95         
+96            define TRTAN   /order order=internal noprint;
+97            define USUBJID /display width=15 'Subject?ID';
+98            define DSREASCD/display width=30 'Reason for?Discontinuation';
+99            define DSTERM  /display width=30 'Textual Reason';
+100        
+101           compute before TRTAN;
+102              put 'Treatment: #TRTAN#';
+103        	  put line;
+104           endcomp;
+105        run;
+106        
+107        %endmac:
+108        
+109        %mend stdrep;
+110        
+111        **----------------------------------------------------------------------------;
+112        **;
+113        **----------------------------------------------------------------------------;
+114        %stdrep;
+MLOGIC(STDREP):  Beginning execution.
+MPRINT(STDREP):   **----------------------------------------------------------------------------;
+MPRINT(STDREP):   ** input patient population;
+MPRINT(STDREP):   **----------------------------------------------------------------------------;
+MLOGIC(STDREP):  %LET (variable name is _IT)
+MLOGIC(STDREP):  %IF condition "%upcase(&_it)"="Y" is TRUE
+MLOGIC(STDREP):  %LET (variable name is _PP)
+MPRINT(STDREP):   **----------------------------------------------------------------------------;
+MPRINT(STDREP):   ** input user specified titles;
+MPRINT(STDREP):   **----------------------------------------------------------------------------;
+MLOGIC(STDREP):  %LET (variable name is _TT1)
+MLOGIC(STDREP):  %LET (variable name is _TT2)
+MLOGIC(STDREP):  %LET (variable name is _TT3)
+MPRINT(STDREP):   **----------------------------------------------------------------------------;
+MPRINT(STDREP):   ** select and sort data for reporting;
+MPRINT(STDREP):   **----------------------------------------------------------------------------;
+MPRINT(STDREP):   proc sql;
+                                                           The SAS System
+
+MLOGIC(STDREP):  %IF condition "%upcase(&_it)"="Y" is TRUE
+MPRINT(STDREP):   create table _rp as select USUBJID ,TRTAN ,DSREASCD ,DSTERM ,ITTFL from source.adsl where ITTFL='Y';
+ERROR: The following columns were not found in the contributing tables: DSREASCD, DSTERM, TRTAN.
+NOTE: PROC SQL set option NOEXEC and will continue to check the syntax of statements.
+MPRINT(STDREP):   ;
+NOTE: PROC SQL statements are executed immediately; The RUN statement has no effect.
+MPRINT(STDREP):   run;
+MPRINT(STDREP):   quit;
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5383.78k
+      OS Memory           15448.00k
+      Timestamp           10/27/2026 10:53:48 AM
+      Step Count                        5  Switch Count  0
+      
+MPRINT(STDREP):   **----------------------------------------------------------------------------;
+MPRINT(STDREP):   ** report;
+MPRINT(STDREP):   **----------------------------------------------------------------------------;
+MPRINT(STDREP):   options missing='' formchar='|____|+|___+=|_/\<>*';
+
+
+ERROR: File WORK._RP.DATA does not exist.
+MPRINT(STDREP):   proc report data=_rp nowd headline headskip missing split='?' spacing=2 list;
+MPRINT(STDREP):   column TRTAN USUBJID DSREASCD DSTERM;
+MPRINT(STDREP):   by TRTAN;
+ERROR: No data set open to look up variables.
+MPRINT(STDREP):   define TRTAN /order order=internal noprint;
+MPRINT(STDREP):   define USUBJID /display width=15 'Subject?ID';
+MPRINT(STDREP):   define DSREASCD/display width=30 'Reason for?Discontinuation';
+MPRINT(STDREP):   define DSTERM /display width=30 'Textual Reason';
+MPRINT(STDREP):   compute before TRTAN;
+MPRINT(STDREP):   put 'Treatment: #TRTAN#';
+MPRINT(STDREP):   put line;
+MPRINT(STDREP):   endcomp;
+MPRINT(STDREP):   run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              111.25k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:53:48 AM
+      Step Count                        6  Switch Count  0
+      
+MLOGIC(STDREP):  Ending execution.
+
+
+ERROR: Errors printed on page 5.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.98 seconds
+      user cpu time       0.39 seconds
+                                                           The SAS System
+
+      system cpu time     0.35 seconds
+      memory              13863.59k
+      OS Memory           15448.00k
+      Timestamp           10/27/2026 10:53:48 AM
+      Step Count                        6  Switch Count  24
+      

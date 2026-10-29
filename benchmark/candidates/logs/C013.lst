@@ -1,0 +1,48 @@
+                                              Crew Hire Dates with Custom Date Format
+
+                                          Obs    FirstName      LastName        HireDate
+
+                                            1    SALLY          BEAUMONT       07~NOV~1992
+                                            2    CHRISTOPHER    BERGAMASCO     12~MAY~1985
+                                            3    BARBARA-ANN    BETHEA         04~AUG~1988
+                                            4    ROBERT         BJURSTROM      22~APR~1987
+                                            5    SUSAN          BONDS          23~SEP~1982
+                                            6    TERESA         CHANG          03~APR~1994
+                                            7    JOANN          CHOPRA         31~MAR~1993
+                                            8    ANNETTE        CHRISTENSEN    12~MAY~1983
+                                            9    JOHN           CHRISTIAN      15~JAN~1982
+                                           10    DOUGLAS        CIAMPA         13~JAN~1984
+                                           11    JOHN           CLAYTON        12~OCT~1986
+                                           12    WILLIAM        DIELEMAN       26~NOV~1983
+                                           13    DANIEL         DOWELL         09~FEB~1994
+                                           14    JOANNE         DOWTY          05~JUL~1983
+                                           15    KENNETH        EATON          05~JUL~1993
+                                           16    ANITA          EHRISMAN       26~JAN~1984
+                                           17    KAREN          ELAM           26~FEB~1986
+                                           18    GREGORY        ELLIS          23~FEB~1981
+                                           19    ROBERT         EUNICE         15~APR~1994
+                                           20    LISA           FEENSTRA       04~APR~1993
+                                               Crew Hire Dates with Text/Date Format
+
+                                Obs    FirstName      LastName                  HireDate
+
+                                  1    SALLY          BEAUMONT       November during Merger Process
+                                  2    CHRISTOPHER    BERGAMASCO                         Pre-Merger
+                                  3    BARBARA-ANN    BETHEA                             Pre-Merger
+                                  4    ROBERT         BJURSTROM                          Pre-Merger
+                                  5    SUSAN          BONDS                              Pre-Merger
+                                  6    TERESA         CHANG                             Post-Merger
+                                  7    JOANN          CHOPRA         March during Merger Process   
+                                  8    ANNETTE        CHRISTENSEN                        Pre-Merger
+                                  9    JOHN           CHRISTIAN                          Pre-Merger
+                                 10    DOUGLAS        CIAMPA                             Pre-Merger
+                                 11    JOHN           CLAYTON                            Pre-Merger
+                                 12    WILLIAM        DIELEMAN                           Pre-Merger
+                                 13    DANIEL         DOWELL                            Post-Merger
+                                 14    JOANNE         DOWTY                              Pre-Merger
+                                 15    KENNETH        EATON                             Post-Merger
+                                 16    ANITA          EHRISMAN                           Pre-Merger
+                                 17    KAREN          ELAM                               Pre-Merger
+                                 18    GREGORY        ELLIS                              Pre-Merger
+                                 19    ROBERT         EUNICE                            Post-Merger
+                                 20    LISA           FEENSTRA                          Post-Merger

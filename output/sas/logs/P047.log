@@ -1,0 +1,416 @@
+1                                                          The SAS System                            10:53 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.02 seconds
+      cpu time            0.65 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P047
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P047 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*soh********************************************************************************************
+2             CODE NAME         : target4.sas
+3             DESCRIPTION       : Reference SAS program for target 4
+4             SOFTWARE/VERSION# : SAS V9
+5             INPUT             : http://phuse-scripts.googlecode.com/svn/trunk/scriptathon2014/data/advs.xpt
+6          --------------------------------------------------------------------------------------------------
+7             Author:    P. Chen
+8             Notes from Author:
+9               1. This is just a test version reference code, may need to be validated before using.
+10              2. In many cases, one may wish to use LSEMAN instead of the MEAN, other produces
+11                 (For example: PROC MIXED) could be used to calculate lsmeans in data step. The code for plot part
+12                 should only require very minor changes.
+13              3. A BANDPLOT statement can be added to the reference code to draw the shaded "Normal Range" area
+14                 in the background based on your data and your requirement.
+15         **eoh**********************************************************************************************/
+16         options  NOCENTER MPRINT ;
+17         
+18         %* modification 2019-12-23 - update path as data has been moved;
+19         
+20         filename source "&rawadam./advs.xpt" ;
+21         libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advs.xpt
+22         
+23         /*read in ADVS data with selected variables and obs*/
+24         data advs ;
+25         set source.advs ;
+26         where PARAMCD="DIABP" and ATPTN=815 and ANL01FL='Y' and .<avisitn<99 AND SAFFL='Y';
+27         KEEP usubjid trtpn ANL01FL PARAM PARAMCD avisit avisitn ATPTN SAFFL aval;
+28         run;
+
+NOTE: There were 1800 observations read from the data set SOURCE.ADVS.
+      WHERE (PARAMCD='DIABP') and (ATPTN=815) and (ANL01FL='Y') and (avisitn>. and avisitn<99) and (SAFFL='Y');
+NOTE: The data set WORK.ADVS has 1800 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.09 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.01 seconds
+      memory              904.71k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        2  Switch Count  0
+      
+
+29         
+30         
+31         /*take a look at the ADVS data with selected variables and obs*/
+32         proc contents data=advs;
+33         run;
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              845.71k
+The SAS System
+
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        3  Switch Count  0
+      
+NOTE: The PROCEDURE CONTENTS printed page 1.
+
+34         
+35         proc freq data=advs;
+36         tables trtpn Avisit*avisitn aval/list;
+37         run;
+
+NOTE: There were 1800 observations read from the data set WORK.ADVS.
+NOTE: The PROCEDURE FREQ printed pages 2-4.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.14 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1846.15k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        4  Switch Count  0
+      
+
+38         
+39         
+40         /*produce summary statistics of aval by avisitn and trtpn*/
+41         proc sort data=advs;
+42         by trtpn avisitn;
+43         run;
+
+NOTE: There were 1800 observations read from the data set WORK.ADVS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADVS has 1800 observations and 10 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1802.56k
+      OS Memory           12900.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        5  Switch Count  0
+      
+
+44         
+45         PROC MEANS DATA=advs NOPRINT;
+46         BY trtpn avisitn avisit;
+47         VAR aval;
+48         OUTPUT OUT=temp N=n MEAN=mean
+49         STDERR=stderr LCLM=lclm UCLM=uclm ;
+50         RUN ;
+
+NOTE: There were 1800 observations read from the data set WORK.ADVS.
+NOTE: The data set WORK.TEMP has 30 observations and 10 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1667.71k
+The SAS System
+
+      OS Memory           12380.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        6  Switch Count  0
+      
+
+51         
+52         
+53         /*If you want to calculate Confidence Intervals and be 100% confident that your 95% confidence interval of
+54         Mean is correct, it is best that you get your N, Mean and Standard error by any one of the procedures in SAS and
+55         then use the TINV function to calculate the Confidence Interval.*/
+56         DATA temp1 ;
+57         SET temp ;
+58         lo = mean - ( TINV ( 0.95 , n-1 ) * stderr ) ;
+59         hi = mean + ( TINV ( 0.95 , n-1 ) * stderr ) ;
+60         drop _TYPE_  _FREQ_  lclm     uclm stderr;
+61         RUN;
+
+NOTE: There were 30 observations read from the data set WORK.TEMP.
+NOTE: The data set WORK.TEMP1 has 30 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              908.62k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        7  Switch Count  0
+      
+
+62         
+63         
+64         /*format the data for plot -- there many other ways to do this*/
+65         data a b c;
+66         set temp1;
+67         if trtpn=0 then output a;
+68         else if trtpn=54 then output b;
+69         else if trtpn=81 then output c;
+70         run;
+
+NOTE: There were 30 observations read from the data set WORK.TEMP1.
+NOTE: The data set WORK.A has 10 observations and 7 variables.
+NOTE: The data set WORK.B has 10 observations and 7 variables.
+NOTE: The data set WORK.C has 10 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              937.18k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        8  Switch Count  0
+      
+
+71         
+72         data a1;
+73         set a;
+74         rename n=a_n   mean=a_mean lo=a_lcl hi=a_ucl;
+75         run;
+The SAS System
+
+
+NOTE: There were 10 observations read from the data set WORK.A.
+NOTE: The data set WORK.A1 has 10 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              933.37k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        9  Switch Count  0
+      
+
+76         
+77         data b1;
+78         set b;
+79         rename n=b_n   mean=b_mean lo=b_lcl hi=b_ucl;
+80         run;
+
+NOTE: There were 10 observations read from the data set WORK.B.
+NOTE: The data set WORK.B1 has 10 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              886.59k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        10  Switch Count  0
+      
+
+81         
+82         data c1;
+83         set c;
+84         rename n=c_n   mean=c_mean lo=c_lcl hi=c_ucl;
+85         run;
+
+NOTE: There were 10 observations read from the data set WORK.C.
+NOTE: The data set WORK.C1 has 10 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              886.59k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        11  Switch Count  0
+      
+
+86         
+87         data all;
+88         merge a1 b1 c1;
+89         by avisitn avisit;
+90         rename avisitn=xc avisit=x;
+91         drop trtpn;
+92         label a_mean=0 b_mean=54 c_mean=81 ;
+92       !                    ;
+93         run;
+The SAS System
+
+
+INFO: The variable TRTPN on data set WORK.A1 will be overwritten by data set WORK.B1.
+INFO: The variable TRTPN on data set WORK.A1 will be overwritten by data set WORK.C1.
+INFO: The variable TRTPN on data set WORK.B1 will be overwritten by data set WORK.C1.
+NOTE: There were 10 observations read from the data set WORK.A1.
+NOTE: There were 10 observations read from the data set WORK.B1.
+NOTE: There were 10 observations read from the data set WORK.C1.
+NOTE: The data set WORK.ALL has 10 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1203.15k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        12  Switch Count  0
+      
+
+94         
+95         
+96         /* Create the template for the graph*/
+97         /* Used a sample program on SAS web site as reference*/
+98         proc template;
+99         define statgraph dbp_profile;
+100        dynamic title;
+101        begingraph / designwidth=17in designheight=14.5in;
+102        entrytitle title;
+103        layout lattice / columndatarange=union rowweights=(0.8 .05 .05 .05 .05);
+104        layout overlay / cycleattrs=true yaxisopts=(label='Mean(unit)with 95% CI' griddisplay=on)
+105        xaxisopts=(label='Weeks Since Randomized' offsetmin=0.05 offsetmax=0.05
+106        linearopts=(tickvaluelist=(0 2 4 6 8 10 12 16 20 24 26)));
+107        scatterplot x=eval(xc-0.05) y=a_mean / yerrorlower=a_lcl yerrorupper=a_ucl name='as'
+108                                                        markerattrs=graphdata2(size=9px weight=bold)
+109                                                        errorbarattrs=graphdata2(pattern=solid thickness=2);
+110        scatterplot x=eval(xc+0.05) y=b_mean / yerrorlower=b_lcl yerrorupper=b_ucl name='bs'
+111                                                        markerattrs=graphdata3(size=9px weight=bold)
+112                                                        errorbarattrs=graphdata3(pattern=solid thickness=2);
+113        scatterplot x=eval(xc+0.15) y=c_mean / yerrorlower=c_lcl yerrorupper=c_ucl name='cs'
+114                                                        markerattrs=graphdata4(size=9px weight=bold)
+115                                                        errorbarattrs=graphdata4(pattern=solid thickness=2);
+116        seriesplot x=eval(xc-0.05) y=a_mean / lineattrs=graphdata2(pattern=shortdash thickness=2px) name='al';
+117        seriesplot x=eval(xc+0.05) y=b_mean / lineattrs=graphdata3(pattern=mediumdash thickness=2px) name='bl';
+118        seriesplot x=eval(xc+0.15) y=c_mean / lineattrs=graphdata4(pattern=dash thickness=2px) name='cl';
+119        endlayout;
+120        layout overlay;
+121        entry halign=left 'At Risk Subjects';
+122        endlayout;
+123        blockplot x=xc block=c_n / display=(values label) valuehalign=center label='81' repeatedvalues=true
+124                                             valueattrs=graphdata4 labelattrs=graphdata4;
+125        blockplot x=xc block=b_n / display=(values label) valuehalign=center label='54' repeatedvalues=true
+126                                             valueattrs=graphdata3 labelattrs=graphdata3;
+127        blockplot x=xc block=a_n / display=(values label) valuehalign=center label='0' repeatedvalues=true
+128                                             valueattrs=graphdata2 labelattrs=graphdata2;
+129        idebar / spacefill=false;
+           ______
+           1
+WARNING 1-322: Assuming the symbol SIDEBAR was misspelled as idebar.
+130        discretelegend  'al' 'bl' 'cl' / title='Treatment Group: ' across=3;
+The SAS System
+
+131        endsidebar;
+132        endlayout;
+133        endgraph;
+134        end;
+NOTE: Overwriting existing template/link: Dbp_profile
+NOTE: STATGRAPH 'Dbp_profile' has been saved to: SASUSER.TEMPLAT
+135        run;
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              397.15k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:34 AM
+      Step Count                        13  Switch Count  0
+      
+
+137        /* Output graphs!! */
+138        ods listing close;
+139        ods html image_dpi=100 file='DBP_Profile.html' path='.';
+NOTE: Writing HTML Body file: DBP_Profile.html
+140        ods graphics / reset noborder width=600px height=400px
+141                       imagename='ClinicalHandout_DbpProfile' imagefmt=gif noscale;
+143        proc sgrender data=all template=dbp_profile;
+144        dynamic title="Mean of DBP Measures by Treatment: Profile Over Time (Weeks Since Randomized)";
+145        run;
+
+NOTE: There were 10 observations read from the data set WORK.ALL.
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           5.51 seconds
+      user cpu time       0.23 seconds
+      system cpu time     0.56 seconds
+      memory              9502.90k
+      OS Memory           24180.00k
+      Timestamp           10/27/2026 10:53:42 AM
+      Step Count                        14  Switch Count  0
+      
+
+147        ods html close;
+148        ods listing;
+149        
+150        
+151        
+152        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           10.29 seconds
+      user cpu time       0.95 seconds
+      system cpu time     1.53 seconds
+      memory              22197.65k
+      OS Memory           24180.00k
+      Timestamp           10/27/2026 10:53:42 AM
+      Step Count                        14  Switch Count  40
+      

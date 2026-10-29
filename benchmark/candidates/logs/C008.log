@@ -1,0 +1,166 @@
+1                                                          The SAS System                            11:19 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.71 seconds
+      cpu time            0.54 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /************************************************************************************************
+2           USING FUNCTIONS TO CREATE FORMATS
+3               This program creates a FORMAT based on functions created by PROC FCMP.
+4               Keywords: PROC FORMAT, PROC FCMP, FORMAT, VALUE
+5               SAS Versions: SAS 9, SAS Viya
+6               Documentation:
+6        ! https://documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=default&docsetId=proc&docsetTarget=p1xidhqypi0fnwn1if8opjpqpbmn
+6        ! .htm
+7               1. Use PROC FCMP to create two new functions, START and END.
+8               2. The START function will take a date as its argument and from that date will go to the beginning of the week
+9                  and then go forward to the next Monday (day 2 of the week.)
+10              3. The END function will go to the end of the next week, a Saturday. One is subtracted from the result so that the
+11                 End function returns a Friday.
+12              4. The options statement tells SAS where to look for the new functions.
+13              5. The VALUE statements in PROC FORMAT first identifies the name of the new format. The keyword OTHER tells SAS
+14                 to apply the format to all nonmissing values.
+15              6. The square brackets surround the function to be used to define the format. In the start format the START function
+16                 is used so that any date will be labeled as the Monday of the week of the date.
+17              7. Similarly the end format uses the END function to label the date as the next Friday.
+18              8. Create data that includes dates to which the formats can be applied.
+19              9. In the PROC REPORT apply the format to see the results.
+20         ************************************************************************************************/
+                                                           The SAS System
+
+21         
+22         proc fcmp outlib=work.functions.DateType;/*1*/
+23            function START(Date) $ 9;/*2*/
+24               dt=intnx('week.2', Date, 0);/*3*/
+25               return(put(dt,date9.));
+26            endsub;
+27            function END(Date) $ 9;
+28               dt=intnx('week.7', Date, 1) - 1;
+29               return(put(dt,date9.));
+30            endsub;
+31         quit;
+
+NOTE: Function END saved to work.functions.DateType.
+NOTE: Function START saved to work.functions.DateType.
+NOTE: PROCEDURE FCMP used (Total process time):
+      real time           0.09 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              1801.40k
+      OS Memory           10576.00k
+      Timestamp           10/27/2026 11:19:59 AM
+      Step Count                        1  Switch Count  0
+      
+
+32         
+33         options cmplib=work.functions;/*4*/
+34         
+35         proc format;
+35       !             /*5*/
+36            value start other=[start()];
+NOTE: Format START has been output.
+36       !                                /*6*/
+37            value end other=[end()];
+NOTE: Format END has been output.
+37       !                             /*7*/
+38         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              148.93k
+      OS Memory           10320.00k
+      Timestamp           10/27/2026 11:19:59 AM
+      Step Count                        2  Switch Count  0
+      
+
+39         
+40         data orders;/*8*/
+41            infile cards;
+42            input CustomerID DeliveryDate : date9. OrderID;
+43            cards;
+
+NOTE: The data set WORK.ORDERS has 10 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+                                                           The SAS System
+
+      memory              990.18k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 11:19:59 AM
+      Step Count                        3  Switch Count  0
+      
+
+54         ;
+55         run;
+56         
+57         proc report data=orders nowd;/*9*/
+58          columns CustomerID OrderID DeliveryDate ('Expected Delivery Between' DeliveryDate=DD1 DeliveryDate=DD2);
+59          define CustomerID / order 'Customer ID/' ;
+60          define OrderID / 'Order ID/' format=10.;
+61          define DeliveryDate / display 'Actual Delivery' format=weekdate.;
+62          define DD1 / display 'Start'  format=start12.;
+63          define DD2 / display 'End' format=end12.;
+64          title 'Expected Delivery for Current Orders';
+65         run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 10 observations read from the data set WORK.ORDERS.
+NOTE: The PROCEDURE REPORT printed page 1.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.08 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              10086.46k
+      OS Memory           21100.00k
+      Timestamp           10/27/2026 11:19:59 AM
+      Step Count                        4  Switch Count  0
+      
+
+66         
+67         title;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.07 seconds
+      user cpu time       0.35 seconds
+      system cpu time     0.40 seconds
+      memory              18576.40k
+      OS Memory           21100.00k
+      Timestamp           10/27/2026 11:19:59 AM
+      Step Count                        4  Switch Count  20
+      

@@ -1,0 +1,181 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              213.50k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        109  Switch Count  0
+      
+
+1440       %let pid = P005; %let outds = &root./output/sas/datasets/P005; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P005
+1441       %put NOTE: ===== pipeline c2c: P005 P005_adam_adlb.sas =====;
+NOTE: ===== pipeline c2c: P005 P005_adam_adlb.sas =====
+1442       %let _bench_t0 = %sysfunc(datetime());
+1443       %include "&root./programs/sas_run/P005_adam_adlb.sas";
+
+NOTE: Input data set is already sorted; it has been copied to the output data set.
+                                                           The SAS System
+
+NOTE: There were 50 observations read from the data set ADAM.ADSL.
+NOTE: The data set WORK.ADSL_SORTED has 50 observations and 17 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              431.12k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        110  Switch Count  0
+      
+
+
+NOTE: There were 516 observations read from the data set SDTM.LB.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.LB_SORTED has 516 observations and 15 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1263.90k
+      OS Memory           17256.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        111  Switch Count  0
+      
+
+
+INFO: The variable STUDYID on data set WORK.ADSL_SORTED will be overwritten by data set WORK.LB_SORTED.
+NOTE: There were 50 observations read from the data set WORK.ADSL_SORTED.
+NOTE: There were 516 observations read from the data set WORK.LB_SORTED.
+NOTE: The data set WORK.ADLB_DRAFT has 516 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1157.81k
+      OS Memory           16736.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        112  Switch Count  0
+      
+
+
+NOTE: There were 168 observations read from the data set WORK.ADLB_DRAFT.
+      WHERE (ASTDT<=TRTSDT) and (not MISSING(AVAL));
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADLB_BASE_CANDIDATES has 168 observations and 16 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1290.93k
+      OS Memory           17256.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        113  Switch Count  0
+      
+
+
+NOTE: There were 168 observations read from the data set WORK.ADLB_BASE_CANDIDATES.
+                                                           The SAS System
+
+NOTE: The data set WORK.BASE_FLAGS has 168 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              915.78k
+      OS Memory           16480.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        114  Switch Count  0
+      
+
+
+NOTE: There were 516 observations read from the data set WORK.ADLB_DRAFT.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADLB_DRAFT has 516 observations and 16 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              747.87k
+      OS Memory           16740.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        115  Switch Count  0
+      
+
+
+NOTE: There were 516 observations read from the data set WORK.ADLB_DRAFT.
+NOTE: There were 168 observations read from the data set WORK.BASE_FLAGS.
+NOTE: The data set ADAM.ADLB has 516 observations and 20 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1148.71k
+      OS Memory           16736.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        116  Switch Count  0
+      
+
+
+NOTE: There were 516 observations read from the data set ADAM.ADLB.
+NOTE: SAS sort was used.
+NOTE: The data set ADAM.ADLB has 516 observations and 20 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              752.81k
+      OS Memory           16740.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        117  Switch Count  0
+      
+
+
+NOTE: There were 15 observations read from the data set ADAM.ADLB.
+NOTE: The PROCEDURE PRINT printed page 11.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              482.65k
+      OS Memory           16224.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        118  Switch Count  0
+      
+
+1585       %_bench_capture;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5190.62k
+      OS Memory           21348.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        119  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying ADAM.ADLB to OUTDS.ADLB (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 516 observations read from the data set ADAM.ADLB.
+NOTE: The data set OUTDS.ADLB has 516 observations and 20 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              693.96k
+      OS Memory           16736.00k
+      Timestamp           10/27/2026 03:58:44 PM
+      Step Count                        120  Switch Count  0
+      
+
+NOTE: benchmark capture: 1 permanent dataset(s) copied to outds (ADAM ADLB)
+1586       proc printto; run;
+

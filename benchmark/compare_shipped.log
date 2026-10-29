@@ -1,0 +1,124 @@
+1                                           The SAS System             11:40 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.29 seconds
+      cpu time            0.53 seconds
+      
+1          libname ours1 "D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001";
+NOTE: Libref OURS1 was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001
+2          libname ship1 xport "D:\meta_hackathon\sas2r-agent\output\sas\shipped\P001\adsl.xpt";
+NOTE: Libref SHIP1 was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\shipped\P001\adsl.xpt
+3          libname ours3 "D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam";
+NOTE: Libref OURS3 was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+4          libname ship3 xport "D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adae.xpt";
+NOTE: Libref SHIP3 was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adae.xpt
+5          libname oursw_a "D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\adam";
+NOTE: Libref OURSW_A was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\adam
+6          libname oursw_s "D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\sdtm";
+NOTE: Libref OURSW_S was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\sdtm
+7          libname shipw_a "D:\meta_hackathon\sas2r-agent\data\raw\wxzhai-portfolio\adam\data";
+NOTE: Libref SHIPW_A was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\wxzhai-portfolio\adam\data
+8          libname shipw_s "D:\meta_hackathon\sas2r-agent\data\raw\wxzhai-portfolio\sdtm\data";
+NOTE: Libref SHIPW_S was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\wxzhai-portfolio\sdtm\data
+9          options ls=200 ps=500 nodate nonumber;
+10         %macro cmp(id, base, comp, by=);
+11           title "===== &id: base=shipped &base  compare=ours &comp =====";
+12           proc compare base=&base compare=&comp criterion=1e-8 brief maxprint=(10,200) %if %length(&by) %then listvar;;
+13             %if %length(&by) %then %do; id &by; %end;
+14           run;
+15         %mend;
+16         %cmp(P001_ADSL, ship1.adsl, ours1.adsl, by=USUBJID);
+
+WARNING: The requested format could not be applied successfully because the Value Comparison Results report restricts the variable's column width to 9 and this format requires a larger minimum width.
+WARNING: The requested format could not be applied successfully because the Value Comparison Results report restricts the variable's column width to 9 and this format requires a larger minimum width.
+NOTE: There were 306 observations read from the data set SHIP1.ADSL.
+NOTE: There were 306 observations read from the data set OURS1.ADSL.
+NOTE: The PROCEDURE COMPARE printed page 1.
+NOTE: PROCEDURE COMPARE used (Total process time):
+      real time           0.05 seconds
+      cpu time            0.04 seconds
+      
+
+17         %cmp(P002_ADAE, ship3.adae, ours3.adae, by=USUBJID AESEQ);
+
+NOTE: There were 1191 observations read from the data set SHIP3.ADAE.
+NOTE: There were 1191 observations read from the data set OURS3.ADAE.
+NOTE: The PROCEDURE COMPARE printed page 2.
+NOTE: PROCEDURE COMPARE used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+18         %cmp(P064_ADLB, shipw_a.adlb, oursw_a.adlb);
+NOTE: Data file SHIPW_A.ADLB.DATA is in a format that is native to another host, or the file encoding does not match the session encoding. Cross Environment Data Access will be used, which might 
+      require additional CPU resources and might reduce performance.
+
+NOTE: There were 14 observations read from the data set SHIPW_A.ADLB.
+NOTE: There were 14 observations read from the data set OURSW_A.ADLB.
+NOTE: The PROCEDURE COMPARE printed page 3.
+NOTE: PROCEDURE COMPARE used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+19         %cmp(P065_ADLB_QC, shipw_a.adlb_qc, oursw_a.adlb_qc);
+NOTE: Data file SHIPW_A.ADLB_QC.DATA is in a format that is native to another host, or the file encoding does not match the session encoding. Cross Environment Data Access will be used, which might 
+      require additional CPU resources and might reduce performance.
+
+NOTE: There were 14 observations read from the data set SHIPW_A.ADLB_QC.
+NOTE: There were 14 observations read from the data set OURSW_A.ADLB_QC.
+NOTE: The PROCEDURE COMPARE printed page 4.
+NOTE: PROCEDURE COMPARE used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.00 seconds
+      
+
+20         %cmp(P067_AE, shipw_s.ae, oursw_s.ae);
+NOTE: Data file SHIPW_S.AE.DATA is in a format that is native to another host, or the file encoding does not match the session encoding. Cross Environment Data Access will be used, which might 
+      require additional CPU resources and might reduce performance.
+
+NOTE: There were 4 observations read from the data set SHIPW_S.AE.
+NOTE: There were 4 observations read from the data set OURSW_S.AE.
+NOTE: The PROCEDURE COMPARE printed page 5.
+NOTE: PROCEDURE COMPARE used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.50 seconds
+      cpu time            0.70 seconds
+      

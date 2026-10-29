@@ -1,0 +1,25 @@
+                                                          nmiss of TRTSDTM/TRTEDTM: shipped then ours
+
+                                                                      The MEANS Procedure
+
+                                             Variable    Label                                    N          N Miss
+                                             ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                             TRTSDTM     Datetime of First Exposure             254              52
+                                             TRTEDTM     Datetime of Last Exposure              252              54
+                                             ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                                          nmiss of TRTSDTM/TRTEDTM: shipped then ours
+
+                                                                      The MEANS Procedure
+
+                                                                                                         N
+                                                     Variable    Label                           N    Miss
+                                                     ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                                     TRTSDTM     Datetime of First Exposure      0     306
+                                                     TRTEDTM     Datetime of Last Exposure       0     306
+                                                     ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                                                    EFFFL differing subjects
+
+                                               Obs    USUBJID                 SAFFL    ITTFL    F_SHIP    f_ours
+
+                                                1     01-701-1047               Y        Y        N         Y   
+                                                2     01-704-1025               Y        Y        N         Y   

@@ -1,0 +1,188 @@
+1                                                          The SAS System                            11:22 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.60 seconds
+      cpu time            0.49 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the article
+2             "A CUSUM test for autregressive models"
+3             by Rick Wicklin, published 24APR2019 on The DO Loop blog:
+4             https://blogs.sas.com/content/iml/2019/04/24/cusum-test-autregressive-models.html
+5          
+6             This program shows how to use PROC AUTOREG in SAS to generate CUSUM
+7             charts for recursive residuals. You can use the CUSUM charts as a
+8             diagnostic goodness-of-fit tool for a misspeccified model.
+9          
+10            Data from "Create your own version of Anscombe's quartet:
+11            Dissimilar data that have similar statistics" by Rick Wicklin
+12            https://blogs.sas.com/content/iml/2019/04/17/create-version-of-anscombes-quartet.html
+13         */
+14         data Anscombe2;
+15         input X Y1 Y2 ;
+16         datalines;
+
+NOTE: The data set WORK.ANSCOMBE2 has 51 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              1253.25k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:55 AM
+      Step Count                        1  Switch Count  0
+      
+
+68         ;
+69         
+70         /**********************************************************/
+71         /* PROC AUTOREG models a time series with autocorrelation */
+72         /**********************************************************/
+73         
+74         ods graphics on;
+75         proc autoreg data=Anscombe2;
+ERROR: Procedure AUTOREG not found.
+76           Linear: model y1 = x;     /* Y1 is linear. Model is oorrectly specified. */
+77           output out=CusumLinear cusum=cusum cusumub=upper cusumlb=lower
+78                                  r=Residual recres=RecursiveResid;
+79         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+NOTE: PROCEDURE AUTOREG used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              20.18k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:55 AM
+      Step Count                        2  Switch Count  0
+      
+
+
+80         proc autoreg data=Anscombe2;
+ERROR: Procedure AUTOREG not found.
+81           Quadratic: model y2 = x;     /* Y1 is quadratic. Model is misspecified. */
+82           output out=CusumQuad cusum=cusum cusumub=upper cusumlb=lower
+83                                r=Residual recres=RecursiveResid;
+84         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE AUTOREG used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              17.18k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:55 AM
+      Step Count                        3  Switch Count  0
+      
+85         
+86         title "Cumulative Recursive Residuals"
+87         title2 "Linear Data (left) and Quadratic Data (right)";
+WARNING: The TITLE statement is ambiguous due to invalid options or unquoted text.
+88         
+89         ods graphics / width=400px height=300px;
+90         ods layout gridded columns=2 advance=table;
+
+                                                           The SAS System
+
+
+91          proc sgplot data=CusumLinear noautolegend;
+ERROR: File WORK.CUSUMLINEAR.DATA does not exist.
+92             band x=x lower=lower upper=upper;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+93             series x=x y=cusum / break markers;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+94             refline 0  /axis=y noclip;
+95             xaxis grid; yaxis grid;
+96          run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              73.84k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:55 AM
+      Step Count                        4  Switch Count  0
+      
+
+
+97          proc sgplot data=CusumQuad noautolegend;
+ERROR: File WORK.CUSUMQUAD.DATA does not exist.
+98             band x=x lower=lower upper=upper;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+99             series x=x y=cusum / break markers;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+100            refline 0  /axis=y noclip;
+101            xaxis grid; yaxis grid;
+102         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              73.84k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:55 AM
+      Step Count                        5  Switch Count  0
+      
+103        ods layout end;
+104        
+
+
+ERROR: Errors printed on pages 2,3.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.81 seconds
+                                                           The SAS System
+
+      user cpu time       0.23 seconds
+      system cpu time     0.35 seconds
+      memory              8674.53k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:55 AM
+      Step Count                        5  Switch Count  30
+      

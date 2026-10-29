@@ -1,0 +1,155 @@
+1                                                          The SAS System                            10:55 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.85 seconds
+      cpu time            0.73 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P095
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:55:59 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P095 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          %let gpath='.';
+2          %let dpi=300;
+                                                           The SAS System
+
+3          
+4          ods _all_  close;
+5          ods listing gpath=&gpath image_dpi=&dpi;
+6          
+7          /* Creating dummy data for graphing */
+8          data TumorSize;
+9            length Cid $ 3;
+10           label Change='Change from Baseline (%)';
+11           drop i grp1-grp2 l1-l5;
+12           array groupArr{*} $12 grp1-grp2 ('Treatment 2', 'Treatment 1');
+13           array labelArr{*} $ l1 - l5 ('E', 'C', 'R', 'S', 'P');
+14           do i=1 to 25;
+15             Cid = put(i, 2.0);
+16             Change = 30-120*ranuni(2);
+17             Group = groupArr{int(ranuni(2)+0.5) + 1};
+18         	  Label = labelArr{mod(i, 5) + 1};
+19             output;
+20           end;
+21         run;
+
+NOTE: The data set WORK.TUMORSIZE has 25 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              787.37k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 10:55:59 AM
+      Step Count                        2  Switch Count  0
+      
+
+22         
+23         proc sort data=TumorSize out=TumorSizeDesc;
+24           by descending change;
+25         run;
+
+NOTE: There were 25 observations read from the data set WORK.TUMORSIZE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TUMORSIZEDESC has 25 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1254.81k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:55:59 AM
+      Step Count                        3  Switch Count  0
+      
+
+26         
+27         ods listing style=listing;
+28         ods graphics / reset width=5in height=3in imagename='TumorSize_Band_SG_V94';
+29         title 'Change in Tumor Size';
+30         title2 'ITT Population';
+31         proc sgPlot data=TumorSizeDesc nowall noborder;
+32           styleattrs dataColors=(cxbf0000 gold) dataContrastColors=(black) axisExtent=data;
+33           band x=cid upper=20 lower=-30 / transparency=0.5 fill noOutline legendLabel='Confidence';
+34           vBarParm category=cid  response=change / group=group dataLabel=label
+                                                           The SAS System
+
+35                      dataLabelAttrs=(size=5 weight=bold) groupDisplay=cluster
+36                      dataSkin=pressed;
+37           xaxis display=none;
+38           yaxis values=(60 to -100 by -20) grid gridAttrs=(color=cxf0f0f0);
+39           inset "C= Complete Response" "R= Partial Response" "S= Stable Disease"
+40                 "P= Progressive Disease" "E= Early Death" / title='BCR'
+41                  position=bottomLeft border textAttrs=(size=6 weight=bold) titleAttrs=(size=7);
+42           keyLegend / title='' location=inside position=topRight across=1 border opaque;
+43         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           4.76 seconds
+      user cpu time       0.18 seconds
+      system cpu time     0.26 seconds
+      memory              10694.20k
+      OS Memory           21704.00k
+      Timestamp           10/27/2026 10:56:04 AM
+      Step Count                        4  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P095\TumorSize_Band_SG_V94.png.
+NOTE: There were 25 observations read from the data set WORK.TUMORSIZEDESC.
+
+44         title;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           6.87 seconds
+      user cpu time       0.60 seconds
+      system cpu time     0.70 seconds
+      memory              20298.57k
+      OS Memory           21704.00k
+      Timestamp           10/27/2026 10:56:04 AM
+      Step Count                        4  Switch Count  20
+      

@@ -1,0 +1,435 @@
+1                                                          The SAS System                            11:24 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.82 seconds
+      cpu time            0.53 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          %let gpath=\\sashq\root\dept\dvr\DVR_Knowledge_Center\sgf2019\Papers\A_Combined_Waterfall_and_Swimmer_Plot\Image;
+2          %let dpi=300;
+3          
+4          proc format;
+5            value res
+6              0='1.0 mg'
+7          	1='2.0 mg'
+8          	2='3.0 mg'
+9          	3='4.0 mg'
+10         	4='3.0 F6 mg'
+11         	5='4.0 F6 mg';
+NOTE: Format RES has been output.
+12         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              153.87k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:24:51 AM
+      Step Count                        1  Switch Count  0
+                                                           The SAS System
+
+      
+
+13         
+14         /*--Create some data--*/
+15         data tumor;
+16           label Duration='Duration of Treatment' Dropped='Discontinued';
+17           format Drug res.;
+18           length Code $6;
+19           do i=1 to 20;
+20             Response=100*(ranuni(3)-0.7);
+21             Duration=50*ranuni(3);
+22         	Dropped=.;
+23             if ranuni(3) > 0.8 then Dropped=duration-5;
+24         	Drug=floor(6*ranuni(3));
+25         	if ranuni(3) > 0.7 then Code='FL';
+26         	else Code='DLBCL';
+27         	codeloc=ifn(response > 0, 0, response);
+28         	baseline=20+180*(ranuni(2));
+29             output;
+30           end;
+31         run;
+
+NOTE: The data set WORK.TUMOR has 20 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              1293.75k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:24:51 AM
+      Step Count                        2  Switch Count  0
+      
+
+32         
+33         /*--Sort by descending response--*/
+34         proc sort data=tumor out=tumor;
+35           by descending Response;
+36         run;
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TUMOR has 20 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1244.06k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 11:24:51 AM
+      Step Count                        3  Switch Count  0
+      
+
+37         
+38         data tumorsorted;
+39           set tumor;
+40           j=_n_;
+41         run;
+
+                                                           The SAS System
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: The data set WORK.TUMORSORTED has 20 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              910.21k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 11:24:51 AM
+      Step Count                        4  Switch Count  0
+      
+
+42         
+43         ods html;
+NOTE: Writing HTML Body file: sashtml.htm
+44         proc print;run;
+
+NOTE: There were 20 observations read from the data set WORK.TUMORSORTED.
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1561.21k
+      OS Memory           15700.00k
+      Timestamp           10/27/2026 11:24:53 AM
+      Step Count                        5  Switch Count  0
+      
+
+45         ods html close;
+46         
+47         /*--Define Attributes map for walls and axes--*/
+48         data attrmap;
+49           length ID $ 9 value $10 fillcolor $ 10 show $8;
+50           id='Resp';  value='1.0 mg';     fillcolor='white'; show='Attrmap'; output;
+51           id='Resp';  value='2.0 mg';     fillcolor='cxffffc0'; show='Attrmap'; output;
+52           id='Resp';  value='3.0 mg';     fillcolor='cxf0d0a0'; show='Attrmap'; output;
+53           id='Resp';  value='4.0 mg';     fillcolor='orange'; show='Attrmap'; output;
+54           id='Resp';  value='3.0 F6 mg';  fillcolor='cxff7f00'; show='Attrmap'; output;
+55           id='Resp';  value='4.0 F6 mg';  fillcolor='red'; show='Attrmap'; output;
+56         run;
+
+NOTE: The data set WORK.ATTRMAP has 6 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              767.01k
+      OS Memory           12628.00k
+      Timestamp           10/27/2026 11:24:53 AM
+      Step Count                        6  Switch Count  0
+      
+
+57         
+58         ods _all_ close;
+59         ods listing gpath="&gpath" image_dpi=&dpi;
+60         
+61         /*--2D Tumor Response and Duration Graph--*/
+                                                           The SAS System
+
+62         /*title 'Tumor Response and Duration by Subject Id';*/
+63         /*footnote j=l h=7pt italic 'This graph uses simulated data for illustration only';*/
+64         /*ods graphics / reset attrpriority=color width=4in height=3in imagename="WaterFall_2D_SG";*/
+65         /*proc sgplot data=tumorsorted noautolegend dattrmap=attrmap;*/
+66         /*  styleattrs axisextent=data;*/
+67         /*  vbarparm category=j response=duration / fillattrs=graphdata1 dataskin=pressed y2axis name='d';*/
+68         /*  vbarparm category=j response=response / group=drug dataskin=pressed name='r' attrid=Resp;*/
+69         /*  scatter x=j y=dropped / y2axis markerattrs=(symbol=diamondfilled size=5)*/
+70         /*          filledoutlinedmarkers markerfillattrs=(color=gold) name='c';*/
+71         /*  text x=j y=codeloc text=code / rotate=90 position=left textattrs=(size=6);*/
+72         /*  yaxis offsetmax=0.5 labelpos=datacenter grid display=(noline noticks);*/
+73         /*  y2axis offsetmin=0.55 labelpos=datacenter grid display=(noline noticks);*/
+74         /*  xaxis display=none colorbands=odd colorbandsattrs=(transparency=0.2);*/
+75         /*  keylegend 'r' / position=bottomleft location=inside across=1 valueattrs=(size=4) noborder;*/
+76         /*  keylegend 'c' / position=topright location=inside  valueattrs=(size=4) noborder;*/
+77         /*run;*/
+78         
+79         /*--Define Template for graph--*/
+80         /*proc template;*/
+81         /*  define statgraph Waterfall_Plus;*/
+82         /*    begingraph / axislineextent=data;*/
+83         /*	  entrytitle 'Tumor Response and Duration by Subject Id';*/
+84         /*	  entryfootnote halign=left 'This graph uses simulated data for illustration only' / */
+85         /*             textattrs=(size=7pt style=italic);*/
+86         /*	  layout lattice / columndatarange=union rowweights=(0.45 0.55) rowgutter=0;*/
+87         /*	    columnaxes;*/
+88         /*		  columnaxis / display=none discreteopts=(colorbands=odd colorbandsattrs=(transparency=0.2));*/
+89         /*		endcolumnaxes;*/
+90         /*	    layout overlay / yaxisopts=(griddisplay=on offsetmax=0.1 tickvalueattrs=(size=7) labelattrs=(size=9))
+90       ! walldisplay=none;*/
+91         /*		  barchartparm category=j response=duration / datalabel=duration */
+92         /*                       fillattrs=graphdata1 datalabelattrs=(size=5)*/
+93         /*                       dataskin=pressed displaybaseline=auto;*/
+94         /*          scatterplot x=j y=dropped / markerattrs=(symbol=diamondfilled size=9)*/
+95         /*                      filledoutlinedmarkers=true markerfillattrs=(color=gold)*/
+96         /*                      markeroutlineattrs=(color=black) name='d' legendlabel='Dropped';*/
+97         /*	      discretelegend 'd' / location=inside valign=top halign=left valueattrs=(size=7) */
+98         /*                      border=false autoitemsize=true;*/
+99         /*		endlayout;*/
+100        /*	    layout overlay / yaxisopts=(griddisplay=on tickvalueattrs=(size=5) labelattrs=(size=9) offsetmax=0 */
+101        /*                                    linearopts=(tickvaluepriority=true))*/
+102        /*                                    walldisplay=none;*/
+103        /*		  bandplot x=j limitupper=20 limitlower=-30 / extend=true display=(outline) */
+104        /*                       outlineattrs=graphdata1(pattern=dash thickness=1);*/
+105        /*          barchartparm category=j response=response / group=drug groupdisplay=cluster*/
+106        /*                       datalabelattrs=(size=5) dataskin=pressed name='a' datalabelfitpolicy=rotate;*/
+107        /*          textplot x=j y=codeloc text=code / rotate=90 position=left textattrs=(size=6)*/
+108        /*                   contributeoffsets=(ymin);*/
+109        /*	      discretelegend 'a' / location=inside valign=bottom halign=left across=2 opaque=false*/
+110        /*                         valueattrs=(size=5) border=false;*/
+111        /*		endlayout;*/
+112        /*	  endlayout;*/
+113        /*	endgraph;*/
+114        /*  end;*/
+115        /*run;*/
+116        /**/
+117        /*ods graphics / reset width=4in height=3in imagename='Waterfall_2D_GTL';*/
+118        /*proc sgrender template=Waterfall_Plus data=tumorsorted dattrmap=attrmap;*/
+                                                           The SAS System
+
+119        /*format duration 3.0;*/
+120        /*dattrvar drug="Resp";*/
+121        /*run;*/
+122        
+123        /*--WaterFall with Tumor Baseline--*/
+124        proc template;
+125          define statgraph Waterfall_Baseline_Series;
+126            begingraph / axislineextent=data;
+127        	  entrytitle 'Tumor Response and Duration by Subject Id';
+128        	  entryfootnote halign=left 'This graph uses simulated data for illustration only' /
+129                   textattrs=(size=7pt style=italic);
+130        	  layout lattice / columndatarange=union rowweights=(0.3 0.45 0.25) rowgutter=0;
+131        	    columnaxes;
+132        		  columnaxis / display=none discreteopts=(colorbands=odd colorbandsattrs=(transparency=0.2));
+133        		endcolumnaxes;
+134        	    layout overlay / yaxisopts=(griddisplay=on offsetmax=0.15 tickvalueattrs=(size=7) labelattrs=(size=7))
+134      ! walldisplay=none;
+135        		  barchartparm category=j response=duration / datalabel=duration
+136                               fillattrs=graphdata1 datalabelattrs=(size=5)
+137                               dataskin=pressed displaybaseline=auto;
+                                                   _______________ ____
+                                                   1               772
+WARNING 1-322: Assuming the symbol DISPLAY was misspelled as displaybaseline.
+ERROR 772-580: Syntax error: expecting a constant or a dynamic.
+138                  scatterplot x=j y=dropped / markerattrs=(symbol=diamondfilled size=9)
+139                              filledoutlinedmarkers=true markerfillattrs=(color=gold)
+140                              markeroutlineattrs=(color=black) name='d' legendlabel='Discontinued';
+141        	      discretelegend 'd' / location=inside valign=top halign=left valueattrs=(size=7)
+142                                       border=false autoitemsize=true;
+143        		endlayout;
+144        	    layout overlay / yaxisopts=(griddisplay=on tickvalueattrs=(size=5) labelattrs=(size=7) offsetmax=0
+145                                            linearopts=(tickvaluepriority=true) label='Change from Baseline (%)')
+146                                            walldisplay=none;
+147        		  bandplot x=j limitupper=20 limitlower=-30 / extend=true display=(outline)
+148                               outlineattrs=graphdata1(pattern=dash thickness=1);
+149                  barchartparm category=j response=response / group=drug groupdisplay=cluster
+150                               datalabelattrs=(size=5) dataskin=pressed name='a' datalabelfitpolicy=rotate;
+151                  textplot x=j y=codeloc text=code / rotate=90 position=left textattrs=(size=6) contributeoffsets=(ymin);
+152        	      discretelegend 'a' / location=inside valign=bottom halign=left across=2 opaque=false
+153                                 valueattrs=(size=5) border=false;
+154        		endlayout;
+155        	    layout overlay / yaxisopts=(griddisplay=on tickvalueattrs=(size=5) labelattrs=(size=7) offsetmax=0
+156                                            linearopts=(tickvaluepriority=true) reverse=true)
+157                                            walldisplay=none;
+158        		  seriesplot x=j y=baseline / lineattrs=graphdata2(pattern=solid thickness=2);
+159        		  scatterplot x=j y=baseline / markerattrs=(symbol=circlefilled size=7)
+160                              filledoutlinedmarkers=true markerfillattrs=(color=white)
+161                              markeroutlineattrs=graphdata2;
+162        		endlayout;
+163        	  endlayout;
+164        	endgraph;
+165          end;
+WARNING: Object will not be saved.
+166        run;
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              187.31k
+      OS Memory           12372.00k
+      Timestamp           10/27/2026 11:24:53 AM
+      Step Count                        7  Switch Count  0
+      
+WARNING: Errors were produced.
+NOTE: The SAS System stopped processing this step because of errors.
+167        
+168        ods graphics / reset width=4in height=4in imagename='Waterfall_Baseline_Series';
+
+
+169        proc sgrender template=Waterfall_Baseline_Series data=tumorsorted dattrmap=attrmap;
+170        format duration 3.0;
+171        label baseline='Baseline (mm)';
+172        dattrvar drug="Resp";
+173        run;
+
+ERROR: Unable to restore 'Waterfall_Baseline_Series' from template store!
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           0.14 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              558.03k
+      OS Memory           12884.00k
+      Timestamp           10/27/2026 11:24:53 AM
+      Step Count                        8  Switch Count  0
+      
+174        
+175        
+176        /*--WaterFall with Tumor Baseline--*/
+
+
+177        proc template;
+178          define statgraph Waterfall_Baseline_Needle;
+179            begingraph / axislineextent=data;
+180        	  entrytitle 'Tumor Response and Duration by Subject Id';
+181        	  entryfootnote halign=left 'This graph uses simulated data for illustration only' /
+182                   textattrs=(size=7pt style=italic);
+183        	  layout lattice / columndatarange=union rowweights=(0.3 0.45 0.25) rowgutter=0;
+184        	    columnaxes;
+185        		  columnaxis / display=none discreteopts=(colorbands=odd colorbandsattrs=(transparency=0.2));
+186        		endcolumnaxes;
+187        	    layout overlay / yaxisopts=(griddisplay=on offsetmax=0.15 tickvalueattrs=(size=7) labelattrs=(size=7))
+187      ! walldisplay=none;
+188        		  barchartparm category=j response=duration / datalabel=duration
+189                               fillattrs=graphdata1 datalabelattrs=(size=5)
+190                               dataskin=pressed displaybaseline=auto;
+                                                   _______________ ____
+                                                   1               772
+WARNING 1-322: Assuming the symbol DISPLAY was misspelled as displaybaseline.
+ERROR 772-580: Syntax error: expecting a constant or a dynamic.
+191                  scatterplot x=j y=dropped / markerattrs=(symbol=diamondfilled size=9)
+192                              filledoutlinedmarkers=true markerfillattrs=(color=gold)
+193                              markeroutlineattrs=(color=black) name='d' legendlabel='Discontinued';
+194        	      discretelegend 'd' / location=inside valign=top halign=left valueattrs=(size=7)
+195                                       border=false autoitemsize=true;
+196        		endlayout;
+                                                           The SAS System
+
+197        	    layout overlay / yaxisopts=(griddisplay=on tickvalueattrs=(size=5) labelattrs=(size=7) offsetmax=0
+198                                            linearopts=(tickvaluepriority=true)  label='Change from Baseline (%)')
+199                                            walldisplay=none;
+200        		  bandplot x=j limitupper=20 limitlower=-30 / extend=true display=(outline)
+201                               outlineattrs=graphdata1(pattern=dash thickness=1);
+202                  barchartparm category=j response=response / group=drug groupdisplay=cluster
+203                               datalabelattrs=(size=5) dataskin=pressed name='a' datalabelfitpolicy=rotate;
+204                  textplot x=j y=codeloc text=code / rotate=90 position=left textattrs=(size=6) contributeoffsets=(ymin);
+205        	      discretelegend 'a' / location=inside valign=bottom halign=left across=2 opaque=false
+206                                 valueattrs=(size=5) border=false;
+207        		endlayout;
+208        	    layout overlay / yaxisopts=(griddisplay=on tickvalueattrs=(size=5) labelattrs=(size=7) offsetmin=0
+209                                            linearopts=(tickvaluepriority=true))
+210                                            walldisplay=none;
+211        		  needleplot x=j y=baseline / lineattrs=(color=green pattern=solid thickness=3);
+212        		  scatterplot x=j y=baseline / markerattrs=(symbol=circlefilled size=7)
+213                              filledoutlinedmarkers=true markerfillattrs=(color=white)
+214                              markeroutlineattrs=(color=green);
+215        		endlayout;
+216        	  endlayout;
+217        	endgraph;
+218          end;
+WARNING: Object will not be saved.
+219        run;
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              159.03k
+      OS Memory           12884.00k
+      Timestamp           10/27/2026 11:24:53 AM
+      Step Count                        9  Switch Count  0
+      
+WARNING: Errors were produced.
+NOTE: The SAS System stopped processing this step because of errors.
+220        
+221        ods graphics / reset width=4in height=4in imagename='Waterfall_Baseline_Needle';
+
+
+222        proc sgrender template=Waterfall_Baseline_Needle data=tumorsorted dattrmap=attrmap;
+223        format duration 3.0;
+224        label baseline='Baseline (mm)';
+225        dattrvar drug="Resp";
+226        run;
+
+ERROR: Unable to restore 'Waterfall_Baseline_Needle' from template store!
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           0.13 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              547.15k
+      OS Memory           12884.00k
+      Timestamp           10/27/2026 11:24:53 AM
+      Step Count                        10  Switch Count  0
+      
+227        
+228        
+                                                           The SAS System
+
+
+
+ERROR: Errors printed on pages 5,6,7.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           4.23 seconds
+      user cpu time       0.48 seconds
+      system cpu time     0.67 seconds
+      memory              14711.21k
+      OS Memory           15700.00k
+      Timestamp           10/27/2026 11:24:53 AM
+      Step Count                        10  Switch Count  32
+      

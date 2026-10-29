@@ -1,0 +1,54 @@
+                                                 Original Data and Lognormal Model
+
+                                                      The UNIVARIATE Procedure
+                                                            Variable:  x
+
+                                                              Moments
+
+                                  N                         200    Sum Weights                200
+                                  Mean                  18.2182    Sum Observations       3643.64
+                                  Std Deviation      3.90341504    Variance             15.236649
+                                  Skewness           0.87663455    Kurtosis             1.0285276
+                                  Uncorrected SS     69412.6554    Corrected SS        3032.09315
+                                  Coeff Variation    21.4259095    Std Error Mean      0.27601312
+                                                 Original Data and Lognormal Model
+
+                                                      The UNIVARIATE Procedure
+                                                Fitted Lognormal Distribution for x
+
+                                               Parameters for Lognormal Distribution
+ 
+                                                   Parameter   Symbol   Estimate
+
+                                                   Threshold   Theta    5.576026
+                                                   Scale       Zeta     2.491394
+                                                   Shape       Sigma    0.303323
+                                                   Mean                 18.22273
+                                                   Std Dev              3.925978
+                                                  First Generation Lognormal Model
+
+                                                      The UNIVARIATE Procedure
+                                                            Variable:  X
+
+                                                              Moments
+
+                                  N                         200    Sum Weights                200
+                                  Mean               18.2130647    Sum Observations    3642.61295
+                                  Std Deviation      3.65960542    Variance            13.3927118
+                                  Skewness           0.72524298    Kurtosis            0.67048761
+                                  Uncorrected SS     69008.2952    Corrected SS        2665.14966
+                                  Coeff Variation    20.0932983    Std Error Mean      0.25877318
+                                                  First Generation Lognormal Model
+
+                                                      The UNIVARIATE Procedure
+                                                Fitted Lognormal Distribution for X
+
+                                               Parameters for Lognormal Distribution
+ 
+                                                   Parameter   Symbol   Estimate
+
+                                                   Threshold   Theta    4.981141
+                                                   Scale       Zeta     2.545434
+                                                   Shape       Sigma    0.274162
+                                                   Mean                 18.21815
+                                                   Std Dev              3.698354

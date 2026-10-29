@@ -1,0 +1,322 @@
+1                                                          The SAS System                            15:59 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.66 seconds
+      cpu time            0.54 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P062
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.28k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P062 family=morioka
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*** HELP START ***//*
+2          
+                                                           The SAS System
+
+3          Macro name:    diagram_plot
+4            Purpose:
+5              Combines all generated diagram components (boxes, text,
+6              and lines) and plots them as a flow diagram using PROC SGPLOT.
+7              The macro collects all datasets prefixed with "diagram_" and
+8              produces a complete diagram without axes or borders.
+9          
+10           Parameters:
+11             minx  = Minimum value of the X-axis (default=0)
+12             maxx  = Maximum value of the X-axis (default=100)
+13             miny  = Minimum value of the Y-axis (default=0)
+14             maxy  = Maximum value of the Y-axis (default=100)
+15             text_font = Text font (default=Courier)
+16         
+17           Notes:
+18             - This macro expects that %diagram_box and %diagram_line
+19               have already been called to create the component datasets.
+20             - Text is automatically split by the SPLITCHAR (#) option.
+21             - Arrows are drawn for lines with arrowhead at the end.
+22         
+23           Usage Example:
+24             %diagram_box(
+25                 boxid=1,
+26                 left_x=30, top_y=100,
+27                 right_x=70, bottom_y=90,
+28                 text=Assessed for eligibility (n=100)
+29             );
+30         
+31             %diagram_line(
+32                 lineid=1,
+33                 start_x=50, start_y=90,
+34                 end_x=50,   end_y=55
+35             );
+36         
+37             %diagram_box(
+38                 boxid=2,
+39                 left_x=37, top_y=55,
+40                 right_x=63, bottom_y=45,
+41                 text=Randomized (n=90)
+42             );
+43         
+44             %diagram_plot(minx=0, maxx=100, miny=0, maxy=100);
+45         
+46         *//*** HELP END ***/
+47         
+48         %macro diagram_plot(minx=0,maxx=100,miny=0,maxy=100,text_font=Courier);
+49         data plot_diag;
+50         length text text2 $1000.;
+51         set diagram_:;
+52         run;
+53         
+54         data plot_diag_attr;
+55         set diag_style_: line_style_:;
+56         run;
+57         
+58         proc sgplot data=plot_diag noborder noautolegend dattrmap=plot_diag_attr;
+59           polygon id=boxid x=box_x y=box_y/attrid=DIAGID group=DIAGID;
+60           text x=text_x y=text_y text=text /textattrs=(family="&text_font") attrid=DIAGID group=DIAGID sizemin=1pt
+                                                           The SAS System
+
+60       ! sizemaxresponse=100 sizemax=100pt sizeresponse = sizeresponse  splitchar='#' splitpolicy=splitalways;
+61           text x=text_x2 y=text_y2 text=text2 /textattrs=(family="&text_font") attrid=DIAGID group=DIAGID  sizemin=1pt
+61       ! sizemaxresponse=100 sizemax=100pt sizeresponse = sizeresponse  sizeresponse = sizeresponse  position=right splitchar='#'
+61       ! splitpolicy=splitalways;
+62           series x=line_x y=line_y/ attrid=_LINEID  group=_LINEID  arrowheadshape=filled arrowheadpos=end  arrowheadscale=0.3;
+63         
+64           xaxis display=none min=&minx. max=&maxx. offsetmin=0 offsetmax=0;
+65           yaxis display=none min=&miny. max=&maxy. offsetmin=0 offsetmax=0;
+66         run;
+67         %mend;
+68         
+69         /* benchmark driver: the program only defines %diagram_plot; build the header's usage example with the
+70            companion macros from the same repository (programs/sas/macros/morioka) and plot it */
+71         %include "&root./programs/sas/macros/morioka/diagram_box.sas";
+181        %include "&root./programs/sas/macros/morioka/diagram_line.sas";
+251        %diagram_box(boxid=1, left_x=30, top_y=100, right_x=70, bottom_y=90, text=Assessed for eligibility (n=100));
+
+INFO: Character variables have defaulted to a length of 200 at the places given by: (Line):(Column). Truncation can result.
+      251:29   DIAGID
+NOTE: The data set WORK.DIAGRAM_BOX_1 has 4 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              763.56k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        2  Switch Count  0
+      
+
+
+INFO: Character variables have defaulted to a length of 200 at the places given by: (Line):(Column). Truncation can result.
+      251:47   DIAGID
+NOTE: The data set WORK.DIAGRAM_BOX_TEXT_1 has 1 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              777.53k
+      OS Memory           10440.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        3  Switch Count  0
+      
+
+
+NOTE: The data set WORK.DIAG_STYLE_1 has 1 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              750.78k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        4  Switch Count  0
+      
+
+252        %diagram_line(lineid=1, start_x=50, start_y=90, end_x=50, end_y=55);
+
+                                                           The SAS System
+
+INFO: Character variables have defaulted to a length of 200 at the places given by: (Line):(Column). Truncation can result.
+      363:30   _LINEID
+NOTE: The data set WORK.DIAGRAM_LINE_1 has 2 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              773.06k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        5  Switch Count  0
+      
+
+
+NOTE: The data set WORK.LINE_STYLE_1 has 1 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              758.25k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        6  Switch Count  0
+      
+
+253        %diagram_box(boxid=2, left_x=37, top_y=55, right_x=63, bottom_y=45, text=Randomized (n=90));
+
+INFO: Character variables have defaulted to a length of 200 at the places given by: (Line):(Column). Truncation can result.
+      390:28   DIAGID
+NOTE: The data set WORK.DIAGRAM_BOX_2 has 4 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              774.18k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        7  Switch Count  0
+      
+
+
+INFO: Character variables have defaulted to a length of 200 at the places given by: (Line):(Column). Truncation can result.
+      253:47   DIAGID
+NOTE: The data set WORK.DIAGRAM_BOX_TEXT_2 has 1 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              783.15k
+      OS Memory           10440.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        8  Switch Count  0
+      
+
+
+NOTE: The data set WORK.DIAG_STYLE_2 has 1 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+                                                           The SAS System
+
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              758.25k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        9  Switch Count  0
+      
+
+254        %diagram_plot(minx=0, maxx=100, miny=0, maxy=100);
+
+NOTE: There were 4 observations read from the data set WORK.DIAGRAM_BOX_1.
+NOTE: There were 4 observations read from the data set WORK.DIAGRAM_BOX_2.
+NOTE: There were 1 observations read from the data set WORK.DIAGRAM_BOX_TEXT_1.
+NOTE: There were 1 observations read from the data set WORK.DIAGRAM_BOX_TEXT_2.
+NOTE: There were 2 observations read from the data set WORK.DIAGRAM_LINE_1.
+NOTE: The data set WORK.PLOT_DIAG has 12 observations and 23 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              2614.85k
+      OS Memory           12496.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        10  Switch Count  0
+      
+
+
+NOTE: There were 1 observations read from the data set WORK.DIAG_STYLE_1.
+NOTE: There were 1 observations read from the data set WORK.DIAG_STYLE_2.
+NOTE: There were 1 observations read from the data set WORK.LINE_STYLE_1.
+NOTE: The data set WORK.PLOT_DIAG_ATTR has 3 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1159.28k
+      OS Memory           11348.00k
+      Timestamp           10/27/2026 03:59:13 PM
+      Step Count                        11  Switch Count  0
+      
+
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           8.42 seconds
+      user cpu time       0.14 seconds
+      system cpu time     0.48 seconds
+      memory              8286.23k
+      OS Memory           18292.00k
+      Timestamp           10/27/2026 03:59:22 PM
+      Step Count                        12  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P062\SGPlot.png.
+NOTE: There were 12 observations read from the data set WORK.PLOT_DIAG.
+NOTE: There were 3 observations read from the data set WORK.PLOT_DIAG_ATTR.
+
+
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+                                                           The SAS System
+
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              5268.90k
+      OS Memory           22108.00k
+      Timestamp           10/27/2026 03:59:22 PM
+      Step Count                        13  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           10.39 seconds
+      user cpu time       0.40 seconds
+      system cpu time     0.95 seconds
+      memory              18846.43k
+      OS Memory           22108.00k
+      Timestamp           10/27/2026 03:59:22 PM
+      Step Count                        13  Switch Count  38
+      

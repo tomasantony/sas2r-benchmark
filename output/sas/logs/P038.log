@@ -1,0 +1,476 @@
+1                                                          The SAS System                            10:51 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.01 seconds
+      cpu time            0.56 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P038
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P038 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          *** Input section- specific to Script-athon;
+2          
+3          %* modification 2019-12-23 - update path as data has been moved;
+4          
+5          filename source "&rawadam./advs.xpt" ;
+6          libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advs.xpt
+7          data work.advs ;
+8            set source.advs ;
+9            param = catx(' ', param, propcase(atpt));
+10           paramn = atptn;
+11         run ;
+
+NOTE: There were 32139 observations read from the data set SOURCE.ADVS.
+NOTE: The data set WORK.ADVS has 32139 observations and 44 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.11 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.06 seconds
+      memory              854.46k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        2  Switch Count  0
+      
+
+12         
+13         %let inds = advs;
+14         %let invar = USUBJID TRTPN TRTP PARAM PARAMCD PARAMN ATPT ATPTN AVAL AVISITN ANL01FL BNRIND ANRIND SHIFT1 CHGCAT1 SAFFL;
+15         %let inwhere = %str(WHERE PARAMCD='DIABP' and ANL01FL='Y' and AVISITN=99 and SAFFL='Y' and
+16                             BNRIND ne 'Missing' and ANRIND ne 'Missing');
+17         %let trtvar = trtpn;
+18         %let maxcat = 4;
+19         
+20         proc format;
+21           value shifttx
+22             1 = 'Low'
+23         	2 = 'Normal'
+24         	3 = 'High'
+25         	4 = 'Total'
+26         	;
+NOTE: Format SHIFTTX has been output.
+27         
+28           invalue shiftord
+29             'Low'    = 1
+30         	'Normal' = 2
+31         	'High'   = 3
+32         	'Total'  = 4
+33         	;
+NOTE: Informat SHIFTORD has been output.
+34         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+                                                           The SAS System
+
+      system cpu time     0.00 seconds
+      memory              148.84k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        3  Switch Count  0
+      
+
+35         
+36         *** Read selected variables/records from input dataset;
+37         data inds;
+38           set &inds (keep=&invar);
+39           &inwhere;
+40         run;
+
+NOTE: There were 678 observations read from the data set WORK.ADVS.
+      WHERE (PARAMCD='DIABP') and (ANL01FL='Y') and (AVISITN=99) and (SAFFL='Y') and (BNRIND not = 'Missing') and (ANRIND not = 
+      'Missing');
+NOTE: The data set WORK.INDS has 678 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              1017.56k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        4  Switch Count  0
+      
+
+41         
+42         *** Build treatment group display format;
+43         
+44         *** Get name of treatment variable containing text;
+45         %let trtvartx = %substr(&trtvar, 1, %eval(%length(&trtvar) - 1));
+46         
+47         *** Create file of TRTx/TRTxN combinations;
+48         proc sql noprint;
+49           create table trtcomb as
+50             select distinct &trtvar as start, &trtvartx as label, 'TRTFT' as fmtname, 'n' as type
+51         	  from inds;
+NOTE: Table WORK.TRTCOMB created, with 3 rows and 4 columns.
+
+52         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5496.21k
+      OS Memory           15448.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        5  Switch Count  0
+      
+
+53         
+54         *** Generate format;
+55         proc format library=work cntlin=trtcomb;
+NOTE: Format TRTFT has been output.
+56         run;
+
+                                                           The SAS System
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              312.78k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        6  Switch Count  0
+      
+NOTE: There were 3 observations read from the data set WORK.TRTCOMB.
+
+57         
+58         *** Count patients by baseline/post-baseline shift category;
+59         proc summary data=inds;
+60           class param paramn &trtvar bnrind anrind;
+61           var aval;
+62           output out=counts (where=(param is not missing and paramn is not missing and &trtvar is not missing)) n(aval) = n;
+63         run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 678 observations read from the data set WORK.INDS.
+NOTE: The data set WORK.COUNTS has 115 observations and 8 variables.
+NOTE: PROCEDURE SUMMARY used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              7153.43k
+      OS Memory           17260.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        7  Switch Count  0
+      
+
+64         
+65         proc sort data=counts;
+66           by param paramn trtpn;
+67         run;
+
+NOTE: There were 115 observations read from the data set WORK.COUNTS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.COUNTS has 115 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              671.12k
+      OS Memory           12380.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        8  Switch Count  0
+      
+
+68         
+69         *** Fill in total indicator, add numeric shift categories, and split off denominator records;
+70         data fixtot (keep=param paramn &trtvar anrind bnrind anrindn bnrindn n)
+71              denom (keep=param paramn &trtvar n rename=(n=denom));
+72           set counts;
+73         
+74           if missing(bnrind) then bnrind = 'Total';
+75           if missing(anrind) then anrind = 'Total';
+                                                           The SAS System
+
+76         
+77           bnrindn = input(bnrind, shiftord.);
+78           anrindn = input(anrind, shiftord.);
+79         
+80           if bnrind='Total' and anrind='Total' then output denom;
+81             else output fixtot;
+82         run;
+
+NOTE: There were 115 observations read from the data set WORK.COUNTS.
+NOTE: The data set WORK.FIXTOT has 106 observations and 8 variables.
+NOTE: The data set WORK.DENOM has 9 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              966.56k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        9  Switch Count  0
+      
+
+83         
+84         proc sort data=fixtot;
+85           by param paramn &trtvar bnrindn anrindn;
+86         run;
+
+NOTE: There were 106 observations read from the data set WORK.FIXTOT.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.FIXTOT has 106 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              671.12k
+      OS Memory           12380.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        10  Switch Count  0
+      
+
+87         
+88         *** Create full dataset to account for 0 cells;
+89         proc sql noprint;
+90           create table allcat as
+91             select distinct param, paramn, &trtvar
+92         	  from fixtot;
+NOTE: Table WORK.ALLCAT created, with 9 rows and 3 columns.
+
+93         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5315.56k
+      OS Memory           16988.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        11  Switch Count  0
+      
+
+                                                           The SAS System
+
+94         
+95         *** Add records for all combinations of baseline and post-baseline categories;
+96         data full;
+97           set allcat;
+98           do bnrindn=1 to &maxcat;
+99             do anrindn=1 to &maxcat;
+100        	  n = 0;
+101        	  output;
+102        	end;
+103          end;
+104        run;
+
+NOTE: There were 9 observations read from the data set WORK.ALLCAT.
+NOTE: The data set WORK.FULL has 144 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              910.18k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        12  Switch Count  0
+      
+
+105        
+106        *** Merge back with counts to get complete dataset;
+107        data allrecs;
+108          merge full (in=inf) fixtot (in=ins);
+109          by param paramn &trtvar bnrindn anrindn;
+110          if inf;
+111        run;
+
+INFO: The variable n on data set WORK.FULL will be overwritten by data set WORK.FIXTOT.
+NOTE: There were 144 observations read from the data set WORK.FULL.
+NOTE: There were 106 observations read from the data set WORK.FIXTOT.
+NOTE: The data set WORK.ALLRECS has 144 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1049.84k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        13  Switch Count  0
+      
+
+112        
+113        *** Add denominators and repopulate shift categories;
+114        data alldenom (where=(denom is not missing));
+115          merge allrecs (in=ina) denom (in=ind);
+116          by param paramn &trtvar;
+117          if ina;
+118        
+119          bnrind = put(bnrindn, shifttx.);
+120          anrind = put(anrindn, shifttx.);
+121        run;
+
+NOTE: There were 144 observations read from the data set WORK.ALLRECS.
+                                                           The SAS System
+
+NOTE: There were 9 observations read from the data set WORK.DENOM.
+NOTE: The data set WORK.ALLDENOM has 144 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1085.06k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        14  Switch Count  0
+      
+
+122        
+123        *** Get category names for column headings;
+124        proc sql noprint;
+125          select distinct anrind into :pbcat1-:pbcat&maxcat
+126            from alldenom
+127        	where anrind is not missing
+128            order by anrindn;
+WARNING: The query as specified involves ordering by an item that doesn't appear in its SELECT clause. Since you are ordering the 
+         output of a SELECT DISTINCT it may appear that some duplicates have not been eliminated.
+129        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5315.84k
+      OS Memory           17244.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        15  Switch Count  0
+      
+
+130        
+131        *** Transpose to 1 record per baseline category and compute percentage;
+132        data trans (keep=param paramn &trtvar bnrindn bnrind n1-n&maxcat pct1-pct&maxcat denom trttx);
+133          array ns(*) n1-n&maxcat;
+134          array pcts(*) $7 pct1-pct&maxcat;
+135        
+136          do until (last.bnrindn);
+137            set alldenom;
+138        	by param paramn &trtvar bnrindn;
+139        
+140        	ns(anrindn) = n;
+141        	if denom > 0 then pcts(anrindn) = '(' || put(round(((100 * n) / denom), 0.1), 5.1) || ')';
+142        	  else pcts(anrindn) = '(  0.0)';
+143          end;
+144        
+145          length trttx $ 30;
+146          trttx = catx(' ', put(&trtvar, trtft.), ('(N = ' || compress(put(denom, 12.)) || ')'));
+147          output;
+148        run;
+
+NOTE: There were 144 observations read from the data set WORK.ALLDENOM.
+NOTE: The data set WORK.TRANS has 36 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+                                                           The SAS System
+
+      memory              931.40k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 10:51:58 AM
+      Step Count                        16  Switch Count  0
+      
+
+149        
+150        *** Generate output table;
+151        options orientation=landscape;
+152        proc report nowd data=trans split='^';
+153          by paramn param;
+154          column &trtvar trttx bnrindn bnrind
+155                ('Post-Baseline Result' ("&pbcat1" n1 pct1) ("&pbcat2" n2 pct2) ("&pbcat3" n3 pct3) ("&pbcat4" n4 pct4));
+156        
+157          define &trtvar / id order noprint;
+158          define trttx / "Treatment" id order flow;
+159          define bnrindn / id order noprint;
+160          define bnrind / "Baseline^Result" id order flow;
+161        
+162          define n1 / "n" right;
+163          define pct1 / "%" left;
+164          define n2 / "n" right;
+165          define pct2 / "%" left;
+166          define n3 / "n" right;
+167          define pct3 / "%" left;
+168          define n4 / "n" right;
+169          define pct4 / "%" left;
+170        
+171          break after trttx / skip;
+172        run;
+
+NOTE: There were 36 observations read from the data set WORK.TRANS.
+NOTE: The PROCEDURE REPORT printed pages 1-3.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              3059.14k
+      OS Memory           13152.00k
+      Timestamp           10/27/2026 10:51:59 AM
+      Step Count                        17  Switch Count  0
+                                                           The SAS System
+
+      
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.62 seconds
+      user cpu time       0.59 seconds
+      system cpu time     0.70 seconds
+      memory              15808.00k
+      OS Memory           17260.00k
+      Timestamp           10/27/2026 10:51:59 AM
+      Step Count                        17  Switch Count  46
+      

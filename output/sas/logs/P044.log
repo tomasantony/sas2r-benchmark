@@ -1,0 +1,445 @@
+1                                                          The SAS System                            10:53 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.96 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P044
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P044 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          %* modification 2019-12-23 - update path as data has been moved;
+2          
+3          filename source "&rawadam./adsl.xpt" ;
+4          libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+5          
+6          data work.adsl ;
+7            set source.adsl ;
+8          run ;
+
+NOTE: There were 254 observations read from the data set SOURCE.ADSL.
+NOTE: The data set WORK.ADSL has 254 observations and 48 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              855.21k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        2  Switch Count  0
+      
+
+9          
+10          filename source "&rawadam./adae.xpt" ;
+11          libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adae.xpt
+12         
+13          data work.adae ;
+14            set source.adae ;
+15            keep USUBJID TRTAN AEDECOD TRTEMFL AOCCPFL SAFFL;
+16          run ;
+
+NOTE: There were 1191 observations read from the data set SOURCE.ADAE.
+NOTE: The data set WORK.ADAE has 1191 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              860.21k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        3  Switch Count  0
+      
+
+17         
+18            proc sort data=work.adae;
+19            by aedecod;
+20         run;
+
+NOTE: There were 1191 observations read from the data set WORK.ADAE.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADAE has 1191 observations and 6 variables.
+                                                           The SAS System
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              751.78k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        4  Switch Count  0
+      
+
+21         
+22            data adae1;
+23            set adae;
+24            where TRTEMFL="Y" and AOCCPFL='Y' and saffl="Y";
+25            run;
+
+NOTE: There were 781 observations read from the data set WORK.ADAE.
+      WHERE (TRTEMFL='Y') and (AOCCPFL='Y') and (saffl='Y');
+NOTE: The data set WORK.ADAE1 has 781 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              976.96k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        5  Switch Count  0
+      
+
+26         
+27         
+28            proc sql;
+29            	create table countae as
+30         	select distinct count(usubjid) as numAE, aedecod, trtan
+31         	from adae1
+32         	group by trtan, aedecod;
+NOTE: Table WORK.COUNTAE created, with 354 rows and 3 columns.
+
+33         
+34             create table nsubj as
+35         	select distinct count(distinct usubjid) as numusubjid, TRT01AN
+36         	from adsl
+37         	group by TRT01AN;
+NOTE: Table WORK.NSUBJ created, with 3 rows and 2 columns.
+
+38         	quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5876.21k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        6  Switch Count  0
+      
+
+39         
+40         data count;
+                                                           The SAS System
+
+41         merge countae(in=_countae)  nsubj(in=_nsubj rename=(trt01an=trtan));
+42         by trtan;
+43         if not _nsubj then do;
+44         abort cancel;
+45         end;
+46         label AEpercent="AEs (%)";
+47         if not missing(numAE) and not missing(numusubjid) then do;
+48         AEpercent= numAE/numusubjid;
+49         end;
+50         else do;
+51         AEpercent= .;
+52         end;
+53         run;
+
+NOTE: There were 354 observations read from the data set WORK.COUNTAE.
+NOTE: There were 3 observations read from the data set WORK.NSUBJ.
+NOTE: The data set WORK.COUNT has 354 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1071.31k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        7  Switch Count  0
+      
+
+54         
+55         proc sort data=count;
+56         by aedecod;
+57         run;
+
+NOTE: There were 354 observations read from the data set WORK.COUNT.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.COUNT has 354 observations and 5 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              678.15k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        8  Switch Count  0
+      
+
+58         
+59         data tcount;
+60         merge
+61         count
+62         count(where=(trtan_1=0) rename=(AEpercent=AEpercent_1 trtan=trtan_1))
+63         ;
+64         by aedecod;
+65         
+66         if missing(AEpercent) then do;
+67         AEpercent=0;
+68         end;
+69         
+70         if missing(AEpercent_1) then do;
+                                                           The SAS System
+
+71         AEpercent_1=0;
+72         end;
+73         
+74         RelRisk= AEpercent - AEpercent_1;
+75         aeseqno+1;
+76         run;
+
+INFO: The variable numAE on data set WORK.COUNT will be overwritten by data set WORK.COUNT.
+INFO: The variable numusubjid on data set WORK.COUNT will be overwritten by data set WORK.COUNT.
+NOTE: There were 354 observations read from the data set WORK.COUNT.
+NOTE: There were 116 observations read from the data set WORK.COUNT.
+      WHERE trtan_1=0;
+NOTE: The data set WORK.TCOUNT has 354 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              934.46k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        9  Switch Count  0
+      
+
+77         
+78         proc sql;
+79         create table maxpercen2 as
+80         select distinct -max(AEpercent) as minusmaxAEpercent, aedecod
+81         from tcount
+82         group by aedecod
+83         order by minusmaxAEpercent;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.MAXPERCEN2 created, with 230 rows and 2 columns.
+
+84         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              13552.78k
+      OS Memory           23716.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        10  Switch Count  0
+      
+
+85         
+86         data maxpercen2;
+87         set maxpercen2;
+88         dispseqno+1;
+89         run;
+
+NOTE: There were 230 observations read from the data set WORK.MAXPERCEN2.
+NOTE: The data set WORK.MAXPERCEN2 has 230 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              880.03k
+      OS Memory           11608.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        11  Switch Count  0
+      
+
+90         
+91         proc sort data=maxpercen2;
+92         by aedecod;
+93         run;
+
+NOTE: There were 230 observations read from the data set WORK.MAXPERCEN2.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.MAXPERCEN2 has 230 observations and 3 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              676.18k
+      OS Memory           11868.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        12  Switch Count  0
+      
+
+94         
+95         data tcount2;
+96         merge tcount maxpercen2;
+97         by aedecod;
+98         run;
+
+NOTE: There were 354 observations read from the data set WORK.TCOUNT.
+NOTE: There were 230 observations read from the data set WORK.MAXPERCEN2.
+NOTE: The data set WORK.TCOUNT2 has 354 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1035.90k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        13  Switch Count  0
+      
+
+99         
+100        proc sql;
+101        create table AEgrid as
+102        select * from (select distinct trtan from tcount2),
+103        (select distinct aedecod, dispseqno from tcount2)
+104        order by aedecod, trtan;
+NOTE: The execution of this query involves performing one or more Cartesian product joins that can not be optimized.
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.AEGRID created, with 690 rows and 3 columns.
+
+105        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              8352.84k
+      OS Memory           18336.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        14  Switch Count  0
+      
+
+106        
+107        data tcount3;
+108        merge tcount2 AEgrid;
+109        by aedecod trtan;
+110        if missing(AEpercent) then do;
+111        AEpercent=0;
+112        end;
+113        run;
+
+INFO: The variable dispseqno on data set WORK.TCOUNT2 will be overwritten by data set WORK.AEGRID.
+NOTE: There were 354 observations read from the data set WORK.TCOUNT2.
+NOTE: There were 690 observations read from the data set WORK.AEGRID.
+NOTE: The data set WORK.TCOUNT3 has 690 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1057.12k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        15  Switch Count  0
+      
+
+114        
+115        proc sort data=tcount3;
+116        by dispseqno;
+117        run;
+
+NOTE: There were 690 observations read from the data set WORK.TCOUNT3.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TCOUNT3 has 690 observations and 11 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              750.78k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 10:53:14 AM
+      Step Count                        16  Switch Count  0
+      
+
+118        
+119        
+120        title1 "Common Treatment-Emergent Adverse Events";
+121        proc sgplot data=tcount3;
+122        label trtan="Treatment";
+123        label aeseqno="AE ordered in descending order";
+124        where dispseqno<=20;
+125          scatter x=AEpercent y=dispseqno / group=trtan;
+126          xaxis grid;
+127          yaxis grid values=(1 to 20 by 1) valueshint;
+128         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+                                                           The SAS System
+
+      real time           4.10 seconds
+      user cpu time       0.18 seconds
+      system cpu time     0.48 seconds
+      memory              7511.37k
+      OS Memory           17632.00k
+      Timestamp           10/27/2026 10:53:18 AM
+      Step Count                        17  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P044\SGPlot.png.
+NOTE: There were 60 observations read from the data set WORK.TCOUNT3.
+      WHERE dispseqno<=20;
+
+129        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           6.63 seconds
+      user cpu time       0.48 seconds
+      system cpu time     1.15 seconds
+      memory              22195.84k
+      OS Memory           23716.00k
+      Timestamp           10/27/2026 10:53:18 AM
+      Step Count                        17  Switch Count  46
+      

@@ -1,0 +1,587 @@
+1                                                          The SAS System                            10:54 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.96 seconds
+      cpu time            0.60 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P053
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P053 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          *filename source "&rawadam./advsmax.xpt" ;
+2          %* modification 2019-12-23 - update path as data has been moved;
+3          
+4          filename source "&rawadam./advsmax.xpt";
+5          libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advsmax.xpt
+6          data work.advsmax ;
+7          	set source.advsmax;
+8             run;
+
+NOTE: There were 32139 observations read from the data set SOURCE.ADVSMAX.
+NOTE: The data set WORK.ADVSMAX has 32139 observations and 44 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.09 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.03 seconds
+      memory              853.46k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        2  Switch Count  0
+      
+
+9          
+10         data advsmax2;
+11            set advsmax(where=((PARAMCD="DIABP") and (ATPTN=815) and (ANL01FL="Y") and (ADY > 1) and (SAFFL="Y")));
+12            keep USUBJID TRTPN PARAM PARAMCD AVAL ANL01FL BNRIND ANRIND SHIFT1 CRIT1FL
+13         	      ANRLO ANRHI
+14         			BASE AVAL
+15         			Ref
+16                  ;
+17         	if not nmiss(base, aval) then Ref = Base;
+18         	label BASE = "Max. Baseline"
+19         	      AVAL = "Max. Post baseline"
+20         			;
+21         	run ;
+
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX.
+      WHERE (PARAMCD='DIABP') and (ATPTN=815) and (ANL01FL='Y') and (ADY>1) and (SAFFL='Y');
+NOTE: The data set WORK.ADVSMAX2 has 250 observations and 14 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1044.62k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        3  Switch Count  0
+      
+
+22         
+23         
+24         *--------------------------------------------------------------------------------
+25         Produce the baseline shift frequency table
+26         *--------------------------------------------------------------------------------;
+                                                           The SAS System
+
+27         
+28         proc sort data = advsmax2;
+29            by TRTPN;
+30         	run;
+
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX2.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADVSMAX2 has 250 observations and 14 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              675.84k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        4  Switch Count  0
+      
+
+31         
+32         proc freq data = advsmax2 noprint;
+33            by TRTPN;
+34            table BNRIND * ANRIND / missing out = TableA;
+35         	table BNRIND / missing out = BNRIND;
+36         	table ANRIND / missing out = ARIND;
+37         	table TRTPN / missing out = TRTPN;
+38         	run;
+
+WARNING: Variable TRTPN already exists on file WORK.TRTPN.
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX2.
+NOTE: The data set WORK.TABLEA has 14 observations and 5 variables.
+NOTE: The data set WORK.BNRIND has 9 observations and 4 variables.
+NOTE: The data set WORK.ARIND has 6 observations and 4 variables.
+NOTE: The data set WORK.TRTPN has 3 observations and 3 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.08 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1940.65k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        5  Switch Count  0
+      
+
+39         
+40         data TableA;
+41            set TableA;
+42         	by TRTPN;
+43         	length ValueFmt $100;
+44         	ValueFmt = trim(left(put(count, comma8.))) !! " (" !! trim(left(put(percent, 10.1))) !! ")";
+45         	run;
+
+NOTE: There were 14 observations read from the data set WORK.TABLEA.
+NOTE: The data set WORK.TABLEA has 14 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              896.75k
+                                                           The SAS System
+
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        6  Switch Count  0
+      
+
+46         
+47         * MERGE ON GROUP NS AND ADD TO THE GROUP LABEL;
+48         
+49         data TableA;
+50            merge TableA
+51         	      TRTPN(rename = (Count = GroupN Percent = GroupPercent));
+52         	by TRTPN;
+53         	length GroupFmt $100;
+54            GroupFmt = trim(left(TRTPN)) !! " (N = " !! trim(left(put(GroupN, comma10.))) !! ")";
+55         	run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      54:25   
+NOTE: There were 14 observations read from the data set WORK.TABLEA.
+NOTE: There were 3 observations read from the data set WORK.TRTPN.
+NOTE: The data set WORK.TABLEA has 14 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1069.21k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        7  Switch Count  0
+      
+
+56         
+57         proc transpose data = TableA out = TableAt prefix = ValueFmt;
+58            by GroupFmt BNRIND;
+59         	var ValueFmt;
+60         	id ANRIND;
+61         	run;
+
+NOTE: There were 14 observations read from the data set WORK.TABLEA.
+NOTE: The data set WORK.TABLEAT has 9 observations and 5 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              2539.31k
+      OS Memory           12892.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        8  Switch Count  0
+      
+
+62         
+63         *--------------------------------------------------------------------------------
+64         Produce the treatment emergent high table
+65         *--------------------------------------------------------------------------------;
+66         
+67         data advsmax3;
+68            set advsmax2;
+69         
+                                                           The SAS System
+
+70         	if (CRIT1FL ne "");
+71         	*n = (CRIT1FL="Y");
+72            n = mod(_n_,17) = 1;
+73            run;
+
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX2.
+NOTE: The data set WORK.ADVSMAX3 has 250 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              919.40k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        9  Switch Count  0
+      
+
+74         	
+75         proc summary data = advsmax3 nway;
+76            class TRTPN;
+77         	var n;
+78         	output out = EmergentHigh n=Nx sum = n mean = percent;
+79         	run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX3.
+NOTE: The data set WORK.EMERGENTHIGH has 3 observations and 6 variables.
+NOTE: PROCEDURE SUMMARY used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              8801.81k
+      OS Memory           19564.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        10  Switch Count  0
+      
+
+80         
+81         data FishersExact;
+82            Name1 = "XP2_FISH";
+83         	nValue1 = .;
+84         	run;
+
+NOTE: The data set WORK.FISHERSEXACT has 1 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              743.71k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        11  Switch Count  0
+      
+
+85         proc freq data = advsmax3;* noprint;
+86            ods output FishersExact=FishersExact;
+87            table TRTPN * n / exact;
+88         	run;
+                                                           The SAS System
+
+
+NOTE: The data set WORK.FISHERSEXACT has 2 observations and 5 variables.
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX3.
+NOTE: The PROCEDURE FREQ printed page 1.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.08 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1363.87k
+      OS Memory           12888.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        12  Switch Count  0
+      
+
+89         
+90         data PValue;
+91            set FishersExact;
+92         	if Name1 = "XP2_FISH";
+93         	*length FishersP $12;
+94         	rename Nvalue1=FishersP;
+95         	format NValue1 pvalue.;
+96         	run;
+
+NOTE: There were 2 observations read from the data set WORK.FISHERSEXACT.
+NOTE: The data set WORK.PVALUE has 1 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              896.96k
+      OS Memory           12632.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        13  Switch Count  0
+      
+
+97         
+98         data EmergentHigh;
+99            merge EmergentHigh
+100                 PValue;
+101        	format percent 6.1;
+102        	if n(percent) then percent = 100 * percent;
+103        	run;
+
+NOTE: There were 3 observations read from the data set WORK.EMERGENTHIGH.
+NOTE: There were 1 observations read from the data set WORK.PVALUE.
+NOTE: The data set WORK.EMERGENTHIGH has 3 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1060.43k
+      OS Memory           12888.00k
+      Timestamp           10/27/2026 10:54:14 AM
+      Step Count                        14  Switch Count  0
+      
+
+104        
+105        
+                                                           The SAS System
+
+106        
+107        	
+108        *--------------------------------------------------------------------------------
+109        Set up the ODS Template
+110        *--------------------------------------------------------------------------------;
+111        	
+112        options orientation=landscape;
+113        ods pdf file = "Target16.pdf" style = journal fontscale = 70;
+NOTE: Writing ODS PDF output to DISK destination "D:\meta_hackathon\sas2r-agent\output\sas\datasets\P053\Target16.pdf", 
+      printer "PDF".
+114        
+115        ods layout start width = 9in height = 7.5in;
+116        
+117        *--------------------------------------------------------------------------------
+118        Produce the graph
+119        *--------------------------------------------------------------------------------;
+120        
+121        %LET MAJOR = 10;   * MAJOR TIC UNITS;
+122        
+123        proc summary data = advsmax2 nway;
+124           var ANRLO ANRHI BASE AVAL ;
+125        	output out = ADVSMAXSum mean =   min(AVAL) = MinValue max(AVAL) = MaxValue;
+126        	run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX2.
+NOTE: The data set WORK.ADVSMAXSUM has 1 observations and 8 variables.
+NOTE: PROCEDURE SUMMARY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              6410.62k
+      OS Memory           20336.00k
+      Timestamp           10/27/2026 10:54:15 AM
+      Step Count                        15  Switch Count  0
+      
+
+127        	
+128        * MANUALLY IDENTIFY Y AXIS MIN AND MAX TO APPLY TO BOTH PLOT AND PLOT2;
+129        * (OTHWERISE DEFAULT SELECTION MAY DIFFER BETWEEN PLOT AND PLOT2);
+130        data _null_;
+                                                           The SAS System
+
+131           set ADVSMAXSum;
+132        	call symput("ANRLO",trim(left(ANRLO)));
+133        	call symput("ANRHI",trim(left(ANRHI)));
+134        	margin = (maxvalue - minvalue) / 100;  * ADD MARGINS 1% OF RANGE;
+135        	YAxisMin =  &MAJOR * (floor((minvalue - margin) / &MAJOR));
+136        	YAxisMax =  &MAJOR * ( ceil((maxvalue + margin) / &MAJOR));
+137        	call symput("MINVALUE", YAxisMin);
+138        	call symput("MAXVALUE", YAxisMax);
+139        	put _all_;
+140        	run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      132:32   133:32   137:26   138:26   
+_TYPE_=0 _FREQ_=250 ANRLO=60 ANRHI=90 BASE=71.732 AVAL=66.412 MinValue=41 MaxValue=90 margin=0.49 YAxisMin=40 YAxisMax=100 _ERROR_=0
+_N_=1
+NOTE: There were 1 observations read from the data set WORK.ADVSMAXSUM.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              910.87k
+      OS Memory           15196.00k
+      Timestamp           10/27/2026 10:54:15 AM
+      Step Count                        16  Switch Count  0
+      
+
+141        
+142        
+143        * NOTE: DEPENDENT ON NUMBER OF TREATMENTS;
+144        
+145        ods region x = .5in y = .5in height = 4.5in width = 4.5in;
+146        
+147        goptions colors=(blue,red,green);
+148        symbol1 interpol = none value = triangle c=green;
+149        symbol2 value = circle c=red;
+150        symbol3 value = x c=blue;
+151        symbol4 value = none interpol = RL value = none line = 21 CI = black;
+152        legend1 position = bottom;
+153        proc gplot data = advsmax2;
+154           title "Scatter Plot-Max. Post-baseline vs Max. Baseline for Lab Test 1 (mmol/L)";
+155           plot AVAL * base = TRTPN/
+                                                           The SAS System
+
+156        	   vref = &ANRLO, &ANRHI lvref = 21 cvref = (blue red) vaxis = &MINVALUE to &MAXVALUE by &MAJOR
+157              href = &ANRLO, &ANRHI lhref = 21 chref = (blue red)
+158              ;
+159        	plot2  Ref * base / overlay noaxis vaxis = &MINVALUE to &MAXVALUE by &MAJOR ;
+160        	legend ;
+161        
+162           run;
+
+NOTE: Regression equation :  Ref = -1.14E-13 + 1*BASE.
+WARNING: TITLE1 is too long. Height has been reduced to 69.27 pct of specified or default size.
+NOTE: Regression equation :  Ref = -1.14E-13 + 1*BASE.
+NOTE: 32556 bytes written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P053\sasgraph.png.
+163        
+164        
+165        * FOR EACH COLUMN WITH VALUES, CREAT PROC REPORT CODE FOR COLUMSN STMT AND DEFINE STATMENTS;
+
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX2.
+NOTE: PROCEDURE GPLOT used (Total process time):
+      real time           0.62 seconds
+      user cpu time       0.17 seconds
+      system cpu time     0.14 seconds
+      memory              6934.06k
+      OS Memory           21196.00k
+      Timestamp           10/27/2026 10:54:16 AM
+      Step Count                        17  Switch Count  0
+      
+
+166        proc format;
+167           picture percpar
+168        	   low-high = "009.9)"
+169        		(prefix = "(");
+NOTE: Format PERCPAR has been output.
+170        	run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              240.68k
+      OS Memory           18268.00k
+      Timestamp           10/27/2026 10:54:16 AM
+                                                           The SAS System
+
+      Step Count                        18  Switch Count  0
+      
+
+171        
+172        * BASELINE SHIFT TABLE;
+173        	
+174        ods region x = 5in y = .5in height = 3.5in;
+175        options missing = "";
+176        proc report data = TableA split="#" style(header)={borderstyle=solid}; * style(report)={fontsize=9pt}
+176      ! style(column)={fontsize=9pt} ;
+177        	columns GroupFmt BNRIND ("Max Post Basline Result (shift from baseline)" (ANRIND,("N (%)" (count percent))));
+178        	*columns GroupFmt BNRIND ("Max Post Basline Result (shift from baseline)" (ANRIND,("N (%)" (ValueFmt))));
+179        	define GroupFmt / "Treatment" group style(column)={just=center cellwidth=1in verticalalign=bottom};
+180           define BNRIND / "Max. Baseline Result" group  style(column)={just=center cellwidth=1in verticalalign=bottom};
+181        	compute after GroupFmt;
+182              line " ";
+183        		endcomp;
+184        	define ANRIND / across ;
+185        	define count / " " analysis sum right format = 4. style(column)={just=right cellwidth=.4in borderrightstyle=hidden}; *
+185      ! sum noprint  right;
+186        	define percent / " " analysis sum left format = percpar6. style(column)={just=left cellwidth=.4in
+186      ! borderleftstyle=hidden}; *analysis sum noprint  left;
+187        	run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+WARNING: The absolute region was too small to accommodate the output supplied for the PDF destination.  Output will be suppressed.
+NOTE: There were 14 observations read from the data set WORK.TABLEA.
+NOTE: The PROCEDURE REPORT printed pages 2-3.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              7701.71k
+      OS Memory           24172.00k
+      Timestamp           10/27/2026 10:54:16 AM
+      Step Count                        19  Switch Count  0
+      
+
+188           quit;
+189        
+190        * EMERGENT HIGH TABLE;
+                                                           The SAS System
+
+191        
+192        ods region x = 5in y = 4in height = 2.5in;
+193        proc report data = EmergentHigh split="#" style(report)={borderleftstyle=solid} style(header)={textalign=left};
+193      ! *style(report)={fontsize=9pt} style(column)={fontsize=9pt} ;
+194        	columns TRTPN  ("Treatment Emergent High" (Nx n percent FishersP));
+195           define TRTPN / display style(column)={cellwidth = .7in};
+196        	define Nx / display style(column)={cellwidth = .7in textalign=left};
+197        	define n / display style(column)={cellwidth = .7in textalign=left};
+198        	define percent / "%" display style(column)={cellwidth = .7in textalign=left};
+199        	define FishersP / display style(column)={cellwidth = .7in textalign=left};
+200        	run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 3 observations read from the data set WORK.EMERGENTHIGH.
+NOTE: The PROCEDURE REPORT printed page 4.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              8088.65k
+      OS Memory           25204.00k
+      Timestamp           10/27/2026 10:54:16 AM
+      Step Count                        20  Switch Count  0
+      
+
+201        
+202        
+203        ods region x = .5in y = 6in height = 1.5in;
+204        ods text="Scatter Plot: Includes subjects with both a baseline and a post-baseline measure.  Reference limits apply to
+204      ! most of the participants are used in the plot";
+205        ods text="N=number of subjects with at least one post-baseline measure; Nx=number of subjects with maximum baseline
+205      ! either normal or low and have at least one post-baseline measure.";
+206        ods text="Summary tables used the reference limits set 1 (Male, Age 18-65, LLNx &ANRLO mmol/L ULNx &ANRHI mmol/L) set 2
+206      ! (Female, Age 18-65, LLN=&ANRLO mmol/L ULN=&ANRHI mmol/L).";
+207        
+208        ods layout end;
+209        
+210        
+211        ods pdf close;
+NOTE: ODS PDF printed 1 page to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P053\Target16.pdf.
+212        
+                                                           The SAS System
+
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           4.63 seconds
+      user cpu time       0.93 seconds
+      system cpu time     0.90 seconds
+      memory              23330.39k
+      OS Memory           25204.00k
+      Timestamp           10/27/2026 10:54:16 AM
+      Step Count                        20  Switch Count  54
+      

@@ -1,0 +1,303 @@
+1                                                          The SAS System                            15:52 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           0.40 seconds
+      cpu time            0.34 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P081
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:52:42 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P081 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    f_mean_cfb.sas
+3          * Purpose:    Figure 14.2.4 - Mean Change from Baseline Over Time
+4          *             (with error bars showing SE or 95% CI)
+5          * Study:      [STUDYID]
+6          * Author:     [Programmer Name]
+7          * Date:       [Date]
+8          * Input:      adam.adeff (or adam.adlb, adam.advs, adam.adqs)
+9          * Output:     f_mean_cfb.rtf
+10         * Population: Efficacy Analysis Set (EFFFL='Y')
+11         *****************************************************************************/
+12         
+13         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:52:42
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+79         %include "&pgmpath./utilities/u_titles.sas";
+241        
+242        /*--- Parameters ---*/
+243        %let eff_param = ACTOT;   /* test copy: placeholder filled with the synthetic efficacy parameter */    /* Analysis
+243      ! parameter */
+244        %let y_label   = Change from Baseline in ADAS-Cog Total Score;
+245        
+246        /*--- Step 1: Prepare analysis data ---*/
+247        proc sql noprint;
+248            create table eff as
+249            select a.USUBJID, a.TRTA, a.TRTAN,
+250                   a.PARAMCD, a.PARAM,
+251                   a.AVISIT, a.AVISITN,
+252                   a.AVAL, a.BASE, a.CHG,
+253                   a.ANL01FL
+254            from adam.adeff a
+255            inner join adam.adsl b on a.USUBJID = b.USUBJID
+256            where b.EFFFL = 'Y'
+257                  and a.PARAMCD = "&eff_param."
+258                  and a.ANL01FL = 'Y'
+259                  and a.CHG ne .
+260            order by a.TRTAN, a.AVISITN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.EFF created, with 650 rows and 11 columns.
+                                                           The SAS System
+
+
+261        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              19830.84k
+      OS Memory           27972.00k
+      Timestamp           10/27/2026 03:52:42 PM
+      Step Count                        2  Switch Count  0
+      
+
+262        
+263        /*--- Step 2: Compute summary statistics by visit and treatment ---*/
+264        proc means data=eff nway noprint;
+265            class TRTA TRTAN AVISIT AVISITN;
+266            var CHG;
+267            output out=stats(drop=_type_ _freq_)
+268                n=n mean=mean stderr=se
+269                lclm=lcl uclm=ucl;
+270        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 650 observations read from the data set WORK.EFF.
+NOTE: The data set WORK.STATS has 9 observations and 9 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              7628.87k
+      OS Memory           17004.00k
+      Timestamp           10/27/2026 03:52:42 PM
+      Step Count                        3  Switch Count  0
+      
+
+271        
+272        /*--- Step 3: Small offset to prevent overlapping points ---*/
+273        data plot_data;
+274            set stats;
+275            /* Offset x-position slightly by treatment for readability */
+276            select(TRTAN);
+277                when(1) xpos = AVISITN - 0.15;
+278                when(2) xpos = AVISITN;
+279                when(3) xpos = AVISITN + 0.15;
+280                otherwise xpos = AVISITN;
+281            end;
+282        run;
+
+NOTE: There were 9 observations read from the data set WORK.STATS.
+NOTE: The data set WORK.PLOT_DATA has 9 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              909.51k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:52:42 PM
+      Step Count                        4  Switch Count  0
+                                                           The SAS System
+
+      
+
+283        
+284        /*--- Step 4: Generate figure ---*/
+285        %set_titles(output=F_MEAN_CFB, population=Efficacy Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+286        
+287        options orientation=landscape; ods rtf file="&tlfpath./f_mean_cfb.rtf" style=journal bodytitle;
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/f_mean_cfb.rtf
+288        ods graphics on / reset width=10in height=6.5in imagefmt=emf;
+289        
+290        proc sgplot data=plot_data;
+291            title4 j=c "Figure 14.2.4";
+292            title5 j=c "Mean Change from Baseline Over Time";
+293            title6 j=c "Efficacy Analysis Set";
+294        
+295            /* Error bars (95% CI) */
+296            highlow x=xpos low=lcl high=ucl / group=TRTA
+297                lineattrs=(thickness=1.5px)
+298                type=bar barwidth=0.05;
+299        
+300            /* Mean values connected by lines */
+301            series x=xpos y=mean / group=TRTA
+302                lineattrs=(thickness=2px) name="trt"
+303                markers markerattrs=(size=8px symbol=circlefilled);
+304        
+305            /* Reference line at 0 */
+306            refline 0 / axis=y lineattrs=(pattern=dash color=gray thickness=1px);
+307        
+308            /* Axes */
+309            xaxis label="Visit (Week)"
+310                  type=linear
+311                  integer;
+312            yaxis label="&y_label."
+313                  grid gridattrs=(pattern=dot color=lightgray);
+314        
+315            keylegend "trt" / location=outside position=bottom across=3;
+316        
+317            footnote1 j=l "Data cutoff: &cutdate.";
+                                                           The SAS System
+
+318            footnote2 j=l "Error bars represent 95% confidence intervals.";
+319            footnote3 j=l "n = number of subjects with non-missing change from baseline.";
+320            footnote4 j=l "Program: &sysin. | Run: %sysfunc(date(), date9.)";
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+321        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           2.72 seconds
+      user cpu time       0.15 seconds
+      system cpu time     0.42 seconds
+      memory              8506.56k
+      OS Memory           19804.00k
+      Timestamp           10/27/2026 03:52:45 PM
+      Step Count                        5  Switch Count  0
+      
+NOTE: There were 9 observations read from the data set WORK.PLOT_DATA.
+
+322        
+323        ods graphics off;
+324        ods rtf close;
+325        %clear_titles;
+326        
+327        /*--- Step 5: Supporting data table (n per visit per treatment) ---*/
+328        proc tabulate data=plot_data out=_ntable;
+329            class TRTA AVISIT AVISITN;
+330            var n;
+331            table TRTA, AVISIT * n * sum / box='n per visit';
+332        run;
+
+WARNING: The variable n conflicts with the keyword of the same name.
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 9 observations read from the data set WORK.PLOT_DATA.
+NOTE: The data set WORK._NTABLE has 9 observations and 6 variables.
+NOTE: PROCEDURE TABULATE used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              7915.75k
+      OS Memory           19308.00k
+      Timestamp           10/27/2026 03:52:45 PM
+                                                           The SAS System
+
+      Step Count                        6  Switch Count  0
+      
+
+333        
+334        proc datasets lib=work nolist;
+335            delete eff stats plot_data _ntable;
+336        quit;
+
+NOTE: Deleting WORK.EFF (memtype=DATA).
+NOTE: Deleting WORK.STATS (memtype=DATA).
+NOTE: Deleting WORK.PLOT_DATA (memtype=DATA).
+NOTE: Deleting WORK._NTABLE (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              230.71k
+      OS Memory           13144.00k
+      Timestamp           10/27/2026 03:52:45 PM
+      Step Count                        7  Switch Count  0
+      
+
+337        
+338        %put NOTE: f_mean_cfb.sas completed successfully.;
+NOTE: f_mean_cfb.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.85 seconds
+      user cpu time       0.45 seconds
+      system cpu time     0.78 seconds
+      memory              26971.09k
+      OS Memory           27972.00k
+      Timestamp           10/27/2026 03:52:45 PM
+      Step Count                        7  Switch Count  27
+      

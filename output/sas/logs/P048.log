@@ -1,0 +1,571 @@
+1                                                          The SAS System                            16:01 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.50 seconds
+      cpu time            0.56 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P048
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.28k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 04:01:30 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P048 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*************************************************/
+2          /* PROGRAM NAME : discontinuation_typeA.sas */
+3          /* Ann Croft 12-Oct-2014 */
+4          
+5          %* modification 2019-12-23 - update path as data has been moved;
+6          
+7          filename source "&rawadam./adsl.xpt";
+8          libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+9          
+10         *** Get data ***;
+11         data adsl;
+12           set source.adsl;
+13           where trt01p ne '';
+14           if trt01pn=0 then trt01pn=3;
+15           else if trt01pn=54 then trt01pn=1;
+16           else if trt01pn=81 then trt01pn=2;
+17         run;
+
+NOTE: There were 254 observations read from the data set SOURCE.ADSL.
+      WHERE trt01p not = ' ';
+NOTE: The data set WORK.ADSL has 254 observations and 48 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              881.31k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 04:01:30 PM
+      Step Count                        2  Switch Count  0
+      
+
+18         
+19         *** Get table counts ***;
+20         proc freq data=adsl noprint;
+21           table studyid * trt01pn * trt01p * disconfl / out=topline (drop=percent);
+22         run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: The data set WORK.TOPLINE has 6 observations and 5 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.11 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.04 seconds
+      memory              1946.06k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 04:01:30 PM
+      Step Count                        3  Switch Count  0
+      
+
+23         
+24         proc freq data=adsl noprint;
+25           table studyid * trt01pn * trt01p * DCREASCD / out=midline1 (drop=percent);
+26           table studyid * DCREASCD   / out=sortord1 (drop=percent);
+                                                           The SAS System
+
+27           where DSRAEFL='Y' or DTHFL='Y';
+28         run;
+
+NOTE: There were 95 observations read from the data set WORK.ADSL.
+      WHERE (DSRAEFL='Y') or (DTHFL='Y');
+NOTE: The data set WORK.MIDLINE1 has 5 observations and 5 variables.
+NOTE: The data set WORK.SORTORD1 has 2 observations and 3 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.07 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1228.96k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 04:01:30 PM
+      Step Count                        4  Switch Count  0
+      
+
+29         
+30         proc freq data=adsl noprint;
+31           table studyid * trt01pn * trt01p * DCREASCD / out=midline2 (drop=percent);
+32           table studyid * DCREASCD   / out=sortord2 (drop=percent);
+33           where DCdecod='LACK OF EFFICACY';
+34         run;
+
+NOTE: There were 4 observations read from the data set WORK.ADSL.
+      WHERE DCdecod='LACK OF EFFICACY';
+NOTE: The data set WORK.MIDLINE2 has 2 observations and 5 variables.
+NOTE: The data set WORK.SORTORD2 has 1 observations and 3 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1218.15k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 04:01:30 PM
+      Step Count                        5  Switch Count  0
+      
+
+35         
+36         proc freq data=adsl noprint;
+37           table studyid * trt01pn * trt01p * DCREASCD / out=midline3 (drop=percent);
+38           table studyid * DCREASCD / out=sortord3 (drop=percent);
+39           where DCdecod^='LACK OF EFFICACY' and DSRAEFL^='Y' and DTHFL^='Y';
+40           where also disconfl='Y';
+NOTE: WHERE clause has been augmented.
+41         run;
+
+NOTE: There were 45 observations read from the data set WORK.ADSL.
+      WHERE (DCdecod not = 'LACK OF EFFICACY') and (disconfl='Y') and (DSRAEFL not = 'Y') and (DTHFL not = 'Y');
+NOTE: The data set WORK.MIDLINE3 has 15 observations and 5 variables.
+NOTE: The data set WORK.SORTORD3 has 6 observations and 3 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1228.96k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 04:01:30 PM
+                                                           The SAS System
+
+      Step Count                        6  Switch Count  0
+      
+
+42         
+43         data all;
+44           set topline (in=a) midline1 (in=b) midline2 (in=c) midline3 (in=d);
+45           by studyid trt01pn trt01p;
+46           if      a then do; ord1=1; ord2=1; end;
+47           else if b then do; ord1=2; ord2=1; end;
+48           else if c then do; ord1=3; ord2=2; end;
+49           else if d then do; ord1=4; ord2=3; end;
+50         run;
+
+NOTE: There were 6 observations read from the data set WORK.TOPLINE.
+NOTE: There were 5 observations read from the data set WORK.MIDLINE1.
+NOTE: There were 2 observations read from the data set WORK.MIDLINE2.
+NOTE: There were 15 observations read from the data set WORK.MIDLINE3.
+NOTE: The data set WORK.ALL has 28 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1414.53k
+      OS Memory           11872.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        7  Switch Count  0
+      
+
+51         data alls;
+52           set sortord1 (in=b) sortord2 (in=c) sortord3 (in=d);
+53           by studyid ;
+54           if      b then do; ord1=2; ord2=1; end;
+55           else if c then do; ord1=3; ord2=2; end;
+56           else if d then do; ord1=4; ord2=3; end;
+57         run;
+
+NOTE: There were 2 observations read from the data set WORK.SORTORD1.
+NOTE: There were 1 observations read from the data set WORK.SORTORD2.
+NOTE: There were 6 observations read from the data set WORK.SORTORD3.
+NOTE: The data set WORK.ALLS has 9 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1211.00k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        8  Switch Count  0
+      
+
+58         
+59         *** Get sort order within table ***;
+60         proc sort data=alls; by ord1 ord2 descending count; run;
+
+NOTE: There were 9 observations read from the data set WORK.ALLS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ALLS has 9 observations and 5 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+                                                           The SAS System
+
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              687.15k
+      OS Memory           11100.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        9  Switch Count  0
+      
+
+61         data alls2;
+62           set alls;
+63           by ord1 ord2 descending count;
+64           retain ord3 .;
+65           if first.ord2 then ord3=1;
+66           else ord3=ord3+1;
+67         run;
+
+NOTE: There were 9 observations read from the data set WORK.ALLS.
+NOTE: The data set WORK.ALLS2 has 9 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              895.00k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        10  Switch Count  0
+      
+
+68         
+69         *** Get population counts ***;
+70         proc freq data=adsl noprint;
+71           table studyid * trt01pn * trt01p / out=pop (drop=percent rename=(count=tot));
+72         run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: The data set WORK.POP has 3 observations and 4 variables.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.12 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1522.12k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        11  Switch Count  0
+      
+
+73         
+74         *** Create output cells with percentage ***;
+75         data allp;
+76           length dcreascd $200;
+77           merge all pop;
+78           by studyid trt01pn trt01p;
+79           if count ne . then do;
+80             countc=put(count, 4.)||' ('||put(round(count/tot, 0.1), 5.1)||')';
+81           end;
+82           if ord1=1 then do;
+83             if disconfl='Y' then DCREASCD='Discontinued';
+                                                           The SAS System
+
+84             else DCREASCD='Completed the Study';
+85           end;
+86         run;
+
+NOTE: There were 28 observations read from the data set WORK.ALL.
+NOTE: There were 3 observations read from the data set WORK.POP.
+NOTE: The data set WORK.ALLP has 28 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1072.46k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        12  Switch Count  0
+      
+
+87         
+88         *** Get data ready for output table ***;
+89         proc sort data=allp; by studyid ord1 ord2 dcreascd trt01pn; run;
+
+NOTE: There were 28 observations read from the data set WORK.ALLP.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ALLP has 28 observations and 10 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              670.81k
+      OS Memory           11100.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        13  Switch Count  0
+      
+
+90         proc transpose data=allp out=allpt prefix=trt;
+91           var countc;
+92           by studyid ord1 ord2 dcreascd;
+93           id trt01pn;
+94         run;
+
+NOTE: There were 28 observations read from the data set WORK.ALLP.
+NOTE: The data set WORK.ALLPT has 11 observations and 8 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2544.53k
+      OS Memory           12892.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        14  Switch Count  0
+      
+
+95         
+96         *** Macro call to determine what treatment groups there are ***;
+97         %global maxc maxt;
+98         data _null_;
+99           length popc $100;
+100          set pop end=eof;
+                                                           The SAS System
+
+101          by studyid trt01pn trt01p;
+102          retain popc '';
+103          if _n_=1 then popc=strip(put(trt01pn, best.));
+104          else if _n_>1 then popc=strip(popc)||', '||strip(put(trt01pn, best.));
+105          call symput('trt'||strip(put(trt01pn, best.))||'c', strip(trt01p)) /*Character Treatment name */;
+106          call symput('trt'||strip(put(trt01pn, best.))||'n', strip(trt01p)) /* Numberic treatment count*/;
+107          if eof then do;
+108            call symput('maxc', strip(popc));
+109            call symput('maxt', strip(put(_n_, best.)));
+110          end;
+111        run;
+
+NOTE: There were 3 observations read from the data set WORK.POP.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              909.31k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        15  Switch Count  0
+      
+
+112        %put &maxc;
+1, 2, 3
+113        %put &maxt;
+3
+114        *** ***;
+115        
+116        *** # is to be used a placeholder for a space for table as rtf does not hold it ***;
+117        
+118        %macro zero;
+119          %do i=1 %to &maxt;
+120            if trt&i.='' then trt&i.='###0';
+121            else trt&i.=tranwrd(trt&i., ' ', '#');
+122          %end;
+123        %mend zero;
+124        
+125        *** Set missing cells to zero ***;
+126        data allpt2;
+127          set allpt;
+128          %zero;
+129        run;
+
+NOTE: There were 11 observations read from the data set WORK.ALLPT.
+NOTE: The data set WORK.ALLPT2 has 11 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              903.28k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        16  Switch Count  0
+      
+
+130        
+131        *** Merge sort order on to table for descending table counts ***;
+                                                           The SAS System
+
+132        data allpt3 (keep=studyid dcreascd ord1 ord2 ord3 trt:);
+133          merge allpt2 alls2;
+134          by studyid ord1 ord2;
+135          if ord1=1 and upcase(DCREASCD)='DISCONTINUED' then ord3=2;
+136          else if ord1=1 then ord3=1;
+137        run;
+
+INFO: The variable dcreascd on data set WORK.ALLPT2 will be overwritten by data set WORK.ALLS2.
+NOTE: MERGE statement has more than one data set with repeats of BY values.
+NOTE: There were 11 observations read from the data set WORK.ALLPT2.
+NOTE: There were 9 observations read from the data set WORK.ALLS2.
+NOTE: The data set WORK.ALLPT3 has 11 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1061.40k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        17  Switch Count  0
+      
+
+138        
+139        proc sort data=allpt3;
+140          by studyid ord1 ord2 ord3;
+141        run;
+
+NOTE: There were 11 observations read from the data set WORK.ALLPT3.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ALLPT3 has 11 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              669.81k
+      OS Memory           11100.00k
+      Timestamp           10/27/2026 04:01:31 PM
+      Step Count                        18  Switch Count  0
+      
+
+142        
+143        options orientation=landscape leftmargin=0.5in rightmargin=0.5in; ods rtf;
+                                                     The SAS System
+
+NOTE: Writing RTF Body file: sasrtf.rtf
+144        %macro disconta;
+145        
+146        data final;
+147          length col1 $200;
+148          set allpt3;
+149          *** Work out how many lines per dispostion is needed (space dependant) ***;
+150          *** Work out how many lines per page can be filled and hence find how many pages required ***;
+151          pagex=1;
+152          if ord1=1 then col1=strip(dcreascd);
+153          else if ord1=3 then col1='####'||strip(dcreascd);
+154        run;
+155        
+156        options ls=256;
+157        title1 j=l "Table X: Dispostion Table";
+158        title2 j=l "##";
+159        title3 j=l "Subject Disposition";
+160        footnote1 j=l "Abbreviations: N=total number of subjects in population.";
+161        footnote2 j=l "###############n=number of subjects in the specified category";
+162        footnote3 j=l "###############%=Percentage of patients with N as denomiator";
+163        footnote4 j=l "##";
+164        footnote5 j=l "##";
+165        footnote6 j=l "Program Location: blah lah blah";
+166        
+167        proc report data=final headline split='@' style = {cellpadding =0pt} nowd spacing=0
+168             style(report)={just=left outputwidth = 25 cm}
+169             style(lines)=[protectspecialchars=off just=left]
+170             style(column)= {pretext = "^R'\s2 '"
+171                             posttext = "   "
+172                             asis=yes};
+173             column pagex ord1 ord2  ord3 col1
+174                          %do i=1 %to &maxt; ("&&trt&i.c @(N=&&trt&i.n)" trt&i) %end; ;
+175             define pagex    / noprint order order=internal;
+176             define ord1     / noprint order order=internal;
+177             define ord2     / noprint order order=internal;
+178             define ord3     / noprint order order=internal;
+179             define col1     / "Subject Disposition"  style(column)=[cellwidth= 9.5 cm just=left];
+180             %do i=1 %to &maxt;
+181               define trt&i. / "  n   %"  style(column)=[cellwidth= 4.5 cm just=left];
+182             %end;
+183        
+                                                     The SAS System
+
+184             compute before ord2 / style(lines)={font_size=9pt font_face="Courier New" font_weight=bold};
+185               length text $150.;
+186               num=150;
+187               if      ord2=1 then text='##Death or Adverse Event';
+188               else if ord2=2 then text='##Lack of Efficacy-Related Reasons';
+189               else if ord2=3 then text='##Other Reasons';
+190             endcomp;
+191        run;
+192        %mend disconta;
+193        %disconta;
+
+NOTE: There were 11 observations read from the data set WORK.ALLPT3.
+NOTE: The data set WORK.FINAL has 11 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              923.34k
+      OS Memory           13400.00k
+      Timestamp           10/27/2026 04:01:32 PM
+      Step Count                        19  Switch Count  0
+      
+
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 11 observations read from the data set WORK.FINAL.
+NOTE: The PROCEDURE REPORT printed page 1.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.13 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.01 seconds
+      memory              7869.15k
+      OS Memory           20068.00k
+      Timestamp           10/27/2026 04:01:33 PM
+      Step Count                        20  Switch Count  0
+      
+
+194        ods rtf close;
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+                                                                                                                         The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5275.40k
+      OS Memory           18524.00k
+      Timestamp           10/27/2026 04:01:33 PM
+      Step Count                        21  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           4.05 seconds
+      user cpu time       0.56 seconds
+      system cpu time     0.93 seconds
+      memory              19059.42k
+      OS Memory           20068.00k
+      Timestamp           10/27/2026 04:01:33 PM
+      Step Count                        21  Switch Count  54
+      

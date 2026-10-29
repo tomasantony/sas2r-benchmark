@@ -1,0 +1,555 @@
+1                                                          The SAS System                            15:46 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.71 seconds
+      cpu time            0.54 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P074
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P074 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    t_lb_shift.sas
+3          * Purpose:    Table 14.3.4 - Shift Table for Laboratory Parameters
+4          *             (Baseline to Worst Post-Baseline by NCI-CTCAE Grade)
+5          * Study:      [STUDYID]
+6          * Author:     [Programmer Name]
+7          * Date:       [Date]
+8          * Input:      adam.adlb, adam.adsl
+9          * Output:     t_lb_shift.rtf
+10         * Population: Safety Analysis Set (SAFFL='Y')
+11         * Notes:      Shift from baseline grade to worst post-baseline grade
+12         *             Grades: Normal (0), Grade 1, Grade 2, Grade 3, Grade 4
+13         *****************************************************************************/
+14         
+15         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:46:58
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+81         %include "&macpath./m_counts.sas";
+173        %include "&macpath./m_report.sas";
+245        %include "&pgmpath./utilities/u_titles.sas";
+407        
+408        /*--- Step 1: Get Big N ---*/
+409        %m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+NOTE: Table WORK._BIGN created, with 3 rows and 2 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5545.06k
+      OS Memory           15192.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        2  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._BIGN.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              888.48k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        3  Switch Count  0
+      
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5398.59k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        4  Switch Count  0
+      
+
+NOTE: ============================================
+NOTE: Treatment group counts:
+NOTE:   Drug X High Dose: N=63
+NOTE:   Drug X Low Dose: N=82
+NOTE:   Placebo: N=95
+NOTE:   Total: N=240
+NOTE: ============================================
+410        
+411        /*--- Step 2: Derive baseline and worst post-baseline grades ---*/
+412        proc sql noprint;
+413            create table lb as
+414            select a.USUBJID, a.TRTA, a.TRTAN, a.PARAMCD, a.PARAM,
+415                   a.AVISIT, a.AVISITN,
+416                   a.ATOXGR,     /* Toxicity grade */
+417                   a.BTOXGR,     /* Baseline toxicity grade */
+418                   a.ABLFL, a.ANL01FL
+419            from adam.adlb a
+420            inner join adam.adsl b on a.USUBJID = b.USUBJID
+421            where b.SAFFL = 'Y'
+422                  and a.PARAMCD in ('ALT', 'AST', 'BILI', 'CREAT', 'HGB', 'WBC', 'PLAT', 'NEUT')
+423            order by a.TRTAN, a.PARAMCD, a.USUBJID, a.AVISITN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.LB created, with 7552 rows and 11 columns.
+
+424        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              11897.45k
+      OS Memory           20720.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        5  Switch Count  0
+      
+
+425        
+426        /*--- Step 3: Get baseline grade per subject per parameter ---*/
+427        proc sql noprint;
+428            create table bl_grade as
+429            select distinct USUBJID, TRTA, TRTAN, PARAMCD, PARAM,
+                                                           The SAS System
+
+430                   BTOXGR as bl_grade
+431            from lb
+432            where ABLFL = 'Y' and BTOXGR ne '';
+NOTE: Table WORK.BL_GRADE created, with 1920 rows and 6 columns.
+
+433        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5403.37k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        6  Switch Count  0
+      
+
+434        
+435        /*--- Step 4: Get worst post-baseline grade ---*/
+436        proc sql noprint;
+437            create table worst_grade as
+438            select USUBJID, TRTA, TRTAN, PARAMCD,
+439                   max(input(ATOXGR, best.)) as worst_grade_n
+440            from lb
+441            where ABLFL ne 'Y' and ATOXGR ne '' and AVISITN > 0
+442            group by USUBJID, TRTA, TRTAN, PARAMCD;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.WORST_GRADE created, with 1896 rows and 5 columns.
+
+443        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              7656.23k
+      OS Memory           17308.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        7  Switch Count  0
+      
+
+444        
+445        data worst_grade2;
+446            set worst_grade;
+447            length worst_grade $2;
+448            worst_grade = strip(put(worst_grade_n, best.));
+449            if worst_grade_n = 0 then worst_grade = '0';
+450        run;
+
+NOTE: There were 1896 observations read from the data set WORK.WORST_GRADE.
+NOTE: The data set WORK.WORST_GRADE2 has 1896 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              989.26k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        8  Switch Count  0
+      
+                                                           The SAS System
+
+
+451        
+452        /*--- Step 5: Merge baseline and worst post-baseline ---*/
+453        proc sql noprint;
+454            create table shift as
+455            select a.*, b.worst_grade
+456            from bl_grade a
+457            inner join worst_grade2 b
+458            on a.USUBJID = b.USUBJID
+459               and a.PARAMCD = b.PARAMCD
+460               and a.TRTA = b.TRTA
+461            order by a.TRTAN, a.PARAMCD, a.bl_grade, b.worst_grade;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.SHIFT created, with 1896 rows and 7 columns.
+
+462        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              12756.93k
+      OS Memory           22172.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        9  Switch Count  0
+      
+
+463        
+464        /*--- Step 6: Count subjects in each shift cell ---*/
+465        proc sql noprint;
+466            create table shift_cnt as
+467            select TRTA, TRTAN, PARAMCD, PARAM,
+468                   bl_grade, worst_grade,
+469                   count(distinct USUBJID) as cnt
+470            from shift
+471            group by TRTA, TRTAN, PARAMCD, PARAM, bl_grade, worst_grade;
+NOTE: Table WORK.SHIFT_CNT created, with 97 rows and 7 columns.
+
+472        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5411.75k
+      OS Memory           16220.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        10  Switch Count  0
+      
+
+473        
+474        /*--- Step 7: Create shift display (one parameter at a time) ---*/
+475        /* Generate all possible combinations of bl_grade x worst_grade */
+476        
+477        data grades;
+478            length grade $2;
+479            do i = 0 to 4;
+480                grade = strip(put(i, best.));
+481                output;
+482            end;
+                                                           The SAS System
+
+483            drop i;
+484        run;
+
+NOTE: The data set WORK.GRADES has 5 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              765.45k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        11  Switch Count  0
+      
+
+485        
+486        /* Cross-join for all cells */
+487        proc sql noprint;
+488            create table all_cells as
+489            select distinct a.TRTA, a.TRTAN, a.PARAMCD, a.PARAM,
+490                   b.grade as bl_grade,
+491                   c.grade as worst_grade
+492            from shift_cnt a
+493            cross join grades b
+494            cross join grades c;
+NOTE: The execution of this query involves performing one or more Cartesian product joins that can not be optimized.
+NOTE: Table WORK.ALL_CELLS created, with 600 rows and 6 columns.
+
+495        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5498.81k
+      OS Memory           16220.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        12  Switch Count  0
+      
+
+496        
+497        /* Merge actual counts */
+498        proc sql noprint;
+499            create table shift_full as
+500            select a.*, coalesce(b.cnt, 0) as cnt
+501            from all_cells a
+502            left join shift_cnt b
+503            on a.TRTA = b.TRTA and a.PARAMCD = b.PARAMCD
+504               and a.bl_grade = b.bl_grade and a.worst_grade = b.worst_grade
+505            order by a.TRTAN, a.PARAMCD, a.bl_grade, a.worst_grade;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.SHIFT_FULL created, with 600 rows and 7 columns.
+
+506        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              12927.21k
+      OS Memory           22692.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        13  Switch Count  0
+      
+
+507        
+508        /*--- Step 8: Format and transpose for display ---*/
+509        /* Transpose worst_grade into columns */
+510        proc transpose data=shift_full out=shift_t(drop=_name_) prefix=wg;
+511            by TRTAN TRTA PARAMCD PARAM bl_grade;  /* test-copy patch: input is ordered by TRTAN, not TRTA */
+512            id worst_grade;
+513            var cnt;
+514        run;
+
+NOTE: There were 600 observations read from the data set WORK.SHIFT_FULL.
+NOTE: The data set WORK.SHIFT_T has 120 observations and 10 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2548.53k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        14  Switch Count  0
+      
+
+515        
+516        data report;
+517            length bl_label $20;
+518            set shift_t;
+519        
+520            /* Label baseline grades */
+521            select(bl_grade);
+522                when('0') bl_label = 'Normal';
+523                when('1') bl_label = 'Grade 1';
+524                when('2') bl_label = 'Grade 2';
+525                when('3') bl_label = 'Grade 3';
+526                when('4') bl_label = 'Grade 4';
+527                otherwise bl_label = bl_grade;
+528            end;
+529        
+530            /* Replace missing with 0 */
+531            array wgs{*} wg:;
+532            do i = 1 to dim(wgs);
+533                if wgs{i} = . then wgs{i} = 0;
+534            end;
+535        
+536            /* Row total */
+537            total = sum(of wg:);
+538            drop i;
+539        run;
+
+NOTE: There were 120 observations read from the data set WORK.SHIFT_T.
+NOTE: The data set WORK.REPORT has 120 observations and 12 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              922.26k
+                                                           The SAS System
+
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:46:58 PM
+      Step Count                        15  Switch Count  0
+      
+
+540        
+541        /*--- Step 9: Generate output ---*/
+542        %set_titles(output=T_LB_SHIFT, population=Safety Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+543        %ods_on(filename=t_lb_shift);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/t_lb_shift.rtf
+544        
+545        /* Generate one page per treatment group and parameter */
+546        %macro print_shift;
+547            %do t = 1 %to &ntrt.;
+548                proc report data=report(where=(TRTAN=&t.)) nowd split='~'
+549                    style(report)=[outputwidth=9in]
+550                    style(header)=[just=center fontweight=bold];
+551        
+552                    columns PARAMCD PARAM bl_label wg0 wg1 wg2 wg3 wg4 total;
+553        
+554                    define PARAMCD  / order noprint;
+555                    define PARAM    / order 'Parameter' style(column)=[width=2in fontweight=bold];
+556                    define bl_label / display 'Baseline~Grade' style(column)=[width=1in];
+557                    define wg0      / display 'Normal' style(column)=[width=0.8in just=center];
+558                    define wg1      / display 'Grade 1' style(column)=[width=0.8in just=center];
+559                    define wg2      / display 'Grade 2' style(column)=[width=0.8in just=center];
+560                    define wg3      / display 'Grade 3' style(column)=[width=0.8in just=center];
+561                    define wg4      / display 'Grade 4' style(column)=[width=0.8in just=center];
+562                    define total    / display 'Total' style(column)=[width=0.8in just=center];
+563        
+564                    break after PARAMCD / page;
+565        
+566                run;
+567            %end;
+568        %mend print_shift;
+569        %print_shift;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+                                                           The SAS System
+
+NOTE: There were 40 observations read from the data set WORK.REPORT.
+      WHERE TRTAN=1;
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              8493.53k
+      OS Memory           19824.00k
+      Timestamp           10/27/2026 03:46:59 PM
+      Step Count                        16  Switch Count  0
+      
+
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 40 observations read from the data set WORK.REPORT.
+      WHERE TRTAN=2;
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              7633.75k
+      OS Memory           20592.00k
+      Timestamp           10/27/2026 03:46:59 PM
+      Step Count                        17  Switch Count  0
+      
+
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 40 observations read from the data set WORK.REPORT.
+      WHERE TRTAN=3;
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              7632.53k
+      OS Memory           20592.00k
+      Timestamp           10/27/2026 03:46:59 PM
+      Step Count                        18  Switch Count  0
+      
+
+570        
+                                                           The SAS System
+
+571        footnote4 j=l "Grades based on NCI-CTCAE v[X.X]";
+572        footnote5 j=l "Shift from baseline grade to worst post-baseline grade.";
+573        
+574        %ods_off;
+575        %clear_titles;
+576        
+577        proc datasets lib=work nolist;
+578            delete lb bl_grade worst_grade: shift shift_cnt all_cells grades
+579                   shift_full shift_t report;
+580        quit;
+
+NOTE: Deleting WORK.LB (memtype=DATA).
+NOTE: Deleting WORK.BL_GRADE (memtype=DATA).
+NOTE: Deleting WORK.WORST_GRADE (memtype=DATA).
+NOTE: Deleting WORK.WORST_GRADE2 (memtype=DATA).
+NOTE: Deleting WORK.SHIFT (memtype=DATA).
+NOTE: Deleting WORK.SHIFT_CNT (memtype=DATA).
+NOTE: Deleting WORK.ALL_CELLS (memtype=DATA).
+NOTE: Deleting WORK.GRADES (memtype=DATA).
+NOTE: Deleting WORK.SHIFT_FULL (memtype=DATA).
+NOTE: Deleting WORK.SHIFT_T (memtype=DATA).
+NOTE: Deleting WORK.REPORT (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              229.84k
+      OS Memory           13400.00k
+      Timestamp           10/27/2026 03:46:59 PM
+      Step Count                        19  Switch Count  0
+      
+
+581        
+582        %put NOTE: t_lb_shift.sas completed successfully.;
+NOTE: t_lb_shift.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.20 seconds
+      user cpu time       0.48 seconds
+      system cpu time     0.75 seconds
+      memory              20671.87k
+                                                           The SAS System
+
+      OS Memory           22692.00k
+      Timestamp           10/27/2026 03:46:59 PM
+      Step Count                        19  Switch Count  50
+      

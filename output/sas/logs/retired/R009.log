@@ -1,0 +1,219 @@
+1                                                          The SAS System                            10:59 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.09 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\R009
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:00:00 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=R009 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*
+2          Initial draft of table specified in "docs" folder, on page 54 of UCM072974:
+3          Table 7.1.1.1
+4          Deaths Listing
+5          
+6          NOTES:
+7          A footnote should describe the rule for including deaths in the table (e.g., all deaths that occurred during a period of
+7        ! drug exposure or within a period of up to 30 days following discontinuation from drug and also those occurring later but
+7        ! resulting from adverse events that had an onset during drug exposure or during the 30-day follow up period). Other rules
+7        ! may be equally appropriate Deaths occurring outside the time window for this table should be listed elsewhere.
+8          
+9          This table should be provided by the sponsor in electronic format. The exact design of the table and the preferred
+9        ! electronic format should be established in discussions between the sponsor and the reviewing division.
+10         
+11         Similar lists should be provided for patients exposed to placebo and active control drugs.
+12         
+13         This is the data lock date for entering data into this table (i.e., the date beyond which additional exposed patients
+13       ! were not available for entry). Generally this date should be no more than several months prior to the submission date for
+13       !  an NDA. This date as well as this table may likely need to be updated during the course of NDA review as more data
+13       ! become available.
+14         
+15         Dose at time of death, or if death occurred after discontinuation, note that, as well as last dose before
+15       ! discontinuation.
+16         
+17         Time (days) = days on drug at time of death; or if death occurred after discontinuation, note how many days on drug
+17       ! before discontinuation and also how many days off drug at time of death.
+18         
+19         This listing should include all deaths meeting the inclusion rule, whether arising from a clinical trial or from any
+19       ! secondary source (e.g., postmarketing experience). The source should be identified in this column (i.e., 10 for deaths
+19       ! arising from primary source clinical trials and 20 for those arising from secondary sources). [Kim M: not sure where this
+19       !  is coming from ADaM]
+20         
+21         Person Time should identify patients (yes/no) for whom person-time data are available, so the reviewer can know which
+21       ! patients were included in the mortality rate calculations. [Kim M: not sure where this variable would come from in ADaM]
+22         
+23         Since narrative summaries should be available for all deaths, the description can be very brief (e.g., myocardial
+23       ! infarction, stroke, pancreatic cancer, suicide by drowning).[Kim M: not sure where this is coming from SDTM/ADaM - need
+23       ! just cause or also want to include information from death details dataset]
+24         */
+25         
+26         data dm; set psdtm.dm; run;
+
+NOTE: There were 306 observations read from the data set PSDTM.DM.
+NOTE: The data set WORK.DM has 306 observations and 25 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              973.81k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 11:00:00 AM
+      Step Count                        2  Switch Count  0
+      
+
+26       !                             data ex; set psdtm.ex; run;
+
+                                                           The SAS System
+
+NOTE: There were 591 observations read from the data set PSDTM.EX.
+NOTE: The data set WORK.EX has 591 observations and 17 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              959.46k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 11:00:00 AM
+      Step Count                        3  Switch Count  0
+      
+
+26       !                                                          /* benchmark: SDTM from the pilot */
+26       !                                                                                               data dth ;
+27            merge dm (where = (dthfl = 'Y'))
+28                  ex ;
+29            by subjid ;
+30            if last.exdt;
+31            if dthdtc gt rfendtc then dthdy = rfendtc-rfstdtc + 1||'/'|| dthdtc-rfendtc ;
+32            else dthdy = dthdtc - rfstdtc + 1;
+33         run ;
+
+NOTE: Character values have been converted to numeric values at the places given by: (Line):(Column).
+      31:38   31:46   31:65   31:72   32:17   32:26   
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      31:54   31:71   32:34   
+NOTE: Variable last.exdt is uninitialized.
+ERROR: BY variable SUBJID is not on input data set WORK.EX.
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+WARNING: The data set WORK.DTH may be incomplete.  When this step was stopped there were 0 observations and 40 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1227.46k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 11:00:00 AM
+      Step Count                        4  Switch Count  0
+      
+
+34         
+35         proc report data=dth nofs headline headskip;
+36            column studyid / group width=10 'Trial';
+                             _             __
+                             22            200
+                             200
+ERROR 22-322: Syntax error, expecting one of the following: a name, ;, (, ',', -, :, =, _ALL_, _CHARACTER_, _CHAR_, _NUMERIC_.  
+
+ERROR 200-322: The symbol is not recognized and will be ignored.
+
+36       !    column studyid / group width=10 'Trial';
+                                           __
+                                           22
+ERROR 22-322: Expecting a name.  
+37            define siteid/ group width=10 'Center';
+38            define subjid / width=10 'Patient' ;
+39            define age / width=10 'Age (yrs)';
+                                                           The SAS System
+
+40            define sex / width=10 'Sex';
+41            define exdose / width=10 'Dose (mg)';
+42            define dthdy / width=10 'Time (days)';
+43            define source / width=10 'Source';
+44            define psntime / width=10 'Person Time';
+45            define desc / width=10 'Description';
+46            title1 'Table 7.1.1.1';
+47            title2 'Deaths Listing';
+48            title3 'Treatment = New Drug';
+49            title4 'Cutoff Date';
+50            footnote1 'All deaths that occurred within a period of up to 30 days following discontinuation from drug' ;
+51         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              348.42k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 11:00:00 AM
+      Step Count                        5  Switch Count  0
+      
+52         
+
+
+ERROR: Errors printed on page 3.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.30 seconds
+      user cpu time       0.32 seconds
+      system cpu time     0.42 seconds
+      memory              9433.28k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 11:00:00 AM
+      Step Count                        5  Switch Count  22
+      

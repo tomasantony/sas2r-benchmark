@@ -1,0 +1,300 @@
+1                                                          The SAS System                            15:59 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.33 seconds
+      cpu time            0.49 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P050
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.28k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P050 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          ***********************************************************************;
+2          * Project           : Sample Drug, Sample Indication,Study1
+3          *
+4          * Program name      : table7_2b.sas
+5          *
+6          * Author            : ddabhi
+7          *
+8          * Date created      : 20141012
+9          *
+10         * Purpose           : Subject Disposition table.
+11         *
+12         * Revision History  :
+13         *
+14         * Date        Author      Ref    Revision (Date in YYYYMMDD format)
+15         *
+16         ***********************************************************************;
+17         
+18         ** Reading ADSL data ;
+19         %* modification 2019-12-23 - update path as data has been moved;
+20         
+21         filename source "&rawadam./adsl.xpt";
+22         libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+23         
+24         data adsl(keep = usubjid trt01an trt01a dcreascd ittfl);
+25         	set source.adsl;
+26         	where ittfl = "Y";
+27         run;
+
+NOTE: There were 254 observations read from the data set SOURCE.ADSL.
+      WHERE ittfl='Y';
+NOTE: The data set WORK.ADSL has 254 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              866.78k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        2  Switch Count  0
+      
+
+28         
+29         ** Create total ;
+30         data adsl1;
+31         	set adsl;
+32         	output;
+33         	trt01an = 999;
+34         	trt01a = "Total";
+35         	output;
+36         run;
+
+NOTE: There were 254 observations read from the data set WORK.ADSL.
+NOTE: The data set WORK.ADSL1 has 508 observations and 5 variables.
+                                                           The SAS System
+
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              881.00k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        3  Switch Count  0
+      
+
+37         
+38         ** Header N Count ;
+39         proc sql noprint;
+40         	create table tot as select trt01an, count(distinct usubjid) as tot from adsl1 group by trt01an order by trt01an;
+NOTE: Table WORK.TOT created, with 4 rows and 2 columns.
+
+41         	select count(distinct trt01an) into :ntrt from adsl1;
+42         	select count(distinct usubjid) into :trt1-:trt%cmpres(&ntrt) from adsl1 group by trt01an order by trt01an;
+NOTE: The query as specified involves ordering by an item that doesn't appear in its SELECT clause.
+43         	select distinct trt01a into :trtlbl1-:trtlbl%cmpres(&ntrt) from adsl1 group by trt01a order by trt01a;
+NOTE: A GROUP BY clause has been discarded because neither the SELECT clause nor the optional HAVING clause of the associated 
+      table-expression referenced a summary function.
+44         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.01 seconds
+      memory              5900.84k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        4  Switch Count  0
+      
+
+45         
+46         data dummy;
+47         	length col1 $50;
+48         	col1 = "Completed the study"; 					ord = 1; output;
+49         	col1 = "Discontinued"; 							ord = 2; output;
+50         	col1 = " "; 									ord = 3; output;
+51         	col1 = "  Death"; 								ord = 4; output;
+52         	col1 = "  Adverse Event"; 						ord = 5; output;
+53         	col1 = "  Lack of Efficacy"; 					ord = 6; output;
+54         	col1 = "  Lost to Follow-up"; 					ord = 7; output;
+55         	col1 = "  Non-compliance with Study Drug"; 		ord = 8; output;
+56         	col1 = "  Pregnancy"; 							ord = 9; output;
+57         	col1 = "  Protocal Violation"; 					ord = 10; output;
+58         	col1 = "  Physician Decision"; 					ord = 11; output;
+59         	col1 = "  Withdrawl by Subject"; 				ord = 12; output;
+60         	col1 = "  Withdrawl by Parent/Guardian"; 		ord = 13; output;
+61         	col1 = "  Recovery"; 							ord = 14; output;
+62         	col1 = "  Technical Problems"; 					ord = 15; output;
+63         	col1 = "  Other"; 								ord = 16; output;
+64         run;
+
+NOTE: The data set WORK.DUMMY has 16 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+                                                           The SAS System
+
+      system cpu time     0.01 seconds
+      memory              786.90k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        5  Switch Count  0
+      
+
+65         
+66         * Parameters:							;
+67         * OUTDATA - output dataset name         ;
+68         * WHERE - for subset the input dataset  ;
+69         %macro disp(outdata=, where=, var=);
+70         	proc sql;
+71         		create table &outdata as
+72         			select count(distinct usubjid) as cnt, (calculated cnt*100)/tot as per, &var as col1, a.trt01an, trt01a length=50
+73         				from adsl1 as a, tot as b
+74         					where &where and a.trt01an = b.trt01an
+75         						group by a.trt01an, trt01a, tot, col1;
+76         	quit;
+77         %mend disp;
+78         %disp(outdata=comp, where=%str(upcase(dcreascd) = "COMPLETED"), var=%str("Completed the study"))
+NOTE: At least one nonessential grouping column reference has been removed from a GROUP BY's reference list.
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.COMP created, with 4 rows and 5 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              9355.53k
+      OS Memory           19440.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        6  Switch Count  0
+      
+
+79         %disp(outdata=disc, where=%str(upcase(dcreascd) ^= "COMPLETED"), var=%str("Discontinued"))
+NOTE: At least one nonessential grouping column reference has been removed from a GROUP BY's reference list.
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.DISC created, with 4 rows and 5 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.01 seconds
+      memory              9011.31k
+      OS Memory           19100.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        7  Switch Count  0
+      
+
+80         %disp(outdata=all, where=%str(upcase(dcreascd) ^= "COMPLETED"), var=%str(dcreascd))
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.ALL created, with 31 rows and 5 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+                                                           The SAS System
+
+      memory              8518.81k
+      OS Memory           18588.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        8  Switch Count  0
+      
+
+81         
+82         data outds.disp;
+83         	set comp disc all(in = a);
+84         	by trt01an trt01a;
+85         	if a then col1 = "  " || trim(left(col1));
+86         
+87         	nper = put(cnt, 3.) || "(" || put(per, 5.1) || ")";
+88         run;
+
+NOTE: There were 4 observations read from the data set WORK.COMP.
+NOTE: There were 4 observations read from the data set WORK.DISC.
+NOTE: There were 31 observations read from the data set WORK.ALL.
+NOTE: The data set OUTDS.DISP has 39 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1218.06k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        9  Switch Count  0
+      
+
+89         
+90         /*
+91         proc transpose data = disp out = disp_t;
+92         	by
+93         run;
+94         */
+
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5195.31k
+      OS Memory           16732.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        10  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.65 seconds
+      user cpu time       0.32 seconds
+      system cpu time     0.43 seconds
+      memory              18184.12k
+      OS Memory           19440.00k
+      Timestamp           10/27/2026 03:59:11 PM
+      Step Count                        10  Switch Count  32
+      

@@ -1,0 +1,198 @@
+/*****************************************************************************
+* Program:    t_ae_soc_pt.sas
+* Purpose:    Table 14.3.2 - TEAEs by System Organ Class and Preferred Term
+* Study:      [STUDYID]
+* Author:     [Programmer Name]
+* Date:       [Date]
+* Input:      adam.adsl, adam.adae
+* Output:     t_ae_soc_pt.rtf
+* Population: Safety Analysis Set (SAFFL='Y')
+* Notes:      SOCs sorted by descending frequency (Total column)
+*             PTs sorted by descending frequency within each SOC
+*             Subjects counted once per SOC and once per PT within SOC
+*****************************************************************************/
+
+%include "&pgmpath./utilities/u_setup.sas";
+%include "&macpath./m_counts.sas";
+%include "&macpath./m_report.sas";
+%include "&pgmpath./utilities/u_titles.sas";
+
+/*--- Step 1: Get Big N ---*/
+%m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+
+/*--- Step 2: Subset to TEAE in safety population ---*/
+proc sql noprint;
+    create table ae as
+    select a.USUBJID, a.TRTA, a.AEBODSYS, a.AEDECOD,
+           a.AESOC, a.AESOCCD
+    from adam.adae a
+    inner join adam.adsl b on a.USUBJID = b.USUBJID
+    where b.SAFFL = 'Y' and a.TRTEMFL = 'Y';
+quit;
+
+/*--- Step 3: Count subjects by SOC ---*/
+proc sql noprint;
+    create table soc_cnt as
+    select TRTA, AEBODSYS,
+           count(distinct USUBJID) as cnt
+    from ae
+    group by TRTA, AEBODSYS;
+
+    /* Total column for SOC */
+    create table soc_tot as
+    select AEBODSYS,
+           count(distinct USUBJID) as cnt_tot
+    from ae
+    group by AEBODSYS;
+quit;
+
+/*--- Step 4: Count subjects by SOC + PT ---*/
+proc sql noprint;
+    create table pt_cnt as
+    select TRTA, AEBODSYS, AEDECOD,
+           count(distinct USUBJID) as cnt
+    from ae
+    group by TRTA, AEBODSYS, AEDECOD;
+
+    /* Total column for PT */
+    create table pt_tot as
+    select AEBODSYS, AEDECOD,
+           count(distinct USUBJID) as cnt_tot
+    from ae
+    group by AEBODSYS, AEDECOD;
+quit;
+
+/*--- Step 5: Any TEAE row ---*/
+proc sql noprint;
+    create table any_ae as
+    select TRTA,
+           'Any TEAE' as AEBODSYS length=200,
+           '' as AEDECOD length=200,
+           count(distinct USUBJID) as cnt,
+           0 as soc_ord,
+           0 as pt_ord,
+           1 as rowtype  /* 0=any, 1=SOC, 2=PT */
+    from ae
+    group by TRTA;
+quit;
+
+/*--- Step 6: Build display rows ---*/
+/* SOC rows with sort order */
+proc sql noprint;
+    create table soc_rows as
+    select a.TRTA, a.AEBODSYS, 
+           '' as AEDECOD length=200,
+           a.cnt,
+           b.cnt_tot as soc_ord,  /* Sort by total descending */
+           0 as pt_ord,
+           1 as rowtype
+    from soc_cnt a
+    left join soc_tot b on a.AEBODSYS = b.AEBODSYS;
+
+    /* PT rows with sort order */
+    create table pt_rows as
+    select a.TRTA, a.AEBODSYS, a.AEDECOD, a.cnt,
+           c.cnt_tot as soc_ord,
+           b.cnt_tot as pt_ord,
+           2 as rowtype
+    from pt_cnt a
+    left join pt_tot b on a.AEBODSYS = b.AEBODSYS and a.AEDECOD = b.AEDECOD
+    left join soc_tot c on a.AEBODSYS = c.AEBODSYS;
+quit;
+
+/*--- Step 7: Combine and calculate percentages ---*/
+data combined;
+    set any_ae soc_rows pt_rows;
+run;
+
+proc sql noprint;
+    create table combined2 as
+    select a.*,
+           b.bign,
+           case when b.bign > 0 then a.cnt / b.bign * 100 else . end as pct
+    from combined a
+    left join work._bign b on a.TRTA = b.TRTA
+    order by soc_ord desc, AEBODSYS, rowtype, pt_ord desc, AEDECOD, TRTA;
+quit;
+
+data combined3;
+    set combined2;
+    length value $30;
+    if cnt > 0 then 
+        value = cat(strip(put(cnt, 8.)), ' (', strip(put(pct, 5.1)), ')');
+    else value = '0';
+run;
+
+/*--- Step 8: Transpose ---*/
+proc sort data=combined3 nodupkey; 
+    by descending soc_ord AEBODSYS rowtype descending pt_ord AEDECOD TRTA; 
+run;
+
+proc transpose data=combined3 out=final(drop=_name_ rename=(colPlacebo=col1 colDrug_X_Low_Dose=col2 colDrug_X_High_Dose=col3)) prefix=col;  /* test-copy patch: name the transposed columns col1-col3 as the report expects */
+    by descending soc_ord AEBODSYS rowtype descending pt_ord AEDECOD;
+    id TRTA;
+    var value;
+run;
+
+/*--- Step 9: Create display variable ---*/
+data report;
+    set final;
+    length display_term $200;
+
+    if rowtype = 0 then display_term = AEBODSYS;      /* Any TEAE */
+    else if rowtype = 1 then display_term = AEBODSYS;  /* SOC (bold) */
+    else display_term = '  ' || strip(AEDECOD);        /* PT (indented) */
+
+    /* Replace missing with 0 */
+    array cols{*} col:;
+    do i = 1 to dim(cols);
+        if cols{i} = '' then cols{i} = '0';
+    end;
+    drop i;
+run;
+
+/*--- Step 10: Generate output ---*/
+%set_titles(output=T_AE_SOC_PT, population=Safety Analysis Set);
+%ods_on(filename=t_ae_soc_pt);
+
+proc report data=report nowd split='~'
+    style(report)=[outputwidth=9.5in]
+    style(header)=[just=center fontweight=bold];
+
+    columns rowtype soc_ord pt_ord display_term col1 col2 col3;
+
+    define rowtype      / order noprint;
+    define soc_ord      / order descending noprint;
+    define pt_ord       / order descending noprint;
+    define display_term / display 'System Organ Class~  Preferred Term' 
+                          style(column)=[width=3.5in];
+    define col1         / display "&col1hdr." style(column)=[width=1.5in just=center];
+    define col2         / display "&col2hdr." style(column)=[width=1.5in just=center];
+    define col3         / display "&col3hdr." style(column)=[width=1.5in just=center];
+
+    /* Bold SOC rows */
+    compute display_term;
+        if rowtype = 1 then 
+            call define(_col_, 'style', 'style=[fontweight=bold]');
+    endcomp;
+
+    /* Blank line between SOCs */
+    compute after soc_ord;  /* test-copy patch: AEBODSYS is not a report column; soc_ord is the SOC break */
+        line ' ';
+    endcomp;
+
+run;
+
+footnote4 j=l "MedDRA Version [XX.X]";
+footnote5 j=l "Subjects counted once per SOC and once per PT within each SOC.";
+footnote6 j=l "SOCs sorted by descending frequency of Total column; PTs sorted by descending frequency within SOC.";
+
+%ods_off;
+%clear_titles;
+
+proc datasets lib=work nolist;
+    delete ae soc_cnt soc_tot pt_cnt pt_tot any_ae soc_rows pt_rows 
+           combined: final report;
+quit;
+
+%put NOTE: t_ae_soc_pt.sas completed successfully.;

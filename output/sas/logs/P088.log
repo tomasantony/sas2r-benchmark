@@ -1,0 +1,434 @@
+                                                           The SAS System
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              212.53k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        104  Switch Count  0
+      
+
+2944       %let pid = P088; %let outds = &root./output/sas/datasets/P088; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P088
+2945       %put NOTE: ===== pipeline own-adam: P088 P088_adeff.sas =====;
+NOTE: ===== pipeline own-adam: P088 P088_adeff.sas =====
+2946       %include "&root./programs/sas_run/P088_adeff.sas";
+
+NOTE: The data set WORK.RS has 16 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              736.12k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        105  Switch Count  0
+      
+
+
+NOTE: The data set WORK.TU has 16 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              741.37k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        106  Switch Count  0
+      
+
+
+NOTE: The data set WORK.ADSL has 6 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              743.46k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        107  Switch Count  0
+      
+
+
+NOTE: There were 16 observations read from the data set WORK.RS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.RS has 16 observations and 10 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+                                                           The SAS System
+
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              675.71k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        108  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK.ADSL.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADSL has 6 observations and 10 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              678.71k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        109  Switch Count  0
+      
+
+
+NOTE: There were 16 observations read from the data set WORK.RS.
+      WHERE RSTESTCD='OVRLRESP';
+NOTE: There were 6 observations read from the data set WORK.ADSL.
+NOTE: The data set WORK.ADEFF_RESP has 16 observations and 21 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1093.93k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        110  Switch Count  0
+      
+
+
+NOTE: There were 16 observations read from the data set WORK.TU.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TU has 16 observations and 13 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              674.71k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        111  Switch Count  0
+      
+
+
+NOTE: Variable AVALC is uninitialized.
+NOTE: There were 16 observations read from the data set WORK.TU.
+      WHERE TUTESTCD='LDIAM';
+NOTE: There were 6 observations read from the data set WORK.ADSL.
+NOTE: The data set WORK.ADEFF_TUMOR has 16 observations and 22 variables.
+                                                           The SAS System
+
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1093.75k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        112  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK.ADEFF_TUMOR.
+      WHERE ABLFL='Y';
+NOTE: The data set WORK._BASE_TUMOR has 6 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              911.84k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        113  Switch Count  0
+      
+
+
+NOTE: There were 16 observations read from the data set WORK.ADEFF_TUMOR.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADEFF_TUMOR has 16 observations and 22 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              678.71k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        114  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK._BASE_TUMOR.
+NOTE: SAS sort was used.
+NOTE: The data set WORK._BASE_TUMOR has 6 observations and 3 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              686.12k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        115  Switch Count  0
+      
+
+
+NOTE: There were 16 observations read from the data set WORK.ADEFF_TUMOR.
+NOTE: There were 6 observations read from the data set WORK._BASE_TUMOR.
+NOTE: The data set WORK.ADEFF_TUMOR has 16 observations and 25 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1079.56k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        116  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._BASE_TUMOR (memtype=DATA).
+NOTE: PROCEDURE DELETE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              20.56k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        117  Switch Count  0
+      
+
+
+NOTE: There were 10 observations read from the data set WORK.ADEFF_RESP.
+      WHERE ABLFL not = 'Y';
+NOTE: SAS sort was used.
+NOTE: The data set WORK._RESP_SORTED has 10 observations and 21 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1202.28k
+      OS Memory           12640.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        118  Switch Count  0
+      
+
+
+NOTE: There were 10 observations read from the data set WORK._RESP_SORTED.
+NOTE: The data set WORK._BOR has 6 observations and 21 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              905.15k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        119  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._RESP_SORTED (memtype=DATA).
+NOTE: PROCEDURE DELETE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              20.56k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        120  Switch Count  0
+                                                           The SAS System
+
+      
+
+
+NOTE: There were 6 observations read from the data set WORK._BOR.
+NOTE: The data set WORK._RESPFL has 6 observations and 22 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              921.75k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        121  Switch Count  0
+      
+
+
+NOTE: There were 10 observations read from the data set WORK.ADEFF_TUMOR.
+      WHERE ABLFL not = 'Y';
+NOTE: The data set WORK._NADIR has 6 observations and 2 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1600.06k
+      OS Memory           12892.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        122  Switch Count  0
+      
+
+
+NOTE: There were 6 observations read from the data set WORK._NADIR.
+NOTE: There were 6 observations read from the data set WORK.ADEFF_TUMOR.
+      WHERE ABLFL='Y';
+NOTE: The data set WORK._NADIR has 6 observations and 22 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1089.06k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        123  Switch Count  0
+      
+
+
+NOTE: There were 16 observations read from the data set WORK.ADEFF_RESP.
+NOTE: There were 16 observations read from the data set WORK.ADEFF_TUMOR.
+NOTE: There were 6 observations read from the data set WORK._BOR.
+NOTE: There were 6 observations read from the data set WORK._RESPFL.
+NOTE: There were 6 observations read from the data set WORK._NADIR.
+NOTE: The data set WORK.ADEFF has 50 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1506.40k
+      OS Memory           12888.00k
+      Timestamp           10/27/2026 03:59:02 PM
+                                                           The SAS System
+
+      Step Count                        124  Switch Count  0
+      
+
+
+NOTE: Deleting WORK._BOR (memtype=DATA).
+NOTE: Deleting WORK._RESPFL (memtype=DATA).
+NOTE: Deleting WORK._NADIR (memtype=DATA).
+NOTE: PROCEDURE DELETE used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              21.03k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        125  Switch Count  0
+      
+
+
+NOTE: There were 50 observations read from the data set WORK.ADEFF.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADEFF has 50 observations and 26 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              683.31k
+      OS Memory           12380.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        126  Switch Count  0
+      
+
+
+NOTE: There were 50 observations read from the data set WORK.ADEFF.
+NOTE: The data set WORK.ADEFF has 50 observations and 28 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              931.03k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        127  Switch Count  0
+      
+
+
+NOTE: PROCEDURE CONTENTS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              551.46k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        128  Switch Count  0
+      
+NOTE: The PROCEDURE CONTENTS printed pages 15-16.
+
+
+NOTE: There were 50 observations read from the data set WORK.ADEFF.
+                                                           The SAS System
+
+NOTE: The PROCEDURE PRINT printed pages 17-18.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              519.37k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        129  Switch Count  0
+      
+
+3528       proc datasets lib=work nolist; copy out=outds memtype=data; select ad:; run;
+
+NOTE: Copying WORK.ADEFF to OUTDS.ADEFF (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 50 observations read from the data set WORK.ADEFF.
+NOTE: The data set OUTDS.ADEFF has 50 observations and 28 variables.
+NOTE: Copying WORK.ADEFF_RESP to OUTDS.ADEFF_RESP (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 16 observations read from the data set WORK.ADEFF_RESP.
+NOTE: The data set OUTDS.ADEFF_RESP has 16 observations and 21 variables.
+NOTE: Copying WORK.ADEFF_TUMOR to OUTDS.ADEFF_TUMOR (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 16 observations read from the data set WORK.ADEFF_TUMOR.
+NOTE: The data set OUTDS.ADEFF_TUMOR has 16 observations and 25 variables.
+NOTE: Copying WORK.ADSL to OUTDS.ADSL (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 6 observations read from the data set WORK.ADSL.
+NOTE: The data set OUTDS.ADSL has 6 observations and 10 variables.
+3528     !                                                                              quit;
+
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              655.43k
+      OS Memory           12120.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        130  Switch Count  0
+      
+
+3528     !                                                                                    proc datasets lib=work kill nolist;
+NOTE: Deleting WORK.ADEFF (memtype=DATA).
+NOTE: Deleting WORK.ADEFF_RESP (memtype=DATA).
+NOTE: Deleting WORK.ADEFF_TUMOR (memtype=DATA).
+NOTE: Deleting WORK.ADSL (memtype=DATA).
+NOTE: Deleting WORK.RS (memtype=DATA).
+NOTE: Deleting WORK.SASMACR (memtype=CATALOG).
+NOTE: File WORK.SASMACR (memtype=CATALOG) cannot be deleted because it is in use.
+NOTE: Deleting WORK.TU (memtype=DATA).
+3528     !                                                                                                                        ru
+3528     ! n; quit;
+
+
+                                                           The SAS System
+
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              232.93k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:59:02 PM
+      Step Count                        131  Switch Count  0
+      
+
+3529       proc printto; run;
+

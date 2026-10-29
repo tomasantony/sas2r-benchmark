@@ -1,0 +1,107 @@
+1                                                          The SAS System                            15:58 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.23 seconds
+      cpu time            0.54 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\wxzhai
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=wxzhai family=wxzhai
+NOTE: Libref RAW was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\raw
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\sdtm
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\wxzhai\adam
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* pipeline driver for family wxzhai: programs run in order in one session; each gets its own log */
+2          %let family = wxzhai;
+3          proc printto log="&outlog./P064.log" print="&outlog./P064.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              6.68k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        7  Switch Count  0
+      
+
+45         proc printto log="&outlog./P065.log" print="&outlog./P065.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              6.68k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        14  Switch Count  0
+      
+
+87         proc printto log="&outlog./P066.log" print="&outlog./P066.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              6.68k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        27  Switch Count  0
+      
+
+171        proc printto log="&outlog./P067.log" print="&outlog./P067.lst" new; run;
+
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              6.68k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        35  Switch Count  0
+      
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.69 seconds
+      user cpu time       0.40 seconds
+      system cpu time     0.46 seconds
+      memory              14109.78k
+      OS Memory           16732.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        35  Switch Count  82
+      

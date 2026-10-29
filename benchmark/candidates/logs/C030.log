@@ -1,0 +1,194 @@
+1                                                          The SAS System                            11:24 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.61 seconds
+      cpu time            0.67 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*--------------------------------------------------*/
+2          /* SAS Programming for R Users - code for exercises */
+3          /* Copyright 2016 SAS Institute Inc.                */
+4          /*--------------------------------------------------*/
+5          
+6          /*SP4R06s09*/
+7          
+8          /*Part A*/
+9          proc freq data=sp4r.earinfection;
+ERROR: Libref SP4R is not assigned.
+10            tables swimmer location age gender infections;
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+11         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+                                                           The SAS System
+
+      system cpu time     0.00 seconds
+      memory              30.75k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:24:25 AM
+      Step Count                        1  Switch Count  0
+      
+12         
+13         /*Part B*/
+14         ods select basicmeasures histogram;
+
+
+15         proc univariate data=sp4r.earinfection;
+ERROR: Libref SP4R is not assigned.
+16            var infections;
+17            histogram infections / normal;
+ERROR: No data set open to look up variables.
+18         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              120.37k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:24:25 AM
+      Step Count                        2  Switch Count  0
+      
+WARNING: Output 'histogram' was not created.  Make sure that the output object name, label, or path is spelled correctly.  Also, 
+         verify that the appropriate procedure options are used to produce the requested output object.  For example, verify that 
+         the NOPRINT option is not used.
+WARNING: Output 'basicmeasures' was not created.  Make sure that the output object name, label, or path is spelled correctly.  
+         Also, verify that the appropriate procedure options are used to produce the requested output object.  For example, verify 
+         that the NOPRINT option is not used.
+19         
+20         /*Part C*/
+
+
+21         proc genmod data=sp4r.earinfection;
+ERROR: Libref SP4R is not assigned.
+22            class swimmer(ref='Occas') location(ref='NonBeach')
+ERROR: No data set open to look up variables.
+ERROR: No data set open to look up variables.
+23               gender(ref='Female') / param=ref;
+ERROR: No data set open to look up variables.
+24            model infections = swimmer location age gender /
+ERROR: No data set open to look up variables.
+25               dist=poisson type3;
+26            store mymod;
+27         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE GENMOD used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              244.65k
+      OS Memory           8520.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 11:24:25 AM
+      Step Count                        3  Switch Count  0
+      
+28         
+29         /*Part D*/
+
+
+30         data sp4r.newdata_inf;
+31            input Swimmer $ Location $ Age Gender $;
+32            datalines;
+
+ERROR: Libref SP4R is not assigned.
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1263.62k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:24:25 AM
+      Step Count                        4  Switch Count  0
+      
+35         ;run;
+
+
+36         
+37         /*Part E*/
+NOTE: PROCEDURE PLM used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              60.81k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:24:25 AM
+      Step Count                        5  Switch Count  0
+      
+NOTE: The SAS System stopped processing this step because of errors.
+38         proc plm restore=mymod;
+39            score data=sp4r.newdata_inf out=sp4r.scores / ilink;
+40         run;
+41         
+
+
+42         proc print data=sp4r.scores;
+ERROR: Libref SP4R is not assigned.
+43         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              67.65k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:24:25 AM
+      Step Count                        6  Switch Count  0
+      
+                                                           The SAS System
+
+
+ERROR: Errors printed on pages 1,2,3.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.83 seconds
+      user cpu time       0.40 seconds
+      system cpu time     0.42 seconds
+      memory              8732.28k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 11:24:25 AM
+      Step Count                        6  Switch Count  24
+      

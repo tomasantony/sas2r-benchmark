@@ -1,0 +1,195 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              211.53k
+                                                           The SAS System
+
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        15  Switch Count  0
+      
+
+88         %let pid = P066; %let outds = &root./output/sas/datasets/P066; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P066
+89         %put NOTE: ===== pipeline wxzhai: P066 P066_Raw_Clinical_Trial_Data_Creation.sas =====;
+NOTE: ===== pipeline wxzhai: P066 P066_Raw_Clinical_Trial_Data_Creation.sas =====
+90         %let _bench_t0 = %sysfunc(datetime());
+91         %include "&root./programs/sas_run/P066_Raw_Clinical_Trial_Data_Creation.sas";
+
+NOTE: The data set RAW.RAW_DM has 4 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              743.50k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        16  Switch Count  0
+      
+
+
+NOTE: The data set RAW.RAW_EX has 4 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              729.18k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        17  Switch Count  0
+      
+
+
+NOTE: The data set RAW.RAW_LB has 14 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              743.50k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        18  Switch Count  0
+      
+
+
+NOTE: The data set RAW.RAW_AE has 4 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              743.50k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:58:56 PM
+                                                           The SAS System
+
+      Step Count                        19  Switch Count  0
+      
+
+
+NOTE: The data set RAW.RAW_VS has 4 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              743.50k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        20  Switch Count  0
+      
+
+169        %_bench_capture;
+INFO: Data file ADAM.ADAE.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file ADAM.ADAE_QC.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file ADAM.ADSL.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file SDTM.DM.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+INFO: Data file SDTM.LB.DATA is in a format that is native to another host, or the file encoding does not match the session 
+encoding. Cross Environment Data Access will be used, which might require additional CPU resources and might reduce performance.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5191.18k
+      OS Memory           16476.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        21  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying RAW.RAW_AE to OUTDS.RAW_AE (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 4 observations read from the data set RAW.RAW_AE.
+NOTE: The data set OUTDS.RAW_AE has 4 observations and 6 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              603.68k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        22  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying RAW.RAW_DM to OUTDS.RAW_DM (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+                                                           The SAS System
+
+NOTE: There were 4 observations read from the data set RAW.RAW_DM.
+NOTE: The data set OUTDS.RAW_DM has 4 observations and 6 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              605.68k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        23  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying RAW.RAW_EX to OUTDS.RAW_EX (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 4 observations read from the data set RAW.RAW_EX.
+NOTE: The data set OUTDS.RAW_EX has 4 observations and 4 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              600.68k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        24  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying RAW.RAW_LB to OUTDS.RAW_LB (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 14 observations read from the data set RAW.RAW_LB.
+NOTE: The data set OUTDS.RAW_LB has 14 observations and 5 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              605.68k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        25  Switch Count  0
+      
+
+
+INFO: COPY with SELECT performance is in use.
+NOTE: Copying RAW.RAW_VS to OUTDS.RAW_VS (memtype=DATA).
+INFO: Engine's block-read method is in use.
+INFO: Engine's block-write  method is in use.
+NOTE: There were 4 observations read from the data set RAW.RAW_VS.
+NOTE: The data set OUTDS.RAW_VS has 4 observations and 5 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              605.68k
+                                                           The SAS System
+
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:58:56 PM
+      Step Count                        26  Switch Count  0
+      
+
+NOTE: benchmark capture: 5 permanent dataset(s) copied to outds (RAW RAW_AE|RAW RAW_DM|RAW RAW_EX|RAW RAW_LB|RAW RAW_VS)
+170        proc printto; run;
+

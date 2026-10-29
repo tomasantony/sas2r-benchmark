@@ -1,0 +1,262 @@
+1                                                          The SAS System                            15:47 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.41 seconds
+      cpu time            0.42 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P079
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:47:14 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P079 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    l_sae.sas
+3          * Purpose:    Listing 16.2.7.2 - Listing of Serious Adverse Events
+4          * Study:      [STUDYID]
+5          * Author:     [Programmer Name]
+6          * Date:       [Date]
+7          * Input:      adam.adae, adam.adsl
+8          * Output:     l_sae.rtf
+9          * Population: Safety Analysis Set (SAFFL='Y')
+10         *****************************************************************************/
+11         
+12         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:47:15
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+78         %include "&macpath./m_report.sas";
+150        %include "&pgmpath./utilities/u_titles.sas";
+312        
+313        /*--- Step 1: Prepare SAE listing data ---*/
+314        proc sql noprint;
+315            create table sae_list as
+316            select a.USUBJID,
+317                   b.TRTA, b.AGE, b.SEX, b.RACE,
+318                   b.TRTSDT format=date9. as TRT_START,
+319                   a.AEBODSYS as SOC,
+320                   a.AEDECOD as PT,
+321                   a.AETERM as VERBATIM,
+322                   a.AESTDTC as START_DATE,
+323                   a.AEENDTC as END_DATE,
+324                   a.AETOXGR as GRADE,
+325                   a.AEREL as RELATIONSHIP,
+326                   a.AEACN as ACTION_TAKEN,
+327                   a.AEOUT as OUTCOME,
+328                   /* SAE criteria */
+329                   a.AESDTH,     /* Results in death */
+330                   a.AESLIFE,    /* Life threatening */
+331                   a.AESHOSP,    /* Requires hospitalization */
+332                   a.AESDISAB,   /* Results in disability */
+333                   a.AESCONG,    /* Congenital anomaly */
+334                   a.AESMIE      /* Other medically important */
+                                                           The SAS System
+
+335            from adam.adae a
+336            inner join adam.adsl b on a.USUBJID = b.USUBJID
+337            where b.SAFFL = 'Y'
+338                  and a.AESER = 'Y'
+339            order by b.TRTA, a.USUBJID, a.AESTDTC;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.SAE_LIST created, with 28 rows and 21 columns.
+
+340        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              18471.87k
+      OS Memory           26704.00k
+      Timestamp           10/27/2026 03:47:14 PM
+      Step Count                        2  Switch Count  0
+      
+
+341        
+342        /*--- Step 2: Derive SAE criteria display ---*/
+343        data sae_report;
+344            set sae_list;
+345            length sae_criteria $200;
+346        
+347            sae_criteria = '';
+348            if AESDTH = 'Y'   then sae_criteria = catx(', ', sae_criteria, 'Death');
+349            if AESLIFE = 'Y'  then sae_criteria = catx(', ', sae_criteria, 'Life-threatening');
+350            if AESHOSP = 'Y'  then sae_criteria = catx(', ', sae_criteria, 'Hospitalization');
+351            if AESDISAB = 'Y' then sae_criteria = catx(', ', sae_criteria, 'Disability');
+352            if AESCONG = 'Y'  then sae_criteria = catx(', ', sae_criteria, 'Congenital anomaly');
+353            if AESMIE = 'Y'   then sae_criteria = catx(', ', sae_criteria, 'Medically important');
+354        
+355            /* Days from first dose to onset */
+356            length onset_day $20;
+357            if TRT_START ne . and input(START_DATE, ??yymmdd10.) ne . then do;
+358                _onset = input(START_DATE, yymmdd10.) - TRT_START + 1;
+359                onset_day = strip(put(_onset, 8.));
+360            end;
+361            else onset_day = '';
+362        
+363            /* Demographics string */
+364            length demog $40;
+365            demog = catx('/', strip(put(AGE, best.)), strip(SEX), strip(substr(RACE, 1, 1)));
+366        run;
+
+NOTE: There were 28 observations read from the data set WORK.SAE_LIST.
+NOTE: The data set WORK.SAE_REPORT has 28 observations and 25 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1069.29k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 03:47:14 PM
+      Step Count                        3  Switch Count  0
+      
+
+                                                           The SAS System
+
+367        
+368        /*--- Step 3: Generate listing ---*/
+369        %set_titles(output=L_SAE, population=Safety Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+370        %ods_on(filename=l_sae);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/l_sae.rtf
+371        
+372        proc report data=sae_report nowd split='~'
+373            style(report)=[outputwidth=10in font_size=7pt]
+374            style(header)=[just=center fontweight=bold font_size=7pt]
+375            style(column)=[just=left verticalalign=top font_size=7pt];
+376        
+377            columns TRTA USUBJID demog SOC PT START_DATE END_DATE onset_day
+378                    GRADE RELATIONSHIP ACTION_TAKEN OUTCOME sae_criteria;
+379        
+380            define TRTA         / order 'Treatment' style(column)=[width=0.7in];
+381            define USUBJID      / order 'Subject~ID' style(column)=[width=0.7in];
+382            define demog        / display 'Age/Sex/~Race' style(column)=[width=0.5in];
+383            define SOC          / display 'SOC' style(column)=[width=1.1in];
+384            define PT           / display 'Preferred~Term' style(column)=[width=0.9in];
+385            define START_DATE   / display 'Start~Date' style(column)=[width=0.7in];
+386            define END_DATE     / display 'End~Date' style(column)=[width=0.7in];
+387            define onset_day    / display 'Study~Day' style(column)=[width=0.4in just=center];
+388            define GRADE        / display 'Grade' style(column)=[width=0.4in just=center];
+389            define RELATIONSHIP / display 'Relation-~ship' style(column)=[width=0.7in];
+390            define ACTION_TAKEN / display 'Action~Taken' style(column)=[width=0.8in];
+391            define OUTCOME      / display 'Outcome' style(column)=[width=0.8in];
+392            define sae_criteria / display 'SAE~Criteria' style(column)=[width=1.1in];
+393        
+394            break after TRTA / page;
+395        
+396        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 28 observations read from the data set WORK.SAE_REPORT.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+                                                           The SAS System
+
+      memory              8261.78k
+      OS Memory           19816.00k
+      Timestamp           10/27/2026 03:47:15 PM
+      Step Count                        4  Switch Count  0
+      
+
+397        
+398        %ods_off;
+399        %clear_titles;
+400        
+401        proc datasets lib=work nolist; delete sae_list sae_report; quit;
+
+NOTE: Deleting WORK.SAE_LIST (memtype=DATA).
+NOTE: Deleting WORK.SAE_REPORT (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              231.00k
+      OS Memory           13656.00k
+      Timestamp           10/27/2026 03:47:15 PM
+      Step Count                        5  Switch Count  0
+      
+
+402        
+403        %put NOTE: l_sae.sas completed successfully.;
+NOTE: l_sae.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.46 seconds
+      user cpu time       0.39 seconds
+      system cpu time     0.43 seconds
+      memory              25612.25k
+      OS Memory           26704.00k
+      Timestamp           10/27/2026 03:47:15 PM
+      Step Count                        5  Switch Count  22
+      

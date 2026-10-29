@@ -1,0 +1,212 @@
+1                                                          The SAS System                            10:53 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.97 seconds
+      cpu time            0.71 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P051
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:54:00 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P051 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /****************************************************************************/
+2          /*         PROGRAM NAME: Target36.sas                                       */
+3          /*                                                                          */
+4          /*          DESCRIPTION: Listing of medications                             */
+5          /*                                                                          */
+6          /*               AUTHOR: Adrienne M Bonwick                                 */
+7          /*                                                                          */
+8          /*                 DATE: 12th October 2014 (PhUSE scriptathon)              */
+9          /*                                                                          */
+10         /*  EXTERNAL FILES USED: ADCM.xpt                                           */
+11         /*                                                                          */
+12         /****************************************************************************/
+13         
+14         %* modification 2019-12-23 - update path as data has been moved;
+15         
+16         filename source "&rawadam./adcm.xpt";
+17         libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adcm.xpt
+18         
+19         %let POPN=SAFFL;
+20         %let POPNLABEL=Safety;
+21         
+22         options orientation=landscape pagesize=41 linesize=119 nodate nonumber;
+23         
+24         proc sort out=work.adcm/*(keep=STUDYID USUBJID TRTA TRTAN SAFFL CMCLAS CMDECOD CMDOSE CMDOSU CMINDC CMSTDTC
+24       ! CMENDTC ADURN AENRF &POPN)*/
+25            data=source.ADCM ;
+26         by TRTA STUDYID USUBJID CMSTDTC CMENDTC CMDECOD;
+27         WHERE &POPN='Y' ;
+28         run ;
+
+NOTE: There were 7510 observations read from the data set SOURCE.ADCM.
+      WHERE SAFFL='Y';
+NOTE: SAS threaded sort was used.
+NOTE: The data set WORK.ADCM has 7510 observations and 42 variables.
+                                                    The SAS System
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              21272.15k
+      OS Memory           31012.00k
+      Timestamp           10/27/2026 10:54:01 AM
+      Step Count                        2  Switch Count  0
+      
+
+29         
+30         Data ADCM2;
+31           set ADCM;
+32           length StartStop $25 Doseunit $50;
+33           Period ='Study Period';
+34           if CMSTDTC='' then CMSTDTC='NK';
+35           if CMENDTC='' then CMENDTC='NK';
+36           StartStop=compbl(CMSTDTC||'/'||CMENDTC);
+37           If cmunit ne . then   DoseUnit = compbl(CMDOSE || '('|| cmunit || ')');
+38             else DoseUnit = compbl(CMDOSE);
+39           *** duration=AENDT-ASTDT;
+40           if AENRF='Ongoing' then Ongoing='Y';
+41             else Ongoing='N';
+42         run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      37:43   37:59   38:28   
+NOTE: Variable cmunit is uninitialized.
+NOTE: There were 7510 observations read from the data set WORK.ADCM.
+NOTE: The data set WORK.ADCM2 has 7510 observations and 47 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1007.28k
+      OS Memory           10844.00k
+      Timestamp           10/27/2026 10:54:01 AM
+      Step Count                        3  Switch Count  0
+      
+                                                    The SAS System
+
+
+43         
+44         
+45         ods listing close;
+46         ods rtf file="Target36.rtf" style=styles.journal;
+NOTE: Writing RTF Body file: Target36.rtf
+47         options nobyline;
+48         Proc Report data=ADCM2 headline ;
+49         by TRTA;
+50         Columns TRTA USUBJID CMTRT cmdecod cmclas DoseUnit CMINDC StartStop ADURN Ongoing;
+51         define TRTA / noprint;
+52         define USUBJID / width=11 flow;
+53         define CMTRT / width=10  flow;
+54         define cmdecod / width=10 flow;
+55         define cmclas  / width=10 flow;
+56         define DoseUnit / width=6 "Dose (unit)" flow;
+57         define CMINDC  / width=10 flow;
+58         define StartStop / width=10 "Start Date / Stop Date" flow;
+59         define ADURN  / width=6 "Dur (Days)" flow;
+60         define Ongoing / width=7 flow;
+61         title JUSTIFY=L "&POPNLABEL Population";
+62         title2 JUSTIFY=L "Study Period";
+63         title3 JUSTIFY=L "Treatment: #byval1";
+64         run;
+
+NOTE: There were 7510 observations read from the data set WORK.ADCM2.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           1.80 seconds
+      user cpu time       1.39 seconds
+      system cpu time     0.28 seconds
+      memory              36981.50k
+      OS Memory           51832.00k
+      Timestamp           10/27/2026 10:54:03 AM
+      Step Count                        4  Switch Count  0
+      
+
+64       !     quit;
+65         ods rtf close;
+66         ods listing;
+                                                    The SAS System
+
+67         
+68         
+69         /*Dataset: ADCM
+70          Variables: STUDYID, USUBJID, TRTA, TRTAN, SAFFL, CMCLAS, CMDECOD, CMDOSE, CMDOSU, CMINDC, CMSTDTC, CMENDTC,
+70       !  ADURN, AENRF, SAFFL
+71          Record Selection:
+72         
+73         Subject ID = USUBJID
+74          Medication ATC term(s) = CMCLAS
+75          Generic Name = CMDECOD
+76          Dose (unit) = CMDOSE (CMDOSU)
+77          Primary Indication for Use = CMINDC
+78          Start Date/Stop Date = CMSTDTC/CMENDTC
+79          Dur. (days) = ADURN
+80          Cont. (Y/N) = display 'Y' if AENRF='Ongoing'; else display 'N'
+81          Sort by STUDYID, USUBJID, CMSTDTC, CMENDTC, CMDECOD.
+82         */
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           4.97 seconds
+      user cpu time       2.07 seconds
+      system cpu time     0.85 seconds
+      memory              46258.53k
+      OS Memory           51832.00k
+      Timestamp           10/27/2026 10:54:03 AM
+      Step Count                        4  Switch Count  20
+      

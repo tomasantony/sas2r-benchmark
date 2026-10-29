@@ -1,0 +1,603 @@
+1                                                          The SAS System                            10:50 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.85 seconds
+      cpu time            0.54 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P003
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:50:02 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P003 family=pilot
+NOTE: Libref SDTMNEW refers to the same physical library as PSDTM.
+NOTE: Libref SDTMNEW was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: Libref ADAMNEW refers to the same physical library as PADAM.
+                                                           The SAS System
+
+NOTE: Libref ADAMNEW was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\ae.xpt
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.AE to SDTMNEW.AE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+NOTE: There were 1191 observations read from the data set _X.AE.
+NOTE: The data set SDTMNEW.AE has 1191 observations and 35 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              762.03k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 10:50:02 AM
+      Step Count                        2  Switch Count  0
+      
+
+NOTE: Libref _X has been deassigned.
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\sdtm\suppae.xpt
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.SUPPAE to SDTMNEW.SUPPAE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+NOTE: There were 1191 observations read from the data set _X.SUPPAE.
+NOTE: The data set SDTMNEW.SUPPAE has 1191 observations and 10 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              573.62k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:02 AM
+      Step Count                        3  Switch Count  0
+      
+
+NOTE: Libref _X has been deassigned.
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADSL to ADAMNEW.ADSL (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+NOTE: There were 254 observations read from the data set _X.ADSL.
+NOTE: The data set ADAMNEW.ADSL has 254 observations and 48 variables.
+                                                           The SAS System
+
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              655.53k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:02 AM
+      Step Count                        4  Switch Count  0
+      
+
+NOTE: Libref _X has been deassigned.
+NOTE: Libref _X was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adae.xpt
+
+NOTE: Input library _X is sequential.
+NOTE: Copying _X.ADAE to ADAMNEW.ADAE (memtype=DATA).
+NOTE: BUFSIZE is not cloned when copying across different engines. System Option for BUFSIZE was used.
+INFO: Data set block I/O cannot be used because:
+INFO:   -  The data sets use different engines, have different variables or have attributes that may differ.
+NOTE: There were 1191 observations read from the data set _X.ADAE.
+NOTE: The data set ADAMNEW.ADAE has 1191 observations and 55 variables.
+NOTE: PROCEDURE COPY used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              670.06k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:02 AM
+      Step Count                        5  Switch Count  0
+      
+
+NOTE: Libref _X has been deassigned.
+
+NOTE: AUTOEXEC processing completed.
+
+1          **********************************************************************************;
+2          * Program Name:      at14-5-02.sas
+3          * Purpose:           combines adverse event data with subject level analysis data
+4                               calculates n (%) for body system, preferred term and
+5                               number of events for both and then produces adverse
+6                               event table for SERIOUS events only
+7          
+8           *****************************************************************************;
+9          
+10         libname adam "&root.\data\derived\cdisc-pilot\adam";
+NOTE: Libref ADAM refers to the same physical library as ADAMNEW.
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+11         data ADSL;
+12         	set ADAM.ADSL;
+13         run;
+
+NOTE: There were 254 observations read from the data set ADAM.ADSL.
+NOTE: The data set WORK.ADSL has 254 observations and 48 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              975.76k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:02 AM
+      Step Count                        6  Switch Count  0
+      
+
+14         data ADAE;
+15         	set ADAM.ADAE;
+16         run;
+
+NOTE: There were 1191 observations read from the data set ADAM.ADAE.
+NOTE: The data set WORK.ADAE has 1191 observations and 55 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              980.95k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:50:02 AM
+      Step Count                        7  Switch Count  0
+      
+
+17         ** GET DESCRIPTIVE STATISTICS - COUNTS FREQUENCIES AND UNIQUE COUNTS AT SUBJECT, SOC AND PT LEVELS**;
+18         PROC SQL;
+19         CREATE TABLE DENOM AS
+20         SELECT COUNT(distinct usubjid) as denom, TRT01AN as TRTAN
+21         FROM ADSL(where=(SAFFL='Y'))
+22         GROUP BY TRTAN
+23         ORDER BY TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.DENOM created, with 3 rows and 2 columns.
+
+24         /* COUNT UNIQUE SUBJECTS BY SOC AND PREFERRED TERM AND TREATMENT */
+25         CREATE TABLE AEPTD AS
+26         SELECT COUNT(distinct usubjid) AS count, AEBODSYS, AEDECOD, TRTAN
+27         FROM ADAE(where=(TRTEMFL='Y' and AESER='Y'))
+28         GROUP BY TRTAN, AEBODSYS, AEDECOD
+29         ORDER BY TRTAN, AEBODSYS, AEDECOD;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.AEPTD created, with 3 rows and 4 columns.
+
+30         ** COUNT ALL EVENTS BY SOC AND PREFERRED TERM AND TREATMENT **;
+31         CREATE TABLE AEPTA AS
+32         SELECT COUNT(usubjid) AS events, AEBODSYS, AEDECOD, TRTAN
+33         FROM ADAE(where=(TRTEMFL='Y' and AESER='Y'))
+34         GROUP BY TRTAN, AEBODSYS, AEDECOD
+35         ORDER BY TRTAN, AEBODSYS, AEDECOD;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.AEPTA created, with 3 rows and 4 columns.
+
+36         ** GET RESULTS AT PTLEVEL **;
+37         create table RESULTPT as select a.*, 3 as SUMMARYLEVEL, b.DENOM, c.events,
+38         strip(put(count,best.))||' ('||strip(put((count/denom)*100,8.1))||'%) ['||strip(put(events,best.))||']'
+39         as RESULT LENGTH=50
+40         from AEPTD as A left join DENOM as b
+41         on a.TRTAN=b.TRTAN
+                                                           The SAS System
+
+42         left join AEPTA as c
+43         on a.TRTAN=c.TRTAN and a.AEBODSYS=c.AEBODSYS and a.AEDECOD=c.AEDECOD
+44         order by AEBODSYS, AEDECOD, TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.RESULTPT created, with 3 rows and 8 columns.
+
+45         
+46         /* COUNT UNIQUE SUBJECTS BY SOC AND TREATMENT */
+47         CREATE TABLE AESOCD AS
+48         SELECT COUNT(distinct usubjid) AS count, AEBODSYS, TRTAN
+49         FROM ADAE(where=(TRTEMFL='Y' and AESER='Y'))
+50         GROUP BY TRTAN, AEBODSYS
+51         ORDER BY TRTAN, AEBODSYS;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.AESOCD created, with 2 rows and 3 columns.
+
+52         ** COUNT ALL EVENTS BY SOC TREATMENT **;
+53         CREATE TABLE AESOCA AS
+54         SELECT COUNT(usubjid) AS events, AEBODSYS, TRTAN
+55         FROM ADAE(where=(TRTEMFL='Y' and AESER='Y'))
+56         GROUP BY TRTAN, AEBODSYS
+57         ORDER BY TRTAN, AEBODSYS;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.AESOCA created, with 2 rows and 3 columns.
+
+58         ** GET RESULTS AT SOCLEVEL **;
+59         create table RESULTSOC as select a.*, 2 as SUMMARYLEVEL, b.DENOM, c.events,
+60         strip(put(count,best.))||' ('||strip(put((count/denom)*100,8.1))||'%) ['||strip(put(events,best.))||']'
+61         as RESULT LENGTH=50
+62         from AESOCD as A left join DENOM as b
+63         on a.TRTAN=b.TRTAN
+64         left join AESOCA as c
+65         on a.TRTAN=c.TRTAN and a.AEBODSYS=c.AEBODSYS
+66         order by AEBODSYS, TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.RESULTSOC created, with 2 rows and 7 columns.
+
+67         
+68         /* COUNT UNIQUE SUBJECTS BY TREATMENT */
+69         CREATE TABLE AESUBD AS
+70         SELECT COUNT(distinct usubjid) AS count, TRTAN
+71         FROM ADAE(where=(TRTEMFL='Y' and AESER='Y'))
+72         GROUP BY TRTAN
+73         ORDER BY TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.AESUBD created, with 2 rows and 2 columns.
+
+74         ** COUNT ALL EVENTS BY TREATMENT **;
+75         CREATE TABLE AESUBA AS
+76         SELECT COUNT(usubjid) AS events, TRTAN
+77         FROM ADAE(where=(TRTEMFL='Y' and AESER='Y'))
+78         GROUP BY TRTAN
+79         ORDER BY TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.AESUBA created, with 2 rows and 2 columns.
+
+80         ** GET RESULTS AT SUBJECT LEVEL **;
+81         create table RESULTSUB as select a.*, 1 as SUMMARYLEVEL, b.DENOM, c.events,
+                                                           The SAS System
+
+82         strip(put(count,best.))||' ('||strip(put((count/denom)*100,8.1))||'%) ['||strip(put(events,best.))||']'
+83         as RESULT LENGTH=50
+84         from AESUBD as A left join DENOM as b
+85         on a.TRTAN=b.TRTAN
+86         left join AESUBA as c
+87         on a.TRTAN=c.TRTAN
+88         order by TRTAN;
+NOTE: Table WORK.RESULTSUB created, with 2 rows and 6 columns.
+
+89         QUIT;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.28 seconds
+      user cpu time       0.14 seconds
+      system cpu time     0.20 seconds
+      memory              17684.56k
+      OS Memory           27612.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        8  Switch Count  0
+      
+
+90         ** INFERENTIAL STATISTICS **;
+91         ** PT LEVEL **;
+92         proc sql;
+93         create table BACKBONE as select * from
+94         (select distinct USUBJID, TRT01AN as TRTAN from ADSL(where=(SAFFL='Y'))) ,
+95         (select distinct AEDECOD from ADAE(where=(TRTEMFL='Y' and AESER='Y')));
+NOTE: The execution of this query involves performing one or more Cartesian product joins that can not be optimized.
+NOTE: Table WORK.BACKBONE created, with 508 rows and 3 columns.
+
+96         create table HADEVENT as select distinct STUDYID, USUBJID, TRTAN, AEDECOD
+97         from ADAE(where=(TRTEMFL='Y' and AESER='Y'));
+NOTE: Table WORK.HADEVENT created, with 3 rows and 4 columns.
+
+98         
+99         create table FISHER as select a.USUBJID, a.TRTAN, a.AEDECOD,
+100        case when STUDYID='CDISCPILOT01' then 1
+101        else 0
+102        end as EVENT
+103        from BACKBONE a left join HADEVENT b
+104        on a.USUBJID=b.USUBJID and a.TRTAN=b.TRTAN and a.AEDECOD=b.AEDECOD
+105        order by a.AEDECOD, a.TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.FISHER created, with 508 rows and 4 columns.
+
+106        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              9308.23k
+      OS Memory           20388.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        9  Switch Count  0
+      
+
+107        ** HIGH DOSE VERSUS PLACEBO **;
+108        proc freq data=FISHER;
+109        by AEDECOD;
+                                                           The SAS System
+
+110        where TRTAN in (0,2);
+111        table TRTAN*EVENT/exact;
+112        ods output FishersExact=F1PT(where=(Name1='XP2_FISH'));
+113        run;
+
+NOTE: No statistics are computed for TRTAN * EVENT because TRTAN has less than 2 nonmissing levels.
+NOTE: The above message was for the following BY group:
+      Dictionary-Derived Term=PARTIAL SEIZURES WITH SECONDARY GENERALISATION
+NOTE: No statistics are computed for TRTAN * EVENT because TRTAN has less than 2 nonmissing levels.
+NOTE: The above message was for the following BY group:
+      Dictionary-Derived Term=SYNCOPE
+WARNING: Output 'FishersExact' was not created.  Make sure that the output object name, label, or path is spelled correctly.  Also, 
+         verify that the appropriate procedure options are used to produce the requested output object.  For example, verify that 
+         the NOPRINT option is not used.
+NOTE: There were 172 observations read from the data set WORK.FISHER.
+      WHERE TRTAN in (0, 2);
+NOTE: The PROCEDURE FREQ printed pages 1-2.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.10 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.03 seconds
+      memory              1067.40k
+      OS Memory           12896.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        10  Switch Count  0
+      
+
+114        ** LOW DOSE VERSUS PLACEBO **;
+115        proc freq data=FISHER;
+116        by AEDECOD;
+117        where TRTAN in (0,1);
+118        table TRTAN*EVENT/exact;
+119        ods output FishersExact=F2PT(where=(Name1='XP2_FISH'));
+120        run;
+
+NOTE: No statistics are computed for TRTAN * EVENT because TRTAN has less than 2 nonmissing levels.
+NOTE: The above message was for the following BY group:
+      Dictionary-Derived Term=PARTIAL SEIZURES WITH SECONDARY GENERALISATION
+NOTE: No statistics are computed for TRTAN * EVENT because TRTAN has less than 2 nonmissing levels.
+NOTE: The above message was for the following BY group:
+      Dictionary-Derived Term=SYNCOPE
+WARNING: Output 'FishersExact' was not created.  Make sure that the output object name, label, or path is spelled correctly.  Also, 
+         verify that the appropriate procedure options are used to produce the requested output object.  For example, verify that 
+         the NOPRINT option is not used.
+NOTE: There were 172 observations read from the data set WORK.FISHER.
+      WHERE TRTAN in (0, 1);
+NOTE: The PROCEDURE FREQ printed pages 3-4.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              809.12k
+      OS Memory           12896.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        11  Switch Count  0
+      
+
+121        ** SOC LEVEL**;
+                                                           The SAS System
+
+122        proc sql;
+123        create table BACKBONE1 as select * from
+124        (select distinct USUBJID, TRT01AN as TRTAN from ADSL(where=(SAFFL='Y'))) ,
+125        (select distinct AEBODSYS from ADAE(where=(TRTEMFL='Y' and AESER='Y')));
+NOTE: The execution of this query involves performing one or more Cartesian product joins that can not be optimized.
+NOTE: Table WORK.BACKBONE1 created, with 254 rows and 3 columns.
+
+126        create table HADEVENT1 as select distinct STUDYID, USUBJID, TRTAN, AEBODSYS
+127        from ADAE(where=(TRTEMFL='Y' and AESER='Y'));
+NOTE: Table WORK.HADEVENT1 created, with 3 rows and 4 columns.
+
+128        
+129        create table FISHER1 as select a.USUBJID, a.TRTAN, a.AEBODSYS,
+130        case when STUDYID='CDISCPILOT01' then 1
+131        else 0
+132        end as EVENT
+133        from BACKBONE1 a left join HADEVENT1 b
+134        on a.USUBJID=b.USUBJID and a.TRTAN=b.TRTAN and a.AEBODSYS=b.AEBODSYS
+135        order by a.AEBODSYS, a.TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.FISHER1 created, with 254 rows and 4 columns.
+
+136        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              9174.85k
+      OS Memory           19992.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        12  Switch Count  0
+      
+
+137        ** HIGH DOSE VERSUS PLACEBO **;
+138        proc freq data=FISHER1;
+139        by AEBODSYS;
+140        where TRTAN in (0,2);
+141        table TRTAN*EVENT/exact;
+142        ods output FishersExact=F1SOC(where=(Name1='XP2_FISH'));
+143        run;
+
+NOTE: No statistics are computed for TRTAN * EVENT because TRTAN has less than 2 nonmissing levels.
+NOTE: The above message was for the following BY group:
+      Body System or Organ Class=NERVOUS SYSTEM DISORDERS
+WARNING: Output 'FishersExact' was not created.  Make sure that the output object name, label, or path is spelled correctly.  Also, 
+         verify that the appropriate procedure options are used to produce the requested output object.  For example, verify that 
+         the NOPRINT option is not used.
+NOTE: There were 86 observations read from the data set WORK.FISHER1.
+      WHERE TRTAN in (0, 2);
+NOTE: The PROCEDURE FREQ printed page 5.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              792.90k
+      OS Memory           12896.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        13  Switch Count  0
+                                                           The SAS System
+
+      
+
+144        ** LOW DOSE VERSUS PLACEBO **;
+145        proc freq data=FISHER1;
+146        by AEBODSYS;
+147        where TRTAN in (0,1);
+148        table TRTAN*EVENT/exact;
+149        ods output FishersExact=F2SOC(where=(Name1='XP2_FISH'));
+150        run;
+
+NOTE: No statistics are computed for TRTAN * EVENT because TRTAN has less than 2 nonmissing levels.
+NOTE: The above message was for the following BY group:
+      Body System or Organ Class=NERVOUS SYSTEM DISORDERS
+WARNING: Output 'FishersExact' was not created.  Make sure that the output object name, label, or path is spelled correctly.  Also, 
+         verify that the appropriate procedure options are used to produce the requested output object.  For example, verify that 
+         the NOPRINT option is not used.
+NOTE: There were 86 observations read from the data set WORK.FISHER1.
+      WHERE TRTAN in (0, 1);
+NOTE: The PROCEDURE FREQ printed page 6.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              791.75k
+      OS Memory           12896.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        14  Switch Count  0
+      
+
+151        ** SUBJECT LEVEL**;
+152        proc sql;
+153        create table BACKBONE2 as select * from
+154        (select distinct USUBJID, TRT01AN as TRTAN from ADSL(where=(SAFFL='Y')));
+NOTE: Table WORK.BACKBONE2 created, with 254 rows and 2 columns.
+
+155        create table HADEVENT2 as select distinct STUDYID, USUBJID, TRTAN
+156        from ADAE(where=(TRTEMFL='Y' and AESER='Y'));
+NOTE: Table WORK.HADEVENT2 created, with 3 rows and 3 columns.
+
+157        create table FISHER2 as select a.USUBJID, a.TRTAN,
+158        case when STUDYID='CDISCPILOT01' then 1
+159        else 0
+160        end as EVENT
+161        from BACKBONE2 a left join HADEVENT2 b
+162        on a.USUBJID=b.USUBJID and a.TRTAN=b.TRTAN
+163        order by a.TRTAN;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.FISHER2 created, with 254 rows and 3 columns.
+
+164        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              10954.01k
+      OS Memory           21668.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        15  Switch Count  0
+                                                           The SAS System
+
+      
+
+165        ** HIGH DOSE VERSUS PLACEBO **;
+166        proc freq data=FISHER2;
+167        where TRTAN in (0,2);
+168        table TRTAN*EVENT/exact;
+169        ods output FishersExact=F1SUB(where=(Name1='XP2_FISH'));
+170        run;
+
+NOTE: No statistics are computed for TRTAN * EVENT because TRTAN has less than 2 nonmissing levels.
+WARNING: Output 'FishersExact' was not created.  Make sure that the output object name, label, or path is spelled correctly.  Also, 
+         verify that the appropriate procedure options are used to produce the requested output object.  For example, verify that 
+         the NOPRINT option is not used.
+NOTE: There were 86 observations read from the data set WORK.FISHER2.
+      WHERE TRTAN in (0, 2);
+NOTE: The PROCEDURE FREQ printed page 7.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              770.53k
+      OS Memory           12896.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        16  Switch Count  0
+      
+
+171        ** LOW DOSE VERSUS PLACEBO **;
+172        proc freq data=FISHER2;
+173        where TRTAN in (0,1);
+174        table TRTAN*EVENT/exact;
+175        ods output FishersExact=F2SUB(where=(Name1='XP2_FISH'));
+176        run;
+
+NOTE: No statistics are computed for TRTAN * EVENT because TRTAN has less than 2 nonmissing levels.
+WARNING: Output 'FishersExact' was not created.  Make sure that the output object name, label, or path is spelled correctly.  Also, 
+         verify that the appropriate procedure options are used to produce the requested output object.  For example, verify that 
+         the NOPRINT option is not used.
+NOTE: There were 86 observations read from the data set WORK.FISHER2.
+      WHERE TRTAN in (0, 1);
+NOTE: The PROCEDURE FREQ printed page 8.
+NOTE: PROCEDURE FREQ used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              769.34k
+      OS Memory           12896.00k
+      Timestamp           10/27/2026 10:50:03 AM
+      Step Count                        17  Switch Count  0
+      
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.04 seconds
+      user cpu time       0.50 seconds
+      system cpu time     0.75 seconds
+      memory              26021.93k
+      OS Memory           27612.00k
+      Timestamp           10/27/2026 10:50:03 AM
+                                                           The SAS System
+
+      Step Count                        17  Switch Count  46
+      

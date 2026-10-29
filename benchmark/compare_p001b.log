@@ -1,0 +1,78 @@
+1                                           The SAS System             11:41 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.52 seconds
+      cpu time            0.60 seconds
+      
+1          libname ours1 "D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001";
+NOTE: Libref OURS1 was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P001
+2          libname ship1 xport "D:\meta_hackathon\sas2r-agent\output\sas\shipped\P001\adsl.xpt";
+NOTE: Libref SHIP1 was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\shipped\P001\adsl.xpt
+3          options ls=160 nodate nonumber;
+4          title "nmiss of TRTSDTM/TRTEDTM: shipped then ours";
+5          proc means data=ship1.adsl n nmiss; var trtsdtm trtedtm; run;
+
+NOTE: There were 306 observations read from the data set SHIP1.ADSL.
+NOTE: The PROCEDURE MEANS printed page 1.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.09 seconds
+      cpu time            0.04 seconds
+      
+
+6          proc means data=ours1.adsl n nmiss; var trtsdtm trtedtm; run;
+
+NOTE: There were 306 observations read from the data set OURS1.ADSL.
+NOTE: The PROCEDURE MEANS printed page 2.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+7          title "EFFFL differing subjects";
+8          data d; merge ship1.adsl(keep=usubjid efffl saffl ittfl rename=(efffl=f_ship)) ours1.adsl(keep=usubjid efffl rename=(efffl=f_ours)); by usubjid; if
+8        ! f_ship ne f_ours; run;
+
+NOTE: There were 306 observations read from the data set SHIP1.ADSL.
+NOTE: There were 306 observations read from the data set OURS1.ADSL.
+                                                                         The SAS System
+
+NOTE: The data set WORK.D has 2 observations and 5 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.03 seconds
+      
+
+9          proc print data=d; run;
+
+NOTE: There were 2 observations read from the data set WORK.D.
+NOTE: The PROCEDURE PRINT printed page 3.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.00 seconds
+      
+
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.72 seconds
+      cpu time            0.74 seconds
+      

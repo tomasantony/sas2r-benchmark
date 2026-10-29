@@ -1,0 +1,1061 @@
+                                                           The SAS System
+
+                                                 Obs    semana    repet    recuento
+
+                                                   1       1        1         12   
+                                                   2       1        2          1   
+                                                   3       1        3          6   
+                                                   4       1        4          1   
+                                                   5       1        5          5   
+                                                   6       1        6          7   
+                                                   7       1        7          1   
+                                                   8       1        8          1   
+                                                           The SAS System
+
+------------------------------------------------------------- semana=1 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                              Moments
+
+                                  N                          40    Sum Weights                 40
+                                  Mean                    5.225    Sum Observations           209
+                                  Std Deviation      5.99353284    Variance            35.9224359
+                                  Skewness           1.34247877    Kurtosis            0.90408186
+                                  Uncorrected SS           2493    Corrected SS          1400.975
+                                  Coeff Variation    114.708762    Std Error Mean      0.94766075
+
+
+                                                     Basic Statistical Measures
+ 
+                                           Location                    Variability
+
+                                       Mean     5.225000     Std Deviation            5.99353
+                                       Median   2.000000     Variance                35.92244
+                                       Mode     1.000000     Range                   21.00000
+                                                             Interquartile Range      6.50000
+
+
+                                                     Tests for Location: Mu0=0
+ 
+                                          Test           -Statistic-    -----p Value------
+
+                                          Student's t    t  5.513576    Pr > |t|    <.0001
+                                          Sign           M      16.5    Pr >= |M|   <.0001
+                                          Signed Rank    S     280.5    Pr >= |S|   <.0001
+
+
+                                                      Quantiles (Definition 5)
+ 
+                                                       Level         Quantile
+
+                                                       100% Max          21.0
+                                                       99%               21.0
+                                                       95%               19.0
+                                                       90%               15.0
+                                                       75% Q3             7.5
+                                                       50% Median         2.0
+                                                       25% Q1             1.0
+                                                       10%                0.0
+                                                       5%                 0.0
+                                                       1%                 0.0
+                                                       0% Min             0.0
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=1 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                        Extreme Observations
+ 
+                                                ----Lowest----        ----Highest---
+ 
+                                                Value      Obs        Value      Obs
+
+                                                    0       36           12       35
+                                                    0       26           18       28
+                                                    0       22           18       40
+                                                    0       19           20       11
+                                                    0       18           21       25
+
+
+      Stem Leaf                     #             Boxplot                                   Normal Probability Plot
+        20 00                       2                0                     21+                                          *    *  +
+        18 00                       2                0                       |                                      * *      +++
+        16                                                                   |                                           ++++
+        14                                                                   |                                        +++
+        12 000                      3                |                       |                                   ***++
+        10 0                        1                |                     11+                                 +*++
+         8 00                       2                |                       |                              ++**
+         6 00000                    5             +-----+                    |                           +****
+         4 00                       2             |  +  |                    |                       ++++**
+         2 00000000                 8             *-----*                    |                    ++******
+         0 000000000000000         15             +-----+                   1+   *    * * ***********
+           ----+----+----+----+                                               +----+----+----+----+----+----+----+----+----+----+
+                                                                                  -2        -1         0        +1        +2
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=2 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                              Moments
+
+                                  N                          40    Sum Weights                 40
+                                  Mean                    31.35    Sum Observations          1254
+                                  Std Deviation      20.2731982    Variance            411.002564
+                                  Skewness           0.95441937    Kurtosis            0.66175663
+                                  Uncorrected SS          55342    Corrected SS           16029.1
+                                  Coeff Variation    64.6672988    Std Error Mean      3.20547408
+
+
+                                                     Basic Statistical Measures
+ 
+                                           Location                    Variability
+
+                                       Mean     31.35000     Std Deviation           20.27320
+                                       Median   27.00000     Variance               411.00256
+                                       Mode     15.00000     Range                   83.00000
+                                                             Interquartile Range     28.00000
+
+
+                                                     Tests for Location: Mu0=0
+ 
+                                          Test           -Statistic-    -----p Value------
+
+                                          Student's t    t  9.780145    Pr > |t|    <.0001
+                                          Sign           M        20    Pr >= |M|   <.0001
+                                          Signed Rank    S       410    Pr >= |S|   <.0001
+
+
+                                                      Quantiles (Definition 5)
+ 
+                                                       Level         Quantile
+
+                                                       100% Max          86.0
+                                                       99%               86.0
+                                                       95%               75.0
+                                                       90%               58.5
+                                                       75% Q3            43.5
+                                                       50% Median        27.0
+                                                       25% Q1            15.5
+                                                       10%                9.0
+                                                       5%                 6.5
+                                                       1%                 3.0
+                                                       0% Min             3.0
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=2 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                        Extreme Observations
+ 
+                                                ----Lowest----        ----Highest---
+ 
+                                                Value      Obs        Value      Obs
+
+                                                    3       69           53       48
+                                                    6       51           64       65
+                                                    7       62           67       49
+                                                    8       73           83       78
+                                                   10       72           86       77
+
+
+      Stem Leaf                     #             Boxplot                                   Normal Probability Plot
+         8 6                        1                0                   87.5+                                               *
+         8 3                        1                |                       |                                          *      ++
+         7                                           |                       |                                               ++
+         7                                           |                       |                                             ++
+         6 7                        1                |                       |                                        * +++
+         6 4                        1                |                       |                                      * ++
+         5                                           |                       |                                     +++
+         5 003                      3                |                       |                                   ***
+         4 56                       2                |                       |                                +**
+         4 00134                    5             +-----+                    |                             ****
+         3 6                        1             |     |                    |                           +*+
+         3 1224                     4             |  +  |                    |                         +***
+         2 577                      3             *-----*                    |                      ++**
+         2 1124                     4             |     |                    |                    ++**
+         1 5556779                  7             +-----+                    |                ******
+         1 011                      3                |                       |             ***+
+         0 678                      3                |                       |        * * *++
+         0 3                        1                |                    2.5+   *      +++
+           ----+----+----+----+                                               +----+----+----+----+----+----+----+----+----+----+
+       Multiply Stem.Leaf by 10**+1                                               -2        -1         0        +1        +2
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=3 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                              Moments
+
+                                  N                          40    Sum Weights                 40
+                                  Mean                    31.95    Sum Observations          1278
+                                  Std Deviation      24.4759956    Variance            599.074359
+                                  Skewness           1.07118226    Kurtosis            1.18146439
+                                  Uncorrected SS          64196    Corrected SS           23363.9
+                                  Coeff Variation    76.6071849    Std Error Mean       3.8699947
+
+
+                                                     Basic Statistical Measures
+ 
+                                           Location                    Variability
+
+                                       Mean     31.95000     Std Deviation           24.47600
+                                       Median   26.50000     Variance               599.07436
+                                       Mode     20.00000     Range                  108.00000
+                                                             Interquartile Range     31.50000
+
+
+                                                     Tests for Location: Mu0=0
+ 
+                                          Test           -Statistic-    -----p Value------
+
+                                          Student's t    t  8.255825    Pr > |t|    <.0001
+                                          Sign           M        19    Pr >= |M|   <.0001
+                                          Signed Rank    S     370.5    Pr >= |S|   <.0001
+
+
+                                                      Quantiles (Definition 5)
+ 
+                                                       Level         Quantile
+
+                                                       100% Max         108.0
+                                                       99%              108.0
+                                                       95%               77.0
+                                                       90%               63.5
+                                                       75% Q3            44.0
+                                                       50% Median        26.5
+                                                       25% Q1            12.5
+                                                       10%                6.0
+                                                       5%                 2.5
+                                                       1%                 0.0
+                                                       0% Min             0.0
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=3 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                        Extreme Observations
+ 
+                                                ----Lowest----        ----Highest---
+ 
+                                                Value      Obs        Value      Obs
+
+                                                    0      120           63       92
+                                                    0      119           64      114
+                                                    5      107           68       84
+                                                    6      109           86       81
+                                                    6      103          108      111
+
+
+      Stem Leaf                     #             Boxplot                                   Normal Probability Plot
+        10 8                        1                0                    105+                                               *
+         9                                                                   |                                                 ++
+         8 6                        1                |                       |                                          *  ++++
+         7                                           |                       |                                         ++++
+         6 23348                    5                |                       |                                   ****+*
+         5 5                        1                |                     55+                                 +*++
+         4 02266                    5             +-----+                    |                             +****
+         3 0558                     4             |  +  |                    |                         ++***
+         2 00014566789             11             *-----*                    |                    ********
+         1 055                      3             +-----+                    |                 +**+
+         0 005667799                9                |                      5+   *    * * ******
+           ----+----+----+----+                                               +----+----+----+----+----+----+----+----+----+----+
+       Multiply Stem.Leaf by 10**+1                                               -2        -1         0        +1        +2
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=4 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                              Moments
+
+                                  N                          40    Sum Weights                 40
+                                  Mean                    4.825    Sum Observations           193
+                                  Std Deviation      8.22406569    Variance            67.6352564
+                                  Skewness           3.03999922    Kurtosis            9.68583055
+                                  Uncorrected SS           3569    Corrected SS          2637.775
+                                  Coeff Variation    170.446957    Std Error Mean      1.30033896
+
+
+                                                     Basic Statistical Measures
+ 
+                                           Location                    Variability
+
+                                       Mean     4.825000     Std Deviation            8.22407
+                                       Median   2.000000     Variance                67.63526
+                                       Mode     0.000000     Range                   40.00000
+                                                             Interquartile Range      4.50000
+
+
+                                                     Tests for Location: Mu0=0
+ 
+                                          Test           -Statistic-    -----p Value------
+
+                                          Student's t    t  3.710571    Pr > |t|    0.0006
+                                          Sign           M        15    Pr >= |M|   <.0001
+                                          Signed Rank    S     232.5    Pr >= |S|   <.0001
+
+
+                                                      Quantiles (Definition 5)
+ 
+                                                       Level         Quantile
+
+                                                       100% Max          40.0
+                                                       99%               40.0
+                                                       95%               25.0
+                                                       90%               12.5
+                                                       75% Q3             5.0
+                                                       50% Median         2.0
+                                                       25% Q1             0.5
+                                                       10%                0.0
+                                                       5%                 0.0
+                                                       1%                 0.0
+                                                       0% Min             0.0
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=4 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                        Extreme Observations
+ 
+                                                ----Lowest----        ----Highest---
+ 
+                                                Value      Obs        Value      Obs
+
+                                                    0      159            7      152
+                                                    0      156           18      151
+                                                    0      155           21      153
+                                                    0      154           29      121
+                                                    0      148           40      160
+
+
+   Stem Leaf                              #           Boxplot                                 Normal Probability Plot
+      4 0                                 1              *                 42.5+                                               *
+      3                                                                        |
+      3                                                                        |
+      2 9                                 1              *                     |                                          *       +
+      2 1                                 1              *                 22.5+                                        *   ++++++
+      1 8                                 1              0                     |                                      *+++++
+      1                                                                        |                                ++++++
+      0 5556677                           7           +--+--+                  |                          +++++*******
+      0 00000000001111222222233333344    29           *-----*               2.5+   *    * * ********************
+        ----+----+----+----+----+----                                           +----+----+----+----+----+----+----+----+----+----+
+    Multiply Stem.Leaf by 10**+1                                                    -2        -1         0        +1        +2
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=5 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                              Moments
+
+                                  N                          40    Sum Weights                 40
+                                  Mean                      1.5    Sum Observations            60
+                                  Std Deviation      4.15716866    Variance            17.2820513
+                                  Skewness            4.9432063    Kurtosis            27.4338644
+                                  Uncorrected SS            764    Corrected SS               674
+                                  Coeff Variation    277.144577    Std Error Mean      0.65730608
+
+
+                                                     Basic Statistical Measures
+ 
+                                           Location                    Variability
+
+                                       Mean     1.500000     Std Deviation            4.15717
+                                       Median   0.000000     Variance                17.28205
+                                       Mode     0.000000     Range                   25.00000
+                                                             Interquartile Range      1.50000
+
+
+                                                     Tests for Location: Mu0=0
+ 
+                                          Test           -Statistic-    -----p Value------
+
+                                          Student's t    t  2.282042    Pr > |t|    0.0280
+                                          Sign           M         7    Pr >= |M|   0.0001
+                                          Signed Rank    S      52.5    Pr >= |S|   0.0001
+
+
+                                                      Quantiles (Definition 5)
+ 
+                                                       Level         Quantile
+
+                                                       100% Max          25.0
+                                                       99%               25.0
+                                                       95%                6.0
+                                                       90%                4.5
+                                                       75% Q3             1.5
+                                                       50% Median         0.0
+                                                       25% Q1             0.0
+                                                       10%                0.0
+                                                       5%                 0.0
+                                                       1%                 0.0
+                                                       0% Min             0.0
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=5 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                        Extreme Observations
+ 
+                                                ----Lowest----        ----Highest---
+ 
+                                                Value      Obs        Value      Obs
+
+                                                    0      199            4      190
+                                                    0      198            5      161
+                                                    0      197            5      180
+                                                    0      196            7      162
+                                                    0      194           25      171
+
+
+   Stem Leaf                               #           Boxplot                                 Normal Probability Plot
+     24 0                                  1              *                   25+                                               *
+     22                                                                         |
+     20                                                                         |
+     18                                                                         |
+     16                                                                         |
+     14                                                                         |
+     12                                                                       13+
+     10                                                                         |                                              +++++
+      8                                                                         |                                         +++++
+      6 0                                  1              *                     |                                    +++++ *
+      4 000                                3              0                     |                                ++++ ** *
+      2 00000                              5              |                     |                           +++++*****
+      0 000000000000000000000000000000    30           +--+--+                 1+   *    * * ********************
+        ----+----+----+----+----+----+                                           +----+----+----+----+----+----+----+----+----+----+
+                                                                                     -2        -1         0        +1        +2
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=6 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                              Moments
+
+                                  N                          40    Sum Weights                 40
+                                  Mean                    0.525    Sum Observations            21
+                                  Std Deviation      1.48475155    Variance            2.20448718
+                                  Skewness           3.31330721    Kurtosis            10.9833523
+                                  Uncorrected SS             97    Corrected SS            85.975
+                                  Coeff Variation     282.80982    Std Error Mean      0.23475983
+
+
+                                                     Basic Statistical Measures
+ 
+                                           Location                    Variability
+
+                                       Mean     0.525000     Std Deviation            1.48475
+                                       Median   0.000000     Variance                 2.20449
+                                       Mode     0.000000     Range                    7.00000
+                                                             Interquartile Range            0
+
+
+                                                     Tests for Location: Mu0=0
+ 
+                                          Test           -Statistic-    -----p Value------
+
+                                          Student's t    t  2.236328    Pr > |t|    0.0311
+                                          Sign           M       3.5    Pr >= |M|   0.0156
+                                          Signed Rank    S        14    Pr >= |S|   0.0156
+
+
+                                                      Quantiles (Definition 5)
+ 
+                                                       Level         Quantile
+
+                                                       100% Max           7.0
+                                                       99%                7.0
+                                                       95%                4.5
+                                                       90%                1.5
+                                                       75% Q3             0.0
+                                                       50% Median         0.0
+                                                       25% Q1             0.0
+                                                       10%                0.0
+                                                       5%                 0.0
+                                                       1%                 0.0
+                                                       0% Min             0.0
+
+
+                                                           The SAS System
+
+------------------------------------------------------------- semana=6 -------------------------------------------------------------
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                        Extreme Observations
+ 
+                                                ----Lowest----        ----Highest---
+ 
+                                                Value      Obs        Value      Obs
+
+                                                    0      240            1      210
+                                                    0      239            2      212
+                                                    0      238            4      209
+                                                    0      237            5      211
+                                                    0      236            7      205
+
+
+   Stem Leaf                                  #         Boxplot                               Normal Probability Plot
+      7 0                                     1            *               7.25+                                               *
+      6                                                                        |
+      6                                                                        |
+      5                                                                        |
+      5 0                                     1            *                   |                                          *
+      4                                                                        |
+      4 0                                     1            *                   |                                        *        ++
+      3                                                                    3.75+                                              +++
+      3                                                                        |                                          ++++
+      2                                                                        |                                       +++
+      2 0                                     1            *                   |                                   +++*
+      1                                                                        |                                +++
+      1 000                                   3            *                   |                             +++   ***
+      0                                                                        |                         ++++
+      0 000000000000000000000000000000000    33         +--+--+            0.25+   *    * * ***********************
+        ----+----+----+----+----+----+---                                       +----+----+----+----+----+----+----+----+----+----+
+                                                                                    -2        -1         0        +1        +2
+
+
+                                                           The SAS System
+
+                                                      The UNIVARIATE Procedure
+                                                        Variable:  recuento
+
+                                                          Schematic Plots
+
+                            |
+                        110 +
+                            |                                    0
+                            |
+                            |
+                        100 +
+                            |
+                            |
+                            |
+                         90 +
+                            |
+                            |                        0           |
+                            |                        |           |
+                         80 +                        |           |
+                            |                        |           |
+                            |                        |           |
+                            |                        |           |
+                         70 +                        |           |
+                            |                        |           |
+                            |                        |           |
+                            |                        |           |
+                         60 +                        |           |
+                            |                        |           |
+                            |                        |           |
+                            |                        |           |
+                         50 +                        |           |
+                            |                        |           |
+                            |                        |        +-----+
+                            |                     +-----+     |     |
+                         40 +                     |     |     |     |        *
+                            |                     |     |     |     |
+                            |                     |     |     |     |
+                            |                     |  +  |     |  +  |
+                         30 +                     |     |     |     |        *
+                            |                     *-----*     *-----*
+                            |                     |     |     |     |                    *
+                            |                     |     |     |     |
+                         20 +            0        |     |     |     |        *
+                            |            0        |     |     |     |        0
+                            |                     +-----+     |     |
+                            |            |           |        +-----+
+                         10 +            |           |           |
+                            |         +-----+        |           |           |           *           *
+                            |         |  +  |        |           |        +--+--+        0           *
+                            |         *-----*        |           |        *-----*     +--+--+        *
+                          0 +         +-----+                    |        +-----+     *-----*     *--*--*
+                             ------------+-----------+-----------+-----------+-----------+-----------+-----------
+                     semana                 1           2           3           4           5           6
+                                                           The SAS System
+
+                                                         The GLM Procedure
+
+                                                      Class Level Information
+ 
+                                                Class         Levels    Values
+
+                                                semana             6    1 2 3 4 5 6 
+
+
+                                              Number of Observations Read         240
+                                              Number of Observations Used         240
+                                                           The SAS System
+
+                                                         The GLM Procedure
+ 
+                                                  Dependent Variable: recuento   
+
+                                                                Sum of
+                        Source                      DF         Squares     Mean Square    F Value    Pr > F
+
+                        Model                        5     44393.33750      8878.66750      47.01    <.0001
+
+                        Error                      234     44191.72500       188.85353                     
+
+                        Corrected Total            239     88585.06250                                     
+
+
+                                       R-Square     Coeff Var      Root MSE    recuento Mean
+
+                                       0.501138      109.3922      13.74240         12.56250
+
+
+                        Source                      DF       Type I SS     Mean Square    F Value    Pr > F
+
+                        semana                       5     44393.33750      8878.66750      47.01    <.0001
+
+
+                        Source                      DF     Type III SS     Mean Square    F Value    Pr > F
+
+                        semana                       5     44393.33750      8878.66750      47.01    <.0001
+                                                           The SAS System
+
+                                Obs    semana    repet    recuento     pred         res       rst
+
+                                  1       1         1        12        5.225      6.775     0.49928
+                                  2       1         2         1        5.225     -4.225    -0.31136
+                                  3       1         3         6        5.225      0.775     0.05711
+                                  4       1         4         1        5.225     -4.225    -0.31136
+                                  5       1         5         5        5.225     -0.225    -0.01658
+                                  6       1         6         7        5.225      1.775     0.13081
+                                  7       1         7         1        5.225     -4.225    -0.31136
+                                  8       1         8         1        5.225     -4.225    -0.31136
+                                  9       1         9         2        5.225     -3.225    -0.23766
+                                 10       1        10         1        5.225     -4.225    -0.31136
+                                 11       1        11        20        5.225     14.775     1.08884
+                                 12       1        12         0        5.225     -5.225    -0.38505
+                                 13       1        13         9        5.225      3.775     0.27820
+                                 14       1        14         7        5.225      1.775     0.13081
+                                 15       1        15         0        5.225     -5.225    -0.38505
+                                 16       1        16        12        5.225      6.775     0.49928
+                                 17       1        17         2        5.225     -3.225    -0.23766
+                                 18       1        18         0        5.225     -5.225    -0.38505
+                                 19       1        19         0        5.225     -5.225    -0.38505
+                                 20       1        20         2        5.225     -3.225    -0.23766
+                                 21       1        21         8        5.225      2.775     0.20450
+                                 22       1        22         0        5.225     -5.225    -0.38505
+                                 23       1        23        11        5.225      5.775     0.42559
+                                 24       1        24         2        5.225     -3.225    -0.23766
+                                 25       1        25        21        5.225     15.775     1.16253
+                                 26       1        26         0        5.225     -5.225    -0.38505
+                                 27       1        27         3        5.225     -2.225    -0.16397
+                                 28       1        28        18        5.225     12.775     0.94145
+                                 29       1        29         2        5.225     -3.225    -0.23766
+                                 30       1        30         2        5.225     -3.225    -0.23766
+                                 31       1        31         6        5.225      0.775     0.05711
+                                 32       1        32         6        5.225      0.775     0.05711
+                                 33       1        33         5        5.225     -0.225    -0.01658
+                                 34       1        34         1        5.225     -4.225    -0.31136
+                                 35       1        35        12        5.225      6.775     0.49928
+                                 36       1        36         0        5.225     -5.225    -0.38505
+                                 37       1        37         3        5.225     -2.225    -0.16397
+                                 38       1        38         1        5.225     -4.225    -0.31136
+                                 39       1        39         1        5.225     -4.225    -0.31136
+                                 40       1        40        18        5.225     12.775     0.94145
+                                 41       2         1        40       31.350      8.650     0.63746
+                                 42       2         2        16       31.350    -15.350    -1.13121
+                                 43       2         3        32       31.350      0.650     0.04790
+                                 44       2         4        15       31.350    -16.350    -1.20491
+                                 45       2         5        44       31.350     12.650     0.93224
+                                 46       2         6        41       31.350      9.650     0.71115
+                                 47       2         7        43       31.350     11.650     0.85854
+                                 48       2         8        53       31.350     21.650     1.59549
+                                 49       2         9        67       31.350     35.650     2.62721
+                                 50       2        10        21       31.350    -10.350    -0.76274
+                                 51       2        11         6       31.350    -25.350    -1.86816
+                                 52       2        12        31       31.350     -0.350    -0.02579
+                                 53       2        13        15       31.350    -16.350    -1.20491
+                                 54       2        14        11       31.350    -20.350    -1.49968
+                                 55       2        15        21       31.350    -10.350    -0.76274
+                                 56       2        16        40       31.350      8.650     0.63746
+                                                           The SAS System
+
+                                 Obs    semana    repet    recuento     pred       res       rst
+
+                                  57       2        17         15      31.35    -16.35    -1.20491
+                                  58       2        18         50      31.35     18.65     1.37440
+                                  59       2        19         17      31.35    -14.35    -1.05752
+                                  60       2        20         32      31.35      0.65     0.04790
+                                  61       2        21         24      31.35     -7.35    -0.54165
+                                  62       2        22          7      31.35    -24.35    -1.79446
+                                  63       2        23         25      31.35     -6.35    -0.46796
+                                  64       2        24         11      31.35    -20.35    -1.49968
+                                  65       2        25         64      31.35     32.65     2.40613
+                                  66       2        26         22      31.35     -9.35    -0.68904
+                                  67       2        27         50      31.35     18.65     1.37440
+                                  68       2        28         27      31.35     -4.35    -0.32057
+                                  69       2        29          3      31.35    -28.35    -2.08924
+                                  70       2        30         46      31.35     14.65     1.07962
+                                  71       2        31         45      31.35     13.65     1.00593
+                                  72       2        32         10      31.35    -21.35    -1.57338
+                                  73       2        33          8      31.35    -23.35    -1.72077
+                                  74       2        34         27      31.35     -4.35    -0.32057
+                                  75       2        35         34      31.35      2.65     0.19529
+                                  76       2        36         19      31.35    -12.35    -0.91013
+                                  77       2        37         86      31.35     54.65     4.02741
+                                  78       2        38         83      31.35     51.65     3.80632
+                                  79       2        39         17      31.35    -14.35    -1.05752
+                                  80       2        40         36      31.35      4.65     0.34268
+                                  81       3         1         86      31.95     54.05     3.98319
+                                  82       3         2         63      31.95     31.05     2.28821
+                                  83       3         3         20      31.95    -11.95    -0.88065
+                                  84       3         4         68      31.95     36.05     2.65669
+                                  85       3         5         55      31.95     23.05     1.69866
+                                  86       3         6         42      31.95     10.05     0.74063
+                                  87       3         7         24      31.95     -7.95    -0.58587
+                                  88       3         8         29      31.95     -2.95    -0.21740
+                                  89       3         9         20      31.95    -11.95    -0.88065
+                                  90       3        10         27      31.95     -4.95    -0.36479
+                                  91       3        11         26      31.95     -5.95    -0.43848
+                                  92       3        12         63      31.95     31.05     2.28821
+                                  93       3        13         40      31.95      8.05     0.59324
+                                  94       3        14         46      31.95     14.05     1.03541
+                                  95       3        15          7      31.95    -24.95    -1.83868
+                                  96       3        16         15      31.95    -16.95    -1.24912
+                                  97       3        17         10      31.95    -21.95    -1.61759
+                                  98       3        18         30      31.95     -1.95    -0.14370
+                                  99       3        19         46      31.95     14.05     1.03541
+                                 100       3        20         26      31.95     -5.95    -0.43848
+                                 101       3        21         15      31.95    -16.95    -1.24912
+                                 102       3        22         42      31.95     10.05     0.74063
+                                 103       3        23          6      31.95    -25.95    -1.91237
+                                 104       3        24         28      31.95     -3.95    -0.29109
+                                 105       3        25          7      31.95    -24.95    -1.83868
+                                 106       3        26          9      31.95    -22.95    -1.69129
+                                 107       3        27          5      31.95    -26.95    -1.98607
+                                 108       3        28         35      31.95      3.05     0.22477
+                                 109       3        29          6      31.95    -25.95    -1.91237
+                                 110       3        30          9      31.95    -22.95    -1.69129
+                                 111       3        31        108      31.95     76.05     5.60447
+                                 112       3        32         38      31.95      6.05     0.44585
+                                                           The SAS System
+
+                                Obs    semana    repet    recuento     pred         res       rst
+
+                                113       3        33        35       31.950      3.050     0.22477
+                                114       3        34        64       31.950     32.050     2.36191
+                                115       3        35        21       31.950    -10.950    -0.80695
+                                116       3        36        20       31.950    -11.950    -0.88065
+                                117       3        37        62       31.950     30.050     2.21452
+                                118       3        38        25       31.950     -6.950    -0.51218
+                                119       3        39         0       31.950    -31.950    -2.35454
+                                120       3        40         0       31.950    -31.950    -2.35454
+                                121       4         1        29        4.825     24.175     1.78156
+                                122       4         2         2        4.825     -2.825    -0.20819
+                                123       4         3         3        4.825     -1.825    -0.13449
+                                124       4         4         0        4.825     -4.825    -0.35558
+                                125       4         5         4        4.825     -0.825    -0.06080
+                                126       4         6         2        4.825     -2.825    -0.20819
+                                127       4         7         6        4.825      1.175     0.08659
+                                128       4         8         7        4.825      2.175     0.16029
+                                129       4         9         5        4.825      0.175     0.01290
+                                130       4        10         4        4.825     -0.825    -0.06080
+                                131       4        11         6        4.825      1.175     0.08659
+                                132       4        12         0        4.825     -4.825    -0.35558
+                                133       4        13         0        4.825     -4.825    -0.35558
+                                134       4        14         5        4.825      0.175     0.01290
+                                135       4        15         1        4.825     -3.825    -0.28188
+                                136       4        16         3        4.825     -1.825    -0.13449
+                                137       4        17         2        4.825     -2.825    -0.20819
+                                138       4        18         2        4.825     -2.825    -0.20819
+                                139       4        19         2        4.825     -2.825    -0.20819
+                                140       4        20         5        4.825      0.175     0.01290
+                                141       4        21         0        4.825     -4.825    -0.35558
+                                142       4        22         1        4.825     -3.825    -0.28188
+                                143       4        23         1        4.825     -3.825    -0.28188
+                                144       4        24         0        4.825     -4.825    -0.35558
+                                145       4        25         3        4.825     -1.825    -0.13449
+                                146       4        26         1        4.825     -3.825    -0.28188
+                                147       4        27         2        4.825     -2.825    -0.20819
+                                148       4        28         0        4.825     -4.825    -0.35558
+                                149       4        29         3        4.825     -1.825    -0.13449
+                                150       4        30         3        4.825     -1.825    -0.13449
+                                151       4        31        18        4.825     13.175     0.97093
+                                152       4        32         7        4.825      2.175     0.16029
+                                153       4        33        21        4.825     16.175     1.19201
+                                154       4        34         0        4.825     -4.825    -0.35558
+                                155       4        35         0        4.825     -4.825    -0.35558
+                                156       4        36         0        4.825     -4.825    -0.35558
+                                157       4        37         2        4.825     -2.825    -0.20819
+                                158       4        38         3        4.825     -1.825    -0.13449
+                                159       4        39         0        4.825     -4.825    -0.35558
+                                160       4        40        40        4.825     35.175     2.59220
+                                161       5         1         5        1.500      3.500     0.25793
+                                162       5         2         7        1.500      5.500     0.40532
+                                163       5         3         0        1.500     -1.500    -0.11054
+                                164       5         4         0        1.500     -1.500    -0.11054
+                                165       5         5         0        1.500     -1.500    -0.11054
+                                166       5         6         1        1.500     -0.500    -0.03685
+                                167       5         7         1        1.500     -0.500    -0.03685
+                                168       5         8         2        1.500      0.500     0.03685
+                                                           The SAS System
+
+                                 Obs    semana    repet    recuento     pred        res       rst
+
+                                 169       5         9         1       1.500     -0.500    -0.03685
+                                 170       5        10         0       1.500     -1.500    -0.11054
+                                 171       5        11        25       1.500     23.500     1.73182
+                                 172       5        12         1       1.500     -0.500    -0.03685
+                                 173       5        13         0       1.500     -1.500    -0.11054
+                                 174       5        14         0       1.500     -1.500    -0.11054
+                                 175       5        15         0       1.500     -1.500    -0.11054
+                                 176       5        16         0       1.500     -1.500    -0.11054
+                                 177       5        17         0       1.500     -1.500    -0.11054
+                                 178       5        18         0       1.500     -1.500    -0.11054
+                                 179       5        19         0       1.500     -1.500    -0.11054
+                                 180       5        20         5       1.500      3.500     0.25793
+                                 181       5        21         0       1.500     -1.500    -0.11054
+                                 182       5        22         2       1.500      0.500     0.03685
+                                 183       5        23         0       1.500     -1.500    -0.11054
+                                 184       5        24         0       1.500     -1.500    -0.11054
+                                 185       5        25         0       1.500     -1.500    -0.11054
+                                 186       5        26         2       1.500      0.500     0.03685
+                                 187       5        27         0       1.500     -1.500    -0.11054
+                                 188       5        28         0       1.500     -1.500    -0.11054
+                                 189       5        29         0       1.500     -1.500    -0.11054
+                                 190       5        30         4       1.500      2.500     0.18424
+                                 191       5        31         0       1.500     -1.500    -0.11054
+                                 192       5        32         0       1.500     -1.500    -0.11054
+                                 193       5        33         0       1.500     -1.500    -0.11054
+                                 194       5        34         0       1.500     -1.500    -0.11054
+                                 195       5        35         2       1.500      0.500     0.03685
+                                 196       5        36         0       1.500     -1.500    -0.11054
+                                 197       5        37         0       1.500     -1.500    -0.11054
+                                 198       5        38         0       1.500     -1.500    -0.11054
+                                 199       5        39         0       1.500     -1.500    -0.11054
+                                 200       5        40         2       1.500      0.500     0.03685
+                                 201       6         1         1       0.525      0.475     0.03500
+                                 202       6         2         0       0.525     -0.525    -0.03869
+                                 203       6         3         0       0.525     -0.525    -0.03869
+                                 204       6         4         1       0.525      0.475     0.03500
+                                 205       6         5         7       0.525      6.475     0.47717
+                                 206       6         6         0       0.525     -0.525    -0.03869
+                                 207       6         7         0       0.525     -0.525    -0.03869
+                                 208       6         8         0       0.525     -0.525    -0.03869
+                                 209       6         9         4       0.525      3.475     0.25609
+                                 210       6        10         1       0.525      0.475     0.03500
+                                 211       6        11         5       0.525      4.475     0.32978
+                                 212       6        12         2       0.525      1.475     0.10870
+                                 213       6        13         0       0.525     -0.525    -0.03869
+                                 214       6        14         0       0.525     -0.525    -0.03869
+                                 215       6        15         0       0.525     -0.525    -0.03869
+                                 216       6        16         0       0.525     -0.525    -0.03869
+                                 217       6        17         0       0.525     -0.525    -0.03869
+                                 218       6        18         0       0.525     -0.525    -0.03869
+                                 219       6        19         0       0.525     -0.525    -0.03869
+                                 220       6        20         0       0.525     -0.525    -0.03869
+                                 221       6        21         0       0.525     -0.525    -0.03869
+                                 222       6        22         0       0.525     -0.525    -0.03869
+                                 223       6        23         0       0.525     -0.525    -0.03869
+                                 224       6        24         0       0.525     -0.525    -0.03869
+                                                           The SAS System
+
+                                 Obs    semana    repet    recuento     pred      res        rst
+
+                                 225       6        25         0       0.525    -0.525    -0.038690
+                                 226       6        26         0       0.525    -0.525    -0.038690
+                                 227       6        27         0       0.525    -0.525    -0.038690
+                                 228       6        28         0       0.525    -0.525    -0.038690
+                                 229       6        29         0       0.525    -0.525    -0.038690
+                                 230       6        30         0       0.525    -0.525    -0.038690
+                                 231       6        31         0       0.525    -0.525    -0.038690
+                                 232       6        32         0       0.525    -0.525    -0.038690
+                                 233       6        33         0       0.525    -0.525    -0.038690
+                                 234       6        34         0       0.525    -0.525    -0.038690
+                                 235       6        35         0       0.525    -0.525    -0.038690
+                                 236       6        36         0       0.525    -0.525    -0.038690
+                                 237       6        37         0       0.525    -0.525    -0.038690
+                                 238       6        38         0       0.525    -0.525    -0.038690
+                                 239       6        39         0       0.525    -0.525    -0.038690
+                                 240       6        40         0       0.525    -0.525    -0.038690
+                                                           The SAS System
+
+                                                      The UNIVARIATE Procedure
+                                                           Variable:  res
+
+                                                              Moments
+
+                                  N                         240    Sum Weights                240
+                                  Mean                        0    Sum Observations             0
+                                  Std Deviation      13.5978901    Variance            184.902615
+                                  Skewness           1.61685246    Kurtosis            6.70692905
+                                  Uncorrected SS      44191.725    Corrected SS         44191.725
+                                  Coeff Variation             .    Std Error Mean      0.87774003
+
+
+                                                     Basic Statistical Measures
+ 
+                                           Location                    Variability
+
+                                       Mean      0.00000     Std Deviation           13.59789
+                                       Median   -1.50000     Variance               184.90262
+                                       Mode     -0.52500     Range                  108.00000
+                                                             Interquartile Range      5.40000
+
+
+                                                     Tests for Location: Mu0=0
+ 
+                                          Test           -Statistic-    -----p Value------
+
+                                          Student's t    t         0    Pr > |t|    1.0000
+                                          Sign           M       -43    Pr >= |M|   <.0001
+                                          Signed Rank    S     -3658    Pr >= |S|   0.0006
+
+
+                                                        Tests for Normality
+ 
+                                     Test                  --Statistic---    -----p Value------
+
+                                     Shapiro-Wilk          W     0.818005    Pr < W     <0.0001
+                                     Kolmogorov-Smirnov    D     0.223108    Pr > D     <0.0100
+                                     Cramer-von Mises      W-Sq  3.285398    Pr > W-Sq  <0.0050
+                                     Anderson-Darling      A-Sq  15.74663    Pr > A-Sq  <0.0050
+
+
+                                                      Quantiles (Definition 5)
+ 
+                                                       Level         Quantile
+
+                                                       100% Max       76.0500
+                                                       99%            54.0500
+                                                       95%            27.1125
+                                                       90%            13.8500
+                                                       75% Q3          1.1750
+                                                       50% Median     -1.5000
+                                                       25% Q1         -4.2250
+                                                       10%           -14.3500
+                                                       5%            -22.9500
+                                                       1%            -28.3500
+                                                       0% Min        -31.9500
+                                                           The SAS System
+
+                                                      The UNIVARIATE Procedure
+                                                           Variable:  res
+
+                                                        Extreme Observations
+ 
+                                               -----Lowest----        ----Highest----
+ 
+                                                Value      Obs         Value      Obs
+
+                                               -31.95      120         36.05       84
+                                               -31.95      119         51.65       78
+                                               -28.35       69         54.05       81
+                                               -26.95      107         54.65       77
+                                               -25.95      109         76.05      111
+
+
+                      Histogram                     #      Boxplot                            Normal Probability Plot
+   77.5+*                                           1         *            77.5+                                                  *
+       .                                                                       |
+       .                                                                       |
+       .                                                                       |
+       .                                                                       |
+       .*                                           3         *                |                                               ** *
+       .                                                                       |
+       .                                                                       |
+       .*                                           3         *                |                                            ***
+       .**                                          5         *                |                                          ***   +++
+       .                                                                       |                                            ++++
+   22.5+**                                          4         *            22.5+                                        **++
+       .**                                          4         0                |                                     ++**
+       .****                                       12         0                |                                 +++****
+       .****                                       11         0                |                             ++++ ***
+       .************                               34      +--+--+             |                         ++++ *****
+       .***************************************   117      *-----*             |                ***************
+       .*****                                      14         |                |              *** ++++
+       .***                                         9         0                |            ***+++
+       .**                                          6         0                |          ***+
+       .****                                       10         0                |      *****
+       .**                                          5         *                |  *****
+  -32.5+*                                           2         *           -32.5+*++
+        ----+----+----+----+----+----+----+----                                 +----+----+----+----+----+----+----+----+----+----+
+        * may represent up to 3 counts                                              -2        -1         0        +1        +2
+
+
+                                                           The SAS System
+
+                                                         The GLM Procedure
+
+                                                      Class Level Information
+ 
+                                                Class         Levels    Values
+
+                                                semana             6    1 2 3 4 5 6 
+
+
+                                              Number of Observations Read         240
+                                              Number of Observations Used         240
+                                                           The SAS System
+
+                                                         The GLM Procedure
+ 
+                                                  Dependent Variable: recuento   
+
+                                                                Sum of
+                        Source                      DF         Squares     Mean Square    F Value    Pr > F
+
+                        Model                        5     44393.33750      8878.66750      47.01    <.0001
+
+                        Error                      234     44191.72500       188.85353                     
+
+                        Corrected Total            239     88585.06250                                     
+
+
+                                       R-Square     Coeff Var      Root MSE    recuento Mean
+
+                                       0.501138      109.3922      13.74240         12.56250
+
+
+                        Source                      DF       Type I SS     Mean Square    F Value    Pr > F
+
+                        semana                       5     44393.33750      8878.66750      47.01    <.0001
+
+
+                        Source                      DF     Type III SS     Mean Square    F Value    Pr > F
+
+                        semana                       5     44393.33750      8878.66750      47.01    <.0001

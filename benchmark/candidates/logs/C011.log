@@ -1,0 +1,611 @@
+1                                                          The SAS System                            11:20 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.70 seconds
+      cpu time            0.57 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the article
+2             "Fit, simulate, fit: How models can collapse after generations of recursive fitting"
+3             by Rick Wicklin, published 31JUL2024 on The DO Loop blog:
+4              https://blogs.sas.com/content/iml/2024/07/31/synthetic-data-model-collapse.html
+5          
+6             This program shows that models trained recursively from synthetic data
+7             can experience parameter drift and model collapse, which is a decrease in the
+8             variance of the model.
+9          
+10            The programs are intended to illustrate the ideas related to
+11            model collapse in synthetic text generation:
+12            Gibney, 2024, "AI models fed AI-generated data quickly spew nonsense"
+13                https://www.nature.com/articles/d41586-024-02420-7
+14            which reports are the article by
+15            Shumailov, I., Shumaylov, Z., Zhao, Y. et al. (2024)
+16                "AI models collapse when trained on recursively generated data,"
+17                Nature 631, 755Ã¢â‚¬â€œ759.
+18                https://doi.org/10.1038/s41586-024-07566-y
+19         */
+20         
+21         /* clear macros and set define some useful macros from
+22            https://blogs.sas.com/content/iml/2013/05/24/turn-off-ods-for-simulations.html
+                                                           The SAS System
+
+23         */
+24         %symdel N / nowarn;
+25         %symdel SeedVal / nowarn;
+26         %macro ODSOff(); /* Call prior to macro loop */
+27         ods graphics off;
+28         ods exclude all;
+29         ods noresults;
+30         options nonotes;
+31         %mend;
+32         
+33         %macro ODSOn(); /* Call after BY-group processing */
+34         ods graphics on;
+35         ods exclude none;
+36         ods results;
+37         options notes;
+38         %mend;
+39         
+40         /***************************/
+41         /* Start with normally distributed data.
+42            At each generation, fit a model to the data, then simulate
+43            more data from the model. Repeat many times.
+44            The following simulations take about 30-45 seconds to complete.
+45         */
+46         %let N = 200;
+47         %let SeedVal = 123;
+48         
+49         %let mu0 = 125;
+50         %let sigma0 = 30;
+51         data Param0;
+52         mu = &mu0;
+53         sigma = &sigma0;
+54         run;
+
+NOTE: The data set WORK.PARAM0 has 1 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1253.25k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:20:06 AM
+      Step Count                        1  Switch Count  0
+      
+
+55         
+56         %macro Synthetic(i, seed);
+57         %global N;
+58         data Model;
+59         set Param%eval(&i-1);
+60         call streaminit(&seed);
+61         do i = 1 to &N;
+62            x = rand("Normal", mu, sigma);
+63            x = round(x, 1e-5);
+64            output;
+65         end;
+66         keep x;
+67         run;
+68         
+                                                           The SAS System
+
+69         proc means data=Model noprint;
+70           var x;
+71           output out=Param&i.(keep=mu sigma) mean=mu std=sigma;
+72         run;
+73         data Param&i.;
+74            set Param&i.;
+75            ID = &i;
+76            label ID = "Generation";
+77         run;
+78         %mend;
+79         
+80         
+81         %macro RunSynthetic(Niter, seed);
+82         %if &seed=0 %then %do;
+83            %do i = 1 %to &NIter;
+84               %Synthetic(&i, 0);
+85            %end;
+86         %end;
+87         %else %do;
+88         %do i = 1 %to &NIter;
+89            %Synthetic(&i, %eval(&seed+&i));
+90         %end;
+91         %end;
+92         %mend;
+93         
+94         %let Iters = 400;
+95         %let SeedVal = 12345;
+96         %ODSOff;
+97         %RunSynthetic(&Iters, &SeedVal);
+98         
+99         data AllParams;
+100        set Param:;
+101        Lower = mu - sigma;
+102        Upper = mu + sigma;
+103        run;
+104        proc sort data=AllParams; by ID; run;
+105        
+106        proc delete lib=work data=Param1-Param&Iters.;
+107        run;
+108        %ODSOn;
+109        
+110        title "Evolution of Parameter Estimates";
+111        title2 "Each model is trained on the preceding set of synthetic data";
+112        title3 "Initial Seed = &SeedVal";
+113        proc sgplot data=AllParams;
+114           scatter x=ID y=mu / yerrorlower=Lower yerrorupper=Upper;
+115           refline &mu0;
+116           yaxis grid label="Mean";
+117           xaxis label="Generation";
+118           WHERE mod(ID,2)=0; /* graph is very crowded; show only even generations */
+119        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           4.28 seconds
+      user cpu time       0.21 seconds
+      system cpu time     0.32 seconds
+      memory              7192.92k
+      OS Memory           21320.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 11:20:48 AM
+      Step Count                        1205  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C011\SGPlot.png.
+NOTE: There were 200 observations read from the data set WORK.ALLPARAMS.
+      WHERE MOD(ID, 2)=0;
+
+120        
+121        /******************************************************/
+122        /* repeat with a different set of random number seeds */
+123        %let SeedVal = 2468;
+124        %ODSOff;
+125        %RunSynthetic(&Iters, &SeedVal);
+126        
+127        data AllParams;
+128        set Param:;
+129        Lower = mu - sigma;
+130        Upper = mu + sigma;
+131        run;
+132        proc sort data=AllParams; by ID; run;
+133        
+134        proc delete lib=work data=Param1-Param&Iters.;
+135        run;
+136        %ODSOn;
+137        
+138        title "Evolution of Parameter Estimates";
+139        title2 "Each model is trained on the preceding set of synthetic data";
+140        title3 "Initial Seed = &SeedVal";
+141        proc sgplot data=AllParams;
+142           scatter x=ID y=mu / yerrorlower=Lower yerrorupper=Upper;
+143           refline &mu0;
+144           yaxis grid label="Mean";
+145           xaxis label="Generation";
+146           WHERE mod(ID,2)=0; /* graph is very crowded; show only even generations */
+147        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.55 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.04 seconds
+      memory              1783.28k
+      OS Memory           23624.00k
+      Timestamp           10/27/2026 11:21:27 AM
+      Step Count                        2409  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C011\SGPlot1.png.
+NOTE: There were 200 observations read from the data set WORK.ALLPARAMS.
+      WHERE MOD(ID, 2)=0;
+
+148        
+149        /*********************************/
+150        
+151        /* Simulate lognormal data. See
+152           https://blogs.sas.com/content/iml/2017/05/10/simulate-lognormal-data-sas.html
+153        */
+154        /* These data were simulated from a lognormal model with
+155           theta = 10;       * threshold parameter;
+156           zeta = 2;         * scale or log-location parameter;
+                                                           The SAS System
+
+157           sigma = 0.5;      * shape or log-scale parameter;
+158        */
+159        %let N = 200;          /* sample size */
+160        data Have;
+161        input x @@;
+162        datalines;
+
+NOTE: SAS went to a new line when INPUT statement reached past the end of a line.
+NOTE: The data set WORK.HAVE has 200 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              766.87k
+      OS Memory           22720.00k
+      Timestamp           10/27/2026 11:21:27 AM
+      Step Count                        2410  Switch Count  0
+      
+
+183        ;
+184        
+185        title "Original Data and Lognormal Model";
+186        proc univariate data=Have;
+187        histogram x / lognormal(threshold=est) odstitle=title;
+188        ods select Moments ParameterEstimates Histogram;
+189        ods output ParameterEstimates = PELong;
+190        run;
+
+NOTE: The data set WORK.PELONG has 5 observations and 6 variables.
+NOTE: The PROCEDURE UNIVARIATE printed pages 1-2.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           1.10 seconds
+      user cpu time       0.15 seconds
+      system cpu time     0.18 seconds
+      memory              7023.00k
+      OS Memory           28188.00k
+      Timestamp           10/27/2026 11:21:28 AM
+      Step Count                        2411  Switch Count  0
+      
+
+191        
+192        /* transpose from long to wide */
+193        data PE0;
+194        retain theta zeta sigma;
+195        set PELong end=EOF;
+196        if Symbol="Theta" then theta=Estimate;
+197        if Symbol="Zeta"  then  zeta=Estimate;
+198        if Symbol="Sigma" then sigma=Estimate;
+199        if EOF then output;
+200        keep theta zeta sigma;
+201        run;
+
+NOTE: There were 5 observations read from the data set WORK.PELONG.
+NOTE: The data set WORK.PE0 has 1 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              921.50k
+      OS Memory           25024.00k
+      Timestamp           10/27/2026 11:21:28 AM
+      Step Count                        2412  Switch Count  0
+      
+
+202        
+203        /* show synthetic data simulated from the model */
+204        data Model;
+205        call streaminit(54321);
+206        set PE0;
+207        do i = 1 to &N;
+208           Y = rand("Normal", zeta, sigma);
+209           X = theta + exp(Y);
+210           output;
+211        end;
+212        keep X;
+213        run;
+
+NOTE: There were 1 observations read from the data set WORK.PE0.
+NOTE: The data set WORK.MODEL has 200 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              899.96k
+      OS Memory           25024.00k
+      Timestamp           10/27/2026 11:21:28 AM
+      Step Count                        2413  Switch Count  0
+      
+
+214        
+215        title "First Generation Lognormal Model";
+216        proc univariate data=Model;
+217        histogram x / lognormal(threshold=est) odstitle=title;
+218        ods select Moments ParameterEstimates Histogram;
+219        ods output ParameterEstimates = PELong;
+220        run;
+
+NOTE: The data set WORK.PELONG has 5 observations and 6 variables.
+NOTE: The PROCEDURE UNIVARIATE printed pages 3-4.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           0.96 seconds
+      user cpu time       0.11 seconds
+      system cpu time     0.20 seconds
+      memory              6521.62k
+      OS Memory           28188.00k
+      Timestamp           10/27/2026 11:21:29 AM
+      Step Count                        2414  Switch Count  0
+      
+
+221        
+222        /**************************/
+223        
+224        %macro SyntheticLN(i, seed);
+225        %global N;
+226        %put  &=N, &=i, &=seed;
+227        ods select NONE;
+                                                           The SAS System
+
+228        data Model;
+229        set PE%eval(&i-1);
+230        call streaminit(&seed);
+231        do i = 1 to &N;
+232           Y = rand("Normal", zeta, sigma);
+233           X = theta + exp(Y);
+234           output;
+235        end;
+236        keep X;
+237        run;
+238        
+239        proc univariate data=Model;
+240        histogram x / lognormal(threshold=est);
+241        ods output ParameterEstimates = PELong;
+242        run;
+243        
+244        /* transpose from long to wide */
+245        data PE&i.;
+246        retain theta zeta sigma;
+247        set PELong end=EOF;
+248        if Symbol="Theta" then theta=Estimate;
+249        if Symbol="Zeta"  then  zeta=Estimate;
+250        if Symbol="Sigma" then sigma=Estimate;
+251        if EOF then output;
+252        keep theta zeta sigma;
+253        run;
+254        
+255        data PE&i.;
+256           set PE&i.;
+257           ID = &i;
+258           label ID = "Generation";
+259        run;
+260        ods select ALL;
+261        %mend;
+262        
+263        /*
+264        %SyntheticLN(1 ,124);
+265        proc print data=PE1 noobs; run;
+266        %RunSyntheticLN(1, 123);
+267        */
+268        
+269        %macro RunSyntheticLN(Niter, seed);
+270        %if &seed=0 %then %do;
+271           %do i = 1 %to &NIter;
+272              %SyntheticLN(&i, 0);
+273           %end;
+274        %end;
+275        %else %do;
+276        %do i = 1 %to &NIter;
+277           %SyntheticLN(&i, %eval(&seed+&i));
+278        %end;
+279        %end;
+280        %mend;
+281        
+282        data Model;
+283        set PE0;
+284        call streaminit(124);
+285        do i = 1 to &N;
+                                                           The SAS System
+
+286           Y = rand("Normal", zeta, sigma);
+287           X = theta + exp(Y);
+288           output;
+289        end;
+290        keep X;
+291        run;
+
+NOTE: There were 1 observations read from the data set WORK.PE0.
+NOTE: The data set WORK.MODEL has 200 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              910.59k
+      OS Memory           24512.00k
+      Timestamp           10/27/2026 11:21:30 AM
+      Step Count                        2415  Switch Count  0
+      
+
+292        
+293        %let Iters = 100;
+294        %let SeedVal = 123;
+295        %ODSOff;
+296        %RunSyntheticLN(&Iters, &SeedVal);
+N=200, I=1, SEED=124
+N=200, I=2, SEED=125
+N=200, I=3, SEED=126
+N=200, I=4, SEED=127
+N=200, I=5, SEED=128
+N=200, I=6, SEED=129
+N=200, I=7, SEED=130
+N=200, I=8, SEED=131
+N=200, I=9, SEED=132
+N=200, I=10, SEED=133
+N=200, I=11, SEED=134
+N=200, I=12, SEED=135
+N=200, I=13, SEED=136
+N=200, I=14, SEED=137
+N=200, I=15, SEED=138
+N=200, I=16, SEED=139
+N=200, I=17, SEED=140
+N=200, I=18, SEED=141
+N=200, I=19, SEED=142
+N=200, I=20, SEED=143
+N=200, I=21, SEED=144
+N=200, I=22, SEED=145
+N=200, I=23, SEED=146
+N=200, I=24, SEED=147
+N=200, I=25, SEED=148
+N=200, I=26, SEED=149
+N=200, I=27, SEED=150
+N=200, I=28, SEED=151
+N=200, I=29, SEED=152
+N=200, I=30, SEED=153
+N=200, I=31, SEED=154
+N=200, I=32, SEED=155
+N=200, I=33, SEED=156
+N=200, I=34, SEED=157
+                                                           The SAS System
+
+N=200, I=35, SEED=158
+N=200, I=36, SEED=159
+N=200, I=37, SEED=160
+N=200, I=38, SEED=161
+N=200, I=39, SEED=162
+N=200, I=40, SEED=163
+N=200, I=41, SEED=164
+N=200, I=42, SEED=165
+N=200, I=43, SEED=166
+N=200, I=44, SEED=167
+N=200, I=45, SEED=168
+N=200, I=46, SEED=169
+N=200, I=47, SEED=170
+N=200, I=48, SEED=171
+N=200, I=49, SEED=172
+N=200, I=50, SEED=173
+N=200, I=51, SEED=174
+N=200, I=52, SEED=175
+N=200, I=53, SEED=176
+N=200, I=54, SEED=177
+N=200, I=55, SEED=178
+N=200, I=56, SEED=179
+N=200, I=57, SEED=180
+N=200, I=58, SEED=181
+N=200, I=59, SEED=182
+N=200, I=60, SEED=183
+N=200, I=61, SEED=184
+N=200, I=62, SEED=185
+N=200, I=63, SEED=186
+N=200, I=64, SEED=187
+N=200, I=65, SEED=188
+N=200, I=66, SEED=189
+N=200, I=67, SEED=190
+N=200, I=68, SEED=191
+N=200, I=69, SEED=192
+N=200, I=70, SEED=193
+N=200, I=71, SEED=194
+N=200, I=72, SEED=195
+N=200, I=73, SEED=196
+N=200, I=74, SEED=197
+N=200, I=75, SEED=198
+N=200, I=76, SEED=199
+N=200, I=77, SEED=200
+N=200, I=78, SEED=201
+N=200, I=79, SEED=202
+N=200, I=80, SEED=203
+N=200, I=81, SEED=204
+N=200, I=82, SEED=205
+N=200, I=83, SEED=206
+N=200, I=84, SEED=207
+N=200, I=85, SEED=208
+N=200, I=86, SEED=209
+N=200, I=87, SEED=210
+N=200, I=88, SEED=211
+N=200, I=89, SEED=212
+N=200, I=90, SEED=213
+N=200, I=91, SEED=214
+N=200, I=92, SEED=215
+                                                           The SAS System
+
+N=200, I=93, SEED=216
+N=200, I=94, SEED=217
+N=200, I=95, SEED=218
+N=200, I=96, SEED=219
+N=200, I=97, SEED=220
+N=200, I=98, SEED=221
+N=200, I=99, SEED=222
+N=200, I=100, SEED=223
+297        
+298        data AllParams;
+299        set PE:;
+300        run;
+301        proc sort data=AllParams; by ID; run;
+302        
+303        proc delete lib=work data=PE1-PE&Iters.;
+304        run;
+ERROR: The value P    is not a valid SAS name.
+WARNING: File WORK does not exist.
+WARNING: File WORK does not exist.
+ERROR: The value ÂÃ€PE99PE100                    is not a valid SAS name.
+305        %ODSOn;
+306        
+307        title "Evolution of Parameter Estimates in a Lognormal Model";
+308        title2 "Each model is trained on the preceding set of synthetic data";
+309        title3 "Initial Seed = &SeedVal";
+
+
+310        proc sgplot data=AllParams;
+311        series x=id y=theta;
+312        series x=id y=zeta;
+313        series x=id y=sigma;
+314        yaxis grid label="Mean";
+315        xaxis label="Generation";
+316        run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           1.73 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.01 seconds
+      memory              1515.25k
+      OS Memory           24648.00k
+      Timestamp           10/27/2026 11:22:04 AM
+      Step Count                        2819  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C011\SGPlot2.png.
+NOTE: There were 106 observations read from the data set WORK.ALLPARAMS.
+
+317        
+318        /*
+319        title "Simulated Data and Model after &Iters Generations";
+320        proc univariate data=Model;
+321        histogram x / lognormal(threshold=est) odstitle=title;
+322        ods select Moments ParameterEstimates Histogram;
+323        run;
+324        */
+
+ERROR: Errors printed on page 10.
+
+                                                           The SAS System
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1:59.78
+      user cpu time       31.29 seconds
+      system cpu time     28.60 seconds
+      memory              91604.25k
+      OS Memory           138944.00k
+      Timestamp           10/27/2026 11:22:04 AM
+      Step Count                        2819  Switch Count  5650
+      

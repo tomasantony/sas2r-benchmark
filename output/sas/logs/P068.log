@@ -1,0 +1,540 @@
+1                                                          The SAS System                            15:46 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.11 seconds
+      cpu time            0.42 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P068
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P068 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    t_ae_soc_pt.sas
+3          * Purpose:    Table 14.3.2 - TEAEs by System Organ Class and Preferred Term
+4          * Study:      [STUDYID]
+5          * Author:     [Programmer Name]
+6          * Date:       [Date]
+7          * Input:      adam.adsl, adam.adae
+8          * Output:     t_ae_soc_pt.rtf
+9          * Population: Safety Analysis Set (SAFFL='Y')
+10         * Notes:      SOCs sorted by descending frequency (Total column)
+11         *             PTs sorted by descending frequency within each SOC
+12         *             Subjects counted once per SOC and once per PT within SOC
+13         *****************************************************************************/
+14         
+15         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:46:36
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+81         %include "&macpath./m_counts.sas";
+173        %include "&macpath./m_report.sas";
+245        %include "&pgmpath./utilities/u_titles.sas";
+407        
+408        /*--- Step 1: Get Big N ---*/
+409        %m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+NOTE: Table WORK._BIGN created, with 3 rows and 2 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.08 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              5545.06k
+      OS Memory           15192.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        2  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._BIGN.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              888.48k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        3  Switch Count  0
+      
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5398.59k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        4  Switch Count  0
+      
+
+NOTE: ============================================
+NOTE: Treatment group counts:
+NOTE:   Drug X High Dose: N=63
+NOTE:   Drug X Low Dose: N=82
+NOTE:   Placebo: N=95
+NOTE:   Total: N=240
+NOTE: ============================================
+410        
+411        /*--- Step 2: Subset to TEAE in safety population ---*/
+412        proc sql noprint;
+413            create table ae as
+414            select a.USUBJID, a.TRTA, a.AEBODSYS, a.AEDECOD,
+415                   a.AESOC, a.AESOCCD
+416            from adam.adae a
+417            inner join adam.adsl b on a.USUBJID = b.USUBJID
+418            where b.SAFFL = 'Y' and a.TRTEMFL = 'Y';
+NOTE: Table WORK.AE created, with 345 rows and 6 columns.
+
+419        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5677.50k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        5  Switch Count  0
+      
+
+420        
+421        /*--- Step 3: Count subjects by SOC ---*/
+422        proc sql noprint;
+423            create table soc_cnt as
+424            select TRTA, AEBODSYS,
+425                   count(distinct USUBJID) as cnt
+426            from ae
+427            group by TRTA, AEBODSYS;
+NOTE: Table WORK.SOC_CNT created, with 24 rows and 3 columns.
+
+428        
+                                                           The SAS System
+
+429            /* Total column for SOC */
+430            create table soc_tot as
+431            select AEBODSYS,
+432                   count(distinct USUBJID) as cnt_tot
+433            from ae
+434            group by AEBODSYS;
+NOTE: Table WORK.SOC_TOT created, with 8 rows and 2 columns.
+
+435        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5459.56k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        6  Switch Count  0
+      
+
+436        
+437        /*--- Step 4: Count subjects by SOC + PT ---*/
+438        proc sql noprint;
+439            create table pt_cnt as
+440            select TRTA, AEBODSYS, AEDECOD,
+441                   count(distinct USUBJID) as cnt
+442            from ae
+443            group by TRTA, AEBODSYS, AEDECOD;
+NOTE: Table WORK.PT_CNT created, with 24 rows and 4 columns.
+
+444        
+445            /* Total column for PT */
+446            create table pt_tot as
+447            select AEBODSYS, AEDECOD,
+448                   count(distinct USUBJID) as cnt_tot
+449            from ae
+450            group by AEBODSYS, AEDECOD;
+NOTE: Table WORK.PT_TOT created, with 8 rows and 3 columns.
+
+451        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5459.93k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        7  Switch Count  0
+      
+
+452        
+453        /*--- Step 5: Any TEAE row ---*/
+454        proc sql noprint;
+455            create table any_ae as
+456            select TRTA,
+457                   'Any TEAE' as AEBODSYS length=200,
+458                   '' as AEDECOD length=200,
+459                   count(distinct USUBJID) as cnt,
+460                   0 as soc_ord,
+                                                           The SAS System
+
+461                   0 as pt_ord,
+462                   1 as rowtype  /* 0=any, 1=SOC, 2=PT */
+463            from ae
+464            group by TRTA;
+NOTE: Table WORK.ANY_AE created, with 3 rows and 7 columns.
+
+465        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              5425.62k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        8  Switch Count  0
+      
+
+466        
+467        /*--- Step 6: Build display rows ---*/
+468        /* SOC rows with sort order */
+469        proc sql noprint;
+470            create table soc_rows as
+471            select a.TRTA, a.AEBODSYS,
+472                   '' as AEDECOD length=200,
+473                   a.cnt,
+474                   b.cnt_tot as soc_ord,  /* Sort by total descending */
+475                   0 as pt_ord,
+476                   1 as rowtype
+477            from soc_cnt a
+478            left join soc_tot b on a.AEBODSYS = b.AEBODSYS;
+NOTE: Table WORK.SOC_ROWS created, with 24 rows and 7 columns.
+
+479        
+480            /* PT rows with sort order */
+481            create table pt_rows as
+482            select a.TRTA, a.AEBODSYS, a.AEDECOD, a.cnt,
+483                   c.cnt_tot as soc_ord,
+484                   b.cnt_tot as pt_ord,
+485                   2 as rowtype
+486            from pt_cnt a
+487            left join pt_tot b on a.AEBODSYS = b.AEBODSYS and a.AEDECOD = b.AEDECOD
+488            left join soc_tot c on a.AEBODSYS = c.AEBODSYS;
+NOTE: Table WORK.PT_ROWS created, with 24 rows and 7 columns.
+
+489        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5716.96k
+      OS Memory           16220.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        9  Switch Count  0
+      
+
+490        
+491        /*--- Step 7: Combine and calculate percentages ---*/
+492        data combined;
+                                                           The SAS System
+
+493            set any_ae soc_rows pt_rows;
+494        run;
+
+NOTE: There were 3 observations read from the data set WORK.ANY_AE.
+NOTE: There were 24 observations read from the data set WORK.SOC_ROWS.
+NOTE: There were 24 observations read from the data set WORK.PT_ROWS.
+NOTE: The data set WORK.COMBINED has 51 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1199.64k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        10  Switch Count  0
+      
+
+495        
+496        proc sql noprint;
+497            create table combined2 as
+498            select a.*,
+499                   b.bign,
+500                   case when b.bign > 0 then a.cnt / b.bign * 100 else . end as pct
+501            from combined a
+502            left join work._bign b on a.TRTA = b.TRTA
+503            order by soc_ord desc, AEBODSYS, rowtype, pt_ord desc, AEDECOD, TRTA;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.COMBINED2 created, with 51 rows and 9 columns.
+
+504        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              8815.54k
+      OS Memory           18408.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        11  Switch Count  0
+      
+
+505        
+506        data combined3;
+507            set combined2;
+508            length value $30;
+509            if cnt > 0 then
+510                value = cat(strip(put(cnt, 8.)), ' (', strip(put(pct, 5.1)), ')');
+511            else value = '0';
+512        run;
+
+NOTE: There were 51 observations read from the data set WORK.COMBINED2.
+NOTE: The data set WORK.COMBINED3 has 51 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              915.51k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:46:36 PM
+                                                           The SAS System
+
+      Step Count                        12  Switch Count  0
+      
+
+513        
+514        /*--- Step 8: Transpose ---*/
+515        proc sort data=combined3 nodupkey;
+516            by descending soc_ord AEBODSYS rowtype descending pt_ord AEDECOD TRTA;
+517        run;
+
+NOTE: There were 51 observations read from the data set WORK.COMBINED3.
+NOTE: SAS sort was used.
+NOTE: 0 observations with duplicate key values were deleted.
+NOTE: The data set WORK.COMBINED3 has 51 observations and 10 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              741.50k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        13  Switch Count  0
+      
+
+518        
+519        proc transpose data=combined3 out=final(drop=_name_ rename=(colPlacebo=col1 colDrug_X_Low_Dose=col2
+519      ! colDrug_X_High_Dose=col3)) prefix=col;  /* test-copy patch: name the transposed columns col1-col3 as the report expects
+519      ! */
+520            by descending soc_ord AEBODSYS rowtype descending pt_ord AEDECOD;
+521            id TRTA;
+522            var value;
+523        run;
+
+NOTE: There were 51 observations read from the data set WORK.COMBINED3.
+NOTE: The data set WORK.FINAL has 17 observations and 8 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              2551.37k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        14  Switch Count  0
+      
+
+524        
+525        /*--- Step 9: Create display variable ---*/
+526        data report;
+527            set final;
+528            length display_term $200;
+529        
+530            if rowtype = 0 then display_term = AEBODSYS;      /* Any TEAE */
+531            else if rowtype = 1 then display_term = AEBODSYS;  /* SOC (bold) */
+532            else display_term = '  ' || strip(AEDECOD);        /* PT (indented) */
+533        
+534            /* Replace missing with 0 */
+535            array cols{*} col:;
+536            do i = 1 to dim(cols);
+537                if cols{i} = '' then cols{i} = '0';
+                                                           The SAS System
+
+538            end;
+539            drop i;
+540        run;
+
+NOTE: There were 17 observations read from the data set WORK.FINAL.
+NOTE: The data set WORK.REPORT has 17 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              935.70k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:46:36 PM
+      Step Count                        15  Switch Count  0
+      
+
+541        
+542        /*--- Step 10: Generate output ---*/
+543        %set_titles(output=T_AE_SOC_PT, population=Safety Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+544        %ods_on(filename=t_ae_soc_pt);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/t_ae_soc_pt.rtf
+545        
+546        proc report data=report nowd split='~'
+547            style(report)=[outputwidth=9.5in]
+548            style(header)=[just=center fontweight=bold];
+549        
+550            columns rowtype soc_ord pt_ord display_term col1 col2 col3;
+551        
+552            define rowtype      / order noprint;
+553            define soc_ord      / order descending noprint;
+554            define pt_ord       / order descending noprint;
+555            define display_term / display 'System Organ Class~  Preferred Term'
+556                                  style(column)=[width=3.5in];
+557            define col1         / display "&col1hdr." style(column)=[width=1.5in just=center];
+558            define col2         / display "&col2hdr." style(column)=[width=1.5in just=center];
+559            define col3         / display "&col3hdr." style(column)=[width=1.5in just=center];
+560        
+561            /* Bold SOC rows */
+                                                           The SAS System
+
+562            compute display_term;
+563                if rowtype = 1 then
+564                    call define(_col_, 'style', 'style=[fontweight=bold]');
+565            endcomp;
+566        
+567            /* Blank line between SOCs */
+568            compute after soc_ord;  /* test-copy patch: AEBODSYS is not a report column; soc_ord is the SOC break */
+569                line ' ';
+570            endcomp;
+571        
+572        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 17 observations read from the data set WORK.REPORT.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.14 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.06 seconds
+      memory              7919.09k
+      OS Memory           19560.00k
+      Timestamp           10/27/2026 03:46:37 PM
+      Step Count                        16  Switch Count  0
+      
+
+573        
+574        footnote4 j=l "MedDRA Version [XX.X]";
+575        footnote5 j=l "Subjects counted once per SOC and once per PT within each SOC.";
+576        footnote6 j=l "SOCs sorted by descending frequency of Total column; PTs sorted by descending frequency within SOC.";
+577        
+578        %ods_off;
+579        %clear_titles;
+580        
+581        proc datasets lib=work nolist;
+582            delete ae soc_cnt soc_tot pt_cnt pt_tot any_ae soc_rows pt_rows
+583                   combined: final report;
+584        quit;
+
+NOTE: Deleting WORK.AE (memtype=DATA).
+NOTE: Deleting WORK.SOC_CNT (memtype=DATA).
+NOTE: Deleting WORK.SOC_TOT (memtype=DATA).
+NOTE: Deleting WORK.PT_CNT (memtype=DATA).
+                                                           The SAS System
+
+NOTE: Deleting WORK.PT_TOT (memtype=DATA).
+NOTE: Deleting WORK.ANY_AE (memtype=DATA).
+NOTE: Deleting WORK.SOC_ROWS (memtype=DATA).
+NOTE: Deleting WORK.PT_ROWS (memtype=DATA).
+NOTE: Deleting WORK.COMBINED (memtype=DATA).
+NOTE: Deleting WORK.COMBINED2 (memtype=DATA).
+NOTE: Deleting WORK.COMBINED3 (memtype=DATA).
+NOTE: Deleting WORK.FINAL (memtype=DATA).
+NOTE: Deleting WORK.REPORT (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              229.84k
+      OS Memory           13656.00k
+      Timestamp           10/27/2026 03:46:37 PM
+      Step Count                        17  Switch Count  0
+      
+
+585        
+586        %put NOTE: t_ae_soc_pt.sas completed successfully.;
+NOTE: t_ae_soc_pt.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.73 seconds
+      user cpu time       0.40 seconds
+      system cpu time     0.60 seconds
+      memory              17860.15k
+      OS Memory           19560.00k
+      Timestamp           10/27/2026 03:46:37 PM
+      Step Count                        17  Switch Count  46
+      

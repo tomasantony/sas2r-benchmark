@@ -1,0 +1,217 @@
+1                                                          The SAS System                            11:20 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.65 seconds
+      cpu time            0.54 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          
+2          
+3          
+4          proc causalgraph maxsize=min common imap;
+ERROR: Procedure CAUSALGRAPH not found.
+5             model "Base Model"
+6                Age ==> HistoryFracture BMD ChronicDisease GaitSpeed,
+7                BMI <==> ChronicDisease ==> PsychotropicUse GlucocorticoidUse,
+8                BMI ==> VitaminD BMD,
+9                PsychotropicUse ==> FiveTSTS GaitSpeed,
+10               GlucocorticoidUse ==> GaitSpeed FiveTSTS,
+11               BMD ==> HistoryFracture VitaminD Fracture,
+12               HistoryFracture ==> VitaminD,
+13               GaitSpeed ==> Fracture HistoryFalls;
+14            model "Modified Model"
+15               Age ==> HistoryFracture BMD ChronicDisease GaitSpeed,
+16               BMI <==> ChronicDisease ==> PsychotropicUse GlucocorticoidUse GaitSpeed,
+17               BMI ==> VitaminD BMD,
+18               PsychotropicUse ==> FiveTSTS GaitSpeed,
+19               GlucocorticoidUse ==> GaitSpeed FiveTSTS,
+20               BMD ==> HistoryFracture VitaminD Fracture,
+21               HistoryFracture ==> VitaminD,
+                                                           The SAS System
+
+22               GaitSpeed ==> Fracture HistoryFalls;
+23            identify PsychotropicUse ==> Fracture;
+24            unmeasured ChronicDisease BMD HistoryFalls HistoryFracture;
+25         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: SAS set option OBS=0 and will continue to check statements. This might cause NOTE: No observations in data set.
+NOTE: PROCEDURE CAUSALGRAPH used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              43.09k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:20:02 AM
+      Step Count                        1  Switch Count  0
+      
+26         
+27         
+
+
+28         proc causalgraph nolist imap=global;
+ERROR: Procedure CAUSALGRAPH not found.
+29            model "Base Model"
+30               Age ==> HistoryFracture BMD ChronicDisease GaitSpeed,
+31               BMI <==> ChronicDisease ==> PsychotropicUse GlucocorticoidUse,
+32               BMI ==> VitaminD BMD,
+33               PsychotropicUse ==> FiveTSTS GaitSpeed,
+34               GlucocorticoidUse ==> GaitSpeed FiveTSTS,
+35               BMD ==> HistoryFracture VitaminD Fracture,
+36               HistoryFracture ==> VitaminD,
+37               GaitSpeed ==> Fracture HistoryFalls;
+38            model "Modified Model"
+39               Age ==> HistoryFracture BMD ChronicDisease GaitSpeed,
+40               BMI <==> ChronicDisease ==> PsychotropicUse GlucocorticoidUse GaitSpeed,
+41               BMI ==> VitaminD BMD,
+42               PsychotropicUse ==> FiveTSTS GaitSpeed,
+43               GlucocorticoidUse ==> GaitSpeed FiveTSTS,
+44               BMD ==> HistoryFracture VitaminD Fracture,
+45               HistoryFracture ==> VitaminD,
+46               GaitSpeed ==> Fracture HistoryFalls;
+47            identify PsychotropicUse ==> Fracture;
+48            unmeasured ChronicDisease BMD HistoryFalls HistoryFracture;
+49            ods output Imap=IndepData;
+50         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE CAUSALGRAPH used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              35.65k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:20:02 AM
+      Step Count                        2  Switch Count  0
+      
+WARNING: Output 'Imap' was not created.  Make sure that the output object name, label, or path is spelled correctly.  Also, verify 
+         that the appropriate procedure options are used to produce the requested output object.  For example, verify that the 
+         NOPRINT option is not used.
+                                                           The SAS System
+
+51         
+
+
+52         data IndepDataObs;
+53            set IndepData;
+ERROR: File WORK.INDEPDATA.DATA does not exist.
+54            if Observable = 0 then delete;
+55         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+WARNING: The data set WORK.INDEPDATAOBS may be incomplete.  When this step was stopped there were 0 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              869.56k
+      OS Memory           9292.00k
+      Timestamp           10/27/2026 11:20:02 AM
+      Step Count                        3  Switch Count  0
+      
+
+56         
+57         proc sort data=IndepDataObs;
+58            by Set1 Set2 CondSet;
+ERROR: Variable SET1 not found.
+ERROR: Variable SET2 not found.
+ERROR: Variable CONDSET not found.
+59         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              171.40k
+      OS Memory           9292.00k
+      Timestamp           10/27/2026 11:20:02 AM
+      Step Count                        4  Switch Count  0
+      
+60         
+
+
+61         data UniqueIndep CommonIndep;
+62            set IndepDataObs;
+63            by Set1 Set2 CondSet;
+64            if (First.Set1 and Last.Set1) or (First.Set2 and Last.Set2) or (First.CondSet and Last.CondSet) then output
+64       ! UniqueIndep;
+65            else output CommonIndep;
+66         run;
+
+NOTE: The data set WORK.UNIQUEINDEP has 0 observations and 1 variables.
+NOTE: The data set WORK.COMMONINDEP has 0 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              682.84k
+      OS Memory           10060.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 11:20:02 AM
+      Step Count                        5  Switch Count  0
+      
+
+67         
+68         proc print data=UniqueIndep;
+69            var Model Set1 Set2 CondSet;
+ERROR: Variable MODEL not found.
+ERROR: Variable SET1 not found.
+ERROR: Variable SET2 not found.
+ERROR: Variable CONDSET not found.
+70         run;
+
+NOTE: The SAS System stopped processing this step because of errors.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              255.06k
+      OS Memory           9804.00k
+      Timestamp           10/27/2026 11:20:02 AM
+      Step Count                        6  Switch Count  0
+      
+
+ERROR: Errors printed on pages 1,2,3,4.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.86 seconds
+      user cpu time       0.26 seconds
+      system cpu time     0.40 seconds
+      memory              8412.18k
+      OS Memory           10060.00k
+      Timestamp           10/27/2026 11:20:02 AM
+      Step Count                        6  Switch Count  32
+      

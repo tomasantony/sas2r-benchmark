@@ -1,0 +1,121 @@
+                                                           The SAS System
+
+                                                       The LOGISTIC Procedure
+
+                                                         Model Information
+
+                                           Data Set                      WORK.ROC        
+                                           Response Variable             popind          
+                                           Number of Response Levels     2               
+                                           Model                         binary logit    
+                                           Optimization Technique        Fisher's scoring
+
+
+                                              Number of Observations Read          43
+                                              Number of Observations Used          43
+
+
+                                                          Response Profile
+ 
+                                                 Ordered                      Total
+                                                   Value       popind     Frequency
+
+                                                       1            0            12
+                                                       2            1            31
+
+                                                  Probability modeled is popind=0.
+
+
+                                                      Model Convergence Status
+
+                                           Convergence criterion (GCONV=1E-8) satisfied.          
+
+
+                                                        Model Fit Statistics
+ 
+                                                                            Intercept
+                                                             Intercept            and
+                                               Criterion          Only     Covariates
+
+                                               AIC              52.918         47.548
+                                               SC               54.679         54.593
+                                               -2 Log L         50.918         39.548
+
+
+                                              Testing Global Null Hypothesis: BETA=0
+ 
+                                      Test                 Chi-Square       DF     Pr > ChiSq
+
+                                      Likelihood Ratio        11.3701        3         0.0099
+                                      Score                   10.7939        3         0.0129
+                                      Wald                     8.2607        3         0.0409
+
+
+                                                           The SAS System
+
+                                                       The LOGISTIC Procedure
+
+                                             Analysis of Maximum Likelihood Estimates
+ 
+                                                               Standard          Wald
+                                Parameter    DF    Estimate       Error    Chi-Square    Pr > ChiSq
+
+                                Intercept     1      3.6593      2.5292        2.0932        0.1480
+                                alb           1     -0.9847      0.8259        1.4213        0.2332
+                                tp            1      0.2050      0.6592        0.0967        0.7558
+                                totscore      1     -0.6680      0.3136        4.5366        0.0332
+
+
+                                                        Odds Ratio Estimates
+                                                                  
+                                                           Point          95% Wald
+                                            Effect      Estimate      Confidence Limits
+
+                                            alb            0.374       0.074       1.885
+                                            tp             1.228       0.337       4.469
+                                            totscore       0.513       0.277       0.948
+
+
+                                   Association of Predicted Probabilities and Observed Responses
+
+                                         Percent Concordant     77.2    Somers' D    0.543
+                                         Percent Discordant     22.8    Gamma        0.543
+                                         Percent Tied            0.0    Tau-a        0.224
+                                         Pairs                   372    c            0.772
+                                                           The SAS System
+
+                                                       The LOGISTIC Procedure
+
+                                                    ROC Association Statistics
+ 
+                               --------------- Mann-Whitney ---------------
+                                           Standard          90% Wald
+                   ROC             Area       Error      Confidence Limits     Somers' D       Gamma       Tau-a
+
+                   Expert        0.8172      0.0805      0.6848      0.9496       0.6344      0.7024      0.2614
+                   Logistic      0.7715      0.0984      0.6097      0.9333       0.5430      0.5430      0.2237
+                                                           The SAS System
+
+                                             x      xbar        s         z          p
+
+                                           0.73    0.8162    0.0801    1.07615    0.28186
+                                                           The SAS System
+
+                                                        The MEANS Procedure
+
+                                           Analysis Variable : Area Area under the Curve
+ 
+  ROC
+  Model     N Obs          Mean       Std Dev      5th Pctl     95th Pctl     10th Pctl     90th Pctl     25th Pctl     75th Pctl
+  ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+  Expert     5000        0.8162        0.0801        0.6761        0.9382        0.7106        0.9148        0.7671        0.8727
+
+  Logistic   5000        0.7704        0.0979        0.5985        0.9214        0.6421        0.8916        0.7095        0.8387
+  ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+                                                           The SAS System
+
+                                          ROC         Boot     Boot       95%         95%
+                                         Model        Mean    StdErr    Lower CL    Upper CL
+
+                                        Expert      0.8162    0.0801     0.6476      0.9576 
+                                        Logistic    0.7704    0.0979     0.5654      0.9477 

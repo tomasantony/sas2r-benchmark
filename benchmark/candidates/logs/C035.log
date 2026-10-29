@@ -1,0 +1,276 @@
+1                                                          The SAS System                            11:24 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.73 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /* SAS program to accompany the article
+2             "On reducing the spread of coronavirus"
+3             by Rick Wicklin, published 08Apr2020 on The DO Loop blog:
+4             https://blogs.sas.com/content/iml/2020/04/08/reducing-spread-of-coronavirus.html
+5          
+6             This program shows that the public-health mandates to reduce the spread of the
+7             coronovirus (COVID-19) are supported by a very simple mathematical
+8             model, the cumulative geometric distribution. The cumulative distribution
+9             shows the probability that an event occurs on the n_th trial when the
+10            probability in each trial is the same value, p.
+11         
+12            The public health mandates do two things:
+13            1. Reduce the number of interactions: stay at home, social distancing, prohibit congregating,...
+14            2. Reduce the probability that an interaction results in a new infection: wash hands,
+15               sanitize surfaces, wear a mask,....
+16            In addition, the model shows that even if the probability of an infdection is low, it can
+17            still happen in only a few interactions. Lastly, the model quantifies the how the
+18            cumulative probability increase as a function of the number of trials when p << 1.
+19         */
+20         
+21         /* COVID=19 application */
+22         data Geometric;
+                                                           The SAS System
+
+23         do p = 0.0001, 0.001, 0.01;
+24            do n = 0 to 180;    /* event occurs on the n_th trial */
+25               /* there are n-1 trials for which the event did NOT occur */
+26               pdf = pdf("Geometric", n-1, p);  /* number of trials before first event */
+27               cdf = cdf("Geometric", n-1, p);  /* probability that event happens on or before n_th Trial*/
+28               cdf2 = 1 - (1-p)**n;    /* explicit formula */
+29               cdfApprox = n*p;
+30               output;
+31            end;
+32         end;
+33         run;
+
+NOTE: The data set WORK.GEOMETRIC has 543 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1277.28k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:24:55 AM
+      Step Count                        1  Switch Count  0
+      
+
+34         
+35         data GeoLabel;
+36         set Geometric;
+37         by p;
+38         if last.p then do;
+39            px = n;
+40            py = cdf;
+41            pLabel = " p = " || putn(p, "best6.");
+42         end;
+43         run;
+
+NOTE: There were 543 observations read from the data set WORK.GEOMETRIC.
+NOTE: The data set WORK.GEOLABEL has 543 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              913.34k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 11:24:55 AM
+      Step Count                        2  Switch Count  0
+      
+
+44         
+45         ods graphics / width=640px height=480px;
+46         title "Probability That the Event Occurs on or before n_th Trial";
+47         proc sgplot data=GeoLabel noautolegend;
+48            series x=n y=cdf / group=p;
+49            text x=px y=py text=pLabel / group=p position=right textattrs=(size=10);
+50            label n="Number of Trials (n)" cdf="Cumulative Probability";
+51            xaxis grid values=(0 to 175 by 25) offsetmax=0.3;
+52            yaxis grid values=(0 to 0.9 by 0.1);
+53            refline 0 / axis=y;
+54         run;
+
+                                                           The SAS System
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           3.68 seconds
+      user cpu time       0.28 seconds
+      system cpu time     0.39 seconds
+      memory              7300.23k
+      OS Memory           17116.00k
+      Timestamp           10/27/2026 11:24:59 AM
+      Step Count                        3  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C035\SGPlot.png.
+NOTE: There were 543 observations read from the data set WORK.GEOLABEL.
+
+55         
+56         proc print data=Geometric;
+57            where p=0.01 and n in (10, 15, 25, 50, 75, 100);
+58            var p n cdf;
+59         run;
+
+NOTE: There were 6 observations read from the data set WORK.GEOMETRIC.
+      WHERE (p=0.01) and n in (10, 15, 25, 50, 75, 100);
+NOTE: The PROCEDURE PRINT printed page 1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              435.34k
+      OS Memory           16468.00k
+      Timestamp           10/27/2026 11:24:59 AM
+      Step Count                        4  Switch Count  0
+      
+
+60         
+61         %let numSamples = 20;           *sample of 20 people;
+62         data RandGeom;
+63         call streaminit(19);            * random seed for covid-19;
+64         p = 0.01;
+65         do ID = 1 to &numSamples;
+66            x = rand("Geometric", p);    *number of trials before event occurs;
+67            Zero = 0;
+68            output;
+69         end;
+70         run;
+
+NOTE: The data set WORK.RANDGEOM has 20 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              785.25k
+      OS Memory           16468.00k
+      Timestamp           10/27/2026 11:24:59 AM
+      Step Count                        5  Switch Count  0
+      
+
+71         
+72         proc sort data=RandGeom;
+73            by x;
+74         run;
+                                                           The SAS System
+
+
+NOTE: There were 20 observations read from the data set WORK.RANDGEOM.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.RANDGEOM has 20 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              703.84k
+      OS Memory           16984.00k
+      Timestamp           10/27/2026 11:24:59 AM
+      Step Count                        6  Switch Count  0
+      
+
+75         
+76         ods graphics / width=400px height=400px;
+77         title "&numSamples Random Draws from Geom(0.01)";
+78         proc sgplot data=RandGeom;
+79            highlow y=ID low=Zero high=x / type=bar barwidth=1 CLIPCAP highlabel=x;
+80            xaxis grid MAX=90 label="Number of Trials until Event" minor;
+81            yaxis type=discrete discreteorder=data reverse valueattrs=(size=7);
+82         run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           0.48 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.00 seconds
+      memory              1182.09k
+      OS Memory           17196.00k
+      Timestamp           10/27/2026 11:25:00 AM
+      Step Count                        7  Switch Count  0
+      
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\benchmark\candidates\work\C035\SGPlot1.png.
+NOTE: There were 20 observations read from the data set WORK.RANDGEOM.
+
+83         
+84         
+85         proc means data=RandGeom;
+86            var x;
+87         run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 20 observations read from the data set WORK.RANDGEOM.
+NOTE: The PROCEDURE MEANS printed page 2.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              7550.25k
+      OS Memory           23424.00k
+      Timestamp           10/27/2026 11:25:00 AM
+      Step Count                        8  Switch Count  0
+      
+
+88         
+89         /*************************************************/
+90         /* Estimates of the probbility of catching the coronavirus through normal activities.
+91         
+                                                           The SAS System
+
+92         In an interview,
+93         https://www.heraldscotland.com/news/18327916.coronavirus-maths-expert-reveals-chances-catching-covid-19/
+94         Fergus Simpson, an expert in Bayesian statistics, said on 23Mar2020,
+95         "If you were to carry on life as normal" (that is, no social distancing,
+96         the odds are "about 1,000 to 1 each day" of catching the coronavirus
+97         from everyday activities. He then added that "those odds are getting progressively worse each day"
+98         as more people become infected.
+99         
+100        Some aoccupations (for example healthcare workers) might be at an elevated risk.
+101        Public activities in "outbreak areas" can carry an increased risk.
+102        
+103        "By following public health guidelines such as social distancing, then this risk can be greatly reduced."
+104        
+105        Simpson wrote a blog post that has more information about the chances of contracting coronavirus:
+106        https://medium.com/@fergus2/coronavirus-a-personal-risk-assessment-50003c952c03
+107        
+108        Also, Keith Devlin
+109        https://www.mathvalues.org/masterblog/making-sense-of-the-covid-19-data
+110        
+111        Also Rick McAnulty:
+112        https://inside.uncc.edu/news-features/2020-03-26/psychology-noncompliance-health-care-advisories
+113        "People estimate the probability of riskÃ¢â‚¬â€and decide the odds outweigh probable danger.:
+114        */
+115        /*************************************************/
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           6.30 seconds
+      user cpu time       0.56 seconds
+      system cpu time     0.93 seconds
+      memory              21041.31k
+      OS Memory           23424.00k
+      Timestamp           10/27/2026 11:25:00 AM
+      Step Count                        8  Switch Count  28
+      

@@ -1,0 +1,273 @@
+1                                                          The SAS System                            15:52 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           0.41 seconds
+      cpu time            0.32 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P082
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:52:46 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P082 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    f_waterfall.sas
+3          * Purpose:    Figure 14.2.3 - Waterfall Plot of Best Percentage Change
+4          *             from Baseline in Target Lesion Size
+5          * Study:      [STUDYID]
+6          * Author:     [Programmer Name]
+7          * Date:       [Date]
+8          * Input:      adam.adtr (or adam.adrs), adam.adsl
+9          * Output:     f_waterfall.rtf
+10         * Population: Efficacy Analysis Set (EFFFL='Y')
+11         * Notes:      Typically used in oncology trials (RECIST criteria)
+12         *****************************************************************************/
+13         
+14         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:52:46
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+80         %include "&pgmpath./utilities/u_titles.sas";
+242        
+243        /*--- Step 1: Get best percentage change per subject ---*/
+244        proc sql noprint;
+245            create table tumor as
+246            select a.USUBJID, a.TRTA, a.TRTAN,
+247                   a.PARAMCD, a.PARAM,
+248                   a.PCHG,        /* Percent change from baseline */
+249                   a.AVALC,       /* Best overall response category */
+250                   b.EFFFL
+251            from adam.adtr a      /* Tumor response dataset */
+252            inner join adam.adsl b on a.USUBJID = b.USUBJID
+253            where b.EFFFL = 'Y'
+254                  and a.PARAMCD = 'BPCHG'  /* Best percent change */
+255            order by a.PCHG;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.TUMOR created, with 222 rows and 8 columns.
+
+256        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+                                                           The SAS System
+
+      memory              21171.56k
+      OS Memory           29340.00k
+      Timestamp           10/27/2026 03:52:46 PM
+      Step Count                        2  Switch Count  0
+      
+
+257        
+258        /* Alternative: Derive from ADRS if ADTR not available */
+259        /*
+260        proc sql noprint;
+261            create table tumor as
+262            select a.USUBJID, a.TRTA, a.TRTAN,
+263                   min(a.PCHG) as PCHG,
+264                   b.AVALC as BOR
+265            from adam.adrs a
+266            inner join adam.adsl b on a.USUBJID = b.USUBJID
+267            where b.EFFFL = 'Y' and a.PARAMCD = 'SUMLD'
+268            group by a.USUBJID, a.TRTA, a.TRTAN, b.AVALC;
+269        quit;
+270        */
+271        
+272        /*--- Step 2: Assign display order (sorted by percent change) ---*/
+273        data waterfall;
+274            set tumor;
+275            by PCHG;
+276            bar_order = _n_;
+277        
+278            /* Color by response category */
+279            length bar_color $20;
+280            select(upcase(AVALC));
+281                when('CR') bar_color = 'darkgreen';
+282                when('PR') bar_color = 'green';
+283                when('SD') bar_color = 'gold';
+284                when('PD') bar_color = 'red';
+285                otherwise  bar_color = 'gray';
+286            end;
+287        
+288            /* Cap at reasonable bounds */
+289            if PCHG > 100 then PCHG_display = 100;
+290            else if PCHG < -100 then PCHG_display = -100;
+291            else PCHG_display = PCHG;
+292        run;
+
+NOTE: There were 222 observations read from the data set WORK.TUMOR.
+NOTE: The data set WORK.WATERFALL has 222 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              924.73k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:52:46 PM
+      Step Count                        3  Switch Count  0
+      
+
+293        
+294        /*--- Step 3: Generate waterfall plot ---*/
+295        %set_titles(output=F_WATERFALL, population=Efficacy Analysis Set);
+                                                           The SAS System
+
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+296        
+297        options orientation=landscape; ods rtf file="&tlfpath./f_waterfall.rtf" style=journal bodytitle;
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/f_waterfall.rtf
+298        ods graphics on / reset width=10in height=6.5in imagefmt=emf;
+299        
+300        proc sgplot data=waterfall;
+301            title4 j=c "Figure 14.2.3";
+302            title5 j=c "Waterfall Plot of Best Percentage Change from Baseline in Sum of Target Lesions";
+303        
+304            /* Bars colored by best overall response */
+305            vbar bar_order / response=PCHG_display
+306                group=AVALC
+307                groupdisplay=cluster
+308                barwidth=1
+309                outline outlineattrs=(color=black thickness=0.5px);
+310        
+311            /* Reference lines for RECIST thresholds */
+312            refline -30 / axis=y lineattrs=(pattern=dash color=blue thickness=1px)
+313                label='-30% (PR threshold)' labelattrs=(size=7pt);
+314            refline 20 / axis=y lineattrs=(pattern=dash color=red thickness=1px)
+315                label='+20% (PD threshold)' labelattrs=(size=7pt);
+316            refline 0 / axis=y lineattrs=(color=black thickness=1px);
+317        
+318            xaxis display=none label=' ';
+319            yaxis label="Best Percentage Change from Baseline (%)"
+320                  values=(-100 to 100 by 20)
+321                  grid gridattrs=(pattern=dot color=lightgray);
+322        
+323            keylegend / title='Best Overall Response'
+324                location=outside position=bottom across=5;
+325        
+326            footnote1 j=l "Data cutoff: &cutdate.";
+327            footnote2 j=l "Each bar represents one subject.";
+328            footnote3 j=l "CR=Complete Response, PR=Partial Response, SD=Stable Disease, PD=Progressive Disease";
+329            footnote4 j=l "Dashed lines: RECIST 1.1 thresholds for PR (-30%) and PD (+20%)";
+330            footnote5 j=l "Program: &sysin. | Run: %sysfunc(date(), date9.)";
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+                                                           The SAS System
+
+331        run;
+
+NOTE: Since no format is assigned, the numeric category variable will use the default of BEST6.
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           4.38 seconds
+      user cpu time       0.20 seconds
+      system cpu time     0.39 seconds
+      memory              9082.75k
+      OS Memory           20316.00k
+      Timestamp           10/27/2026 03:52:51 PM
+      Step Count                        4  Switch Count  0
+      
+NOTE: There were 222 observations read from the data set WORK.WATERFALL.
+
+332        
+333        ods graphics off;
+334        ods rtf close;
+335        %clear_titles;
+336        
+337        proc datasets lib=work nolist; delete tumor waterfall; quit;
+
+NOTE: Deleting WORK.TUMOR (memtype=DATA).
+NOTE: Deleting WORK.WATERFALL (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              229.81k
+      OS Memory           14936.00k
+      Timestamp           10/27/2026 03:52:51 PM
+      Step Count                        5  Switch Count  0
+      
+
+338        
+339        %put NOTE: f_waterfall.sas completed successfully.;
+NOTE: f_waterfall.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           5.45 seconds
+      user cpu time       0.48 seconds
+      system cpu time     0.68 seconds
+                                                           The SAS System
+
+      memory              28311.81k
+      OS Memory           29340.00k
+      Timestamp           10/27/2026 03:52:51 PM
+      Step Count                        5  Switch Count  23
+      

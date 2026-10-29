@@ -1,0 +1,184 @@
+/*****************************************************************************
+* Program:    t_disp.sas
+* Purpose:    Table 14.1.2 - Subject Disposition
+* Study:      [STUDYID]
+* Author:     [Programmer Name]
+* Date:       [Date]
+* Input:      adam.adsl
+* Output:     t_disp.rtf
+* Population: All Randomized Subjects
+*****************************************************************************/
+
+%include "&pgmpath./utilities/u_setup.sas";
+%include "&macpath./m_counts.sas";
+%include "&macpath./m_report.sas";
+%include "&pgmpath./utilities/u_titles.sas";
+
+/*--- Step 1: Get Big N (all randomized) ---*/
+%m_counts(inds=adam.adsl, trtvar=TRTA, popflag=RANDFL, popval=Y);
+
+/*--- Step 2: Prepare data ---*/
+data disp;
+    set adam.adsl;
+    where RANDFL = 'Y';
+run;
+
+/*--- Step 3: Population analysis sets ---*/
+%macro pop_count(flag=, label=, ord=);
+    proc sql noprint;
+        create table _pop_&flag. as
+        select TRTA, 
+               count(distinct USUBJID) as cnt,
+               "&label." as category length=80,
+               &ord. as ord
+        from disp
+        where upcase(&flag.) = 'Y'
+        group by TRTA;
+    quit;
+%mend pop_count;
+
+%pop_count(flag=RANDFL,  label=Randomized,                    ord=1);
+%pop_count(flag=ITTFL,   label=%str(  Intent-to-Treat Set),   ord=2);
+%pop_count(flag=SAFFL,   label=%str(  Safety Analysis Set),   ord=3);
+%pop_count(flag=EFFFL,   label=%str(  Efficacy Analysis Set), ord=4);
+%pop_count(flag=PPROTFL, label=%str(  Per-Protocol Set),      ord=5);
+
+/*--- Step 4: Completion / Discontinuation ---*/
+proc sql noprint;
+    /* Completed study */
+    create table _completed as
+    select TRTA,
+           count(distinct USUBJID) as cnt,
+           'Completed Study' as category length=80,
+           10 as ord
+    from disp
+    where EOSSTT = 'COMPLETED'
+    group by TRTA;
+
+    /* Discontinued */
+    create table _discont as
+    select TRTA,
+           count(distinct USUBJID) as cnt,
+           'Discontinued Study' as category length=80,
+           11 as ord
+    from disp
+    where EOSSTT = 'DISCONTINUED'
+    group by TRTA;
+quit;
+
+/*--- Step 5: Reasons for discontinuation ---*/
+proc sql noprint;
+    create table _reasons as
+    select TRTA,
+           DCSREAS,
+           count(distinct USUBJID) as cnt
+    from disp
+    where EOSSTT = 'DISCONTINUED' and DCSREAS ne ''
+    group by TRTA, DCSREAS;
+quit;
+
+data _reasons2;
+    set _reasons;
+    length category $80;
+    category = '  ' || strip(DCSREAS);
+    
+    /* Assign display order for reasons */
+    select(upcase(DCSREAS));
+        when('ADVERSE EVENT')          ord = 12;
+        when('DEATH')                  ord = 13;
+        when('LACK OF EFFICACY')       ord = 14;
+        when('LOST TO FOLLOW-UP')      ord = 15;
+        when('PHYSICIAN DECISION')     ord = 16;
+        when('PROTOCOL VIOLATION')     ord = 17;
+        when('WITHDRAWAL BY SUBJECT')  ord = 18;
+        otherwise                      ord = 19;
+    end;
+run;
+
+/*--- Step 6: Combine all sections ---*/
+data all_disp;
+    set _pop_randfl _pop_ittfl _pop_saffl _pop_efffl _pop_pprotfl
+        _completed _discont _reasons2;
+run;
+
+/*--- Step 7: Add percentages and format ---*/
+proc sql noprint;
+    create table all_disp2 as
+    select a.*,
+           b.bign,
+           case when b.bign > 0 
+                then a.cnt / b.bign * 100 
+                else . 
+           end as pct
+    from all_disp a
+    left join work._bign b
+    on a.TRTA = b.TRTA
+    order by ord, TRTA;
+quit;
+
+data all_disp3;
+    set all_disp2;
+    length value $30;
+    if ord = 1 then value = strip(put(cnt, 8.));  /* Just N for randomized */
+    else if cnt > 0 then 
+        value = cat(strip(put(cnt, 8.)), ' (', strip(put(pct, 5.1)), ')');
+    else value = '0';
+run;
+
+/*--- Step 8: Transpose for columnar display ---*/
+proc sort data=all_disp3; by ord category; run;
+
+proc transpose data=all_disp3 out=final(drop=_name_) prefix=col;
+    by ord category;
+    id TRTA;
+    var value;
+run;
+
+/*--- Step 9: Section headers ---*/
+data report;
+    length section $80;
+    set final;
+    by ord;
+
+    if ord = 1 then section = 'Analysis Populations';
+    else if ord = 10 then section = 'Study Completion';
+    else if ord >= 12 then section = '  Reason for Discontinuation';
+    else section = '';
+
+    /* Show section header only once */
+    retain _lastsect '';
+    if section ne _lastsect and section ne '' then do;
+        _show_section = section;
+        _lastsect = section;
+    end;
+    else _show_section = '';
+    drop _lastsect;
+run;
+
+/*--- Step 10: Generate output ---*/
+%set_titles(output=T_DISP, population=All Randomized Subjects);
+%ods_on(filename=t_disp);
+
+proc report data=report nowd split='~'
+    style(report)=[outputwidth=9.5in]
+    style(header)=[just=center fontweight=bold];
+
+    columns ord _show_section category col1 col2 col3;
+
+    define ord            / order noprint;
+    define _show_section  / display '' style(column)=[width=2in fontweight=bold] noprint;
+    define category       / display 'Category' style(column)=[width=2.5in];
+    define col1           / display "&col1hdr." style(column)=[width=1.5in just=center];
+    define col2           / display "&col2hdr." style(column)=[width=1.5in just=center];
+    define col3           / display "&col3hdr." style(column)=[width=1.5in just=center];
+
+run;
+
+%ods_off;
+%clear_titles;
+
+proc datasets lib=work nolist;
+    delete disp all_disp: final report _pop_: _completed _discont _reasons:;
+quit;
+
+%put NOTE: t_disp.sas completed successfully.;

@@ -1,0 +1,391 @@
+1                                                          The SAS System                            10:54 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           2.07 seconds
+      cpu time            0.54 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P052
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.00 seconds
+      memory              1271.28k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P052 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          /************************************/
+2          /* Author:	Kriss Harris			*/
+3          /* Date:    12 October 2014			*/
+4          /* Target:	18						*/
+5          /************************************/
+6          
+7          %* modification 2019-12-23 - update path as data has been moved;
+8          
+9          filename source "&rawadam./adsl.xpt";
+10         libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adsl.xpt
+11          data work.adsl ;
+12            set source.adsl ;
+13          run ;
+
+NOTE: There were 254 observations read from the data set SOURCE.ADSL.
+NOTE: The data set WORK.ADSL has 254 observations and 48 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              855.18k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        2  Switch Count  0
+      
+
+14         
+15         
+16         filename source "&rawadam./advsmax.xpt" ;
+17         libname source xport ;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\advsmax.xpt
+18         
+19           data advsmax ;
+20            set source.advsmax ;
+21          run ;
+
+NOTE: There were 32139 observations read from the data set SOURCE.ADVSMAX.
+NOTE: The data set WORK.ADVSMAX has 32139 observations and 44 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.09 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.00 seconds
+      memory              853.43k
+      OS Memory           10324.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        3  Switch Count  0
+      
+
+22         
+23          /* Selecting appropriate data */
+24         
+                                                           The SAS System
+
+25         proc sort data = advsmax;
+26         by studyid;
+27         run;
+
+NOTE: There were 32139 observations read from the data set WORK.ADVSMAX.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADVSMAX has 32139 observations and 44 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.07 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.04 seconds
+      memory              19838.65k
+      OS Memory           29644.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        4  Switch Count  0
+      
+
+28         
+29         data advsmax_final;
+30         set advsmax;
+31         by studyid;
+32         
+33         /* Creating labels for reference lines */
+34         WHERE PARAMCD="DIABP" and ATPTN=815 and ANL01FL ="Y" and ADY > 1 and SAFFL="Y";
+35         if first.studyid then do;
+36         	LLN_label = "LLN";
+37         	ULN_label = "ULN";
+38         end;
+39         run;
+
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX.
+      WHERE (PARAMCD='DIABP') and (ATPTN=815) and (ANL01FL='Y') and (ADY>1) and (SAFFL='Y');
+NOTE: The data set WORK.ADVSMAX_FINAL has 250 observations and 46 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1024.03k
+      OS Memory           10580.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        5  Switch Count  0
+      
+
+40         
+41         /* Creating ranges so that axis can be equated */
+42         proc sql;
+43         create table range as
+44         select min(base) as min_base, max(base) as max_base, min(aval) as min_aval, max(aval) as max_aval
+45         from advsmax_final;
+NOTE: Table WORK.RANGE created, with 1 rows and 4 columns.
+
+46         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5537.15k
+      OS Memory           15448.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        6  Switch Count  0
+      
+
+47         
+48         data range2;
+49         set range;
+50         min = min(min_base, min_aval);
+51         max = max(max_base, max_aval);
+52         run;
+
+NOTE: There were 1 observations read from the data set WORK.RANGE.
+NOTE: The data set WORK.RANGE2 has 1 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              888.46k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        7  Switch Count  0
+      
+
+53         
+54         proc sql;
+55         select min(min), max(max) into : min, : max
+56         	from range2;
+57         quit;
+NOTE: The PROCEDURE SQL printed page 1.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5316.06k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        8  Switch Count  0
+      
+
+58         
+59         /* Finding out the amount of studyids */
+60         
+61         proc sql;
+62         create table advsmax_final2 as
+63         select *, count(distinct studyid) as count_study
+64         from advsmax_final;
+NOTE: The query requires remerging summary statistics back with the original data.
+NOTE: Table WORK.ADVSMAX_FINAL2 created, with 250 rows and 47 columns.
+
+65         quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5493.18k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        9  Switch Count  0
+                                                           The SAS System
+
+      
+
+66         
+67         data advsmax_final3;
+68         set advsmax_final2;
+69         if count_study <=2 then do;
+70         	column_numbers = 2 ;
+71         	row_numbers = 1;
+72         end;
+73         if count_study >2 then do;
+74         	column_numbers = 2 ;
+75         	row_numbers = 2;
+76         end;
+77         run;
+
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX_FINAL2.
+NOTE: The data set WORK.ADVSMAX_FINAL3 has 250 observations and 49 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1000.09k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        10  Switch Count  0
+      
+
+78         
+79         proc sql;
+80         select distinct column_numbers, row_numbers into: column_numbers, :row_numbers
+81         from advsmax_final3;
+82         run;
+NOTE: PROC SQL statements are executed immediately; The RUN statement has no effect.
+83         
+84         /* Creating template */
+85         
+NOTE: The PROCEDURE SQL printed page 2.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5388.40k
+      OS Memory           15964.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        11  Switch Count  0
+      
+
+86         proc template;
+87         define statgraph shiftplot;
+88         nmvar min max row_numbers column_numbers;
+89         	begingraph;
+90         
+91         		layout datapanel classvars = (studyid) / order = rowmajor rows = row_numbers columns = column_numbers
+92         												 rowaxisopts = (label = "Maximum Post-baseline Measurment" linearopts = (integer = true viewmin = min viewmax
+92       !  = max))
+93         												 columnaxisopts = (label = "Maximum Baseline Measurment" linearopts = (integer = true viewmin = min viewmax =
+93       !  max));
+94         
+                                                           The SAS System
+
+95         			layout prototype;
+96         				scatterplot x = base y = aval / group = trta name = "legend";
+97         				lineparm x = 0 y = 0 slope = 1;
+98         				referenceline x = ANRLO / lineattrs = (pattern = 2) xaxis = x curvelabel = LLN_label curvelabelposition = min;
+99         				referenceline x = ANRHI / lineattrs = (pattern = 2) xaxis = x curvelabel = ULN_label curvelabelposition = min;
+100        
+101        				referenceline y = ANRLO / lineattrs = (pattern = 2) yaxis = y curvelabel = LLN_label curvelabelposition = min;
+102        				referenceline y = ANRHI / lineattrs = (pattern = 2) yaxis = y curvelabel = ULN_label curvelabelposition = min;
+103        
+104        			endlayout;
+105        			sidebar / align=bottom;
+106            			discretelegend "legend";
+107          			endsidebar;
+108        		endlayout;
+109        
+110        	endgraph;
+111        end;
+NOTE: Overwriting existing template/link: Shiftplot
+NOTE: STATGRAPH 'Shiftplot' has been saved to: SASUSER.TEMPLAT
+112        run;
+NOTE: PROCEDURE TEMPLATE used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              314.40k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:54:06 AM
+      Step Count                        12  Switch Count  0
+      
+
+113        
+114        proc sgrender data = advsmax_final3 template = shiftplot;
+115        run;
+
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P052\SGRender.png.
+NOTE: There were 250 observations read from the data set WORK.ADVSMAX_FINAL3.
+NOTE: PROCEDURE SGRENDER used (Total process time):
+      real time           4.66 seconds
+      user cpu time       0.18 seconds
+      system cpu time     0.39 seconds
+      memory              8125.06k
+      OS Memory           17888.00k
+      Timestamp           10/27/2026 10:54:11 AM
+      Step Count                        13  Switch Count  0
+      
+
+116        
+117        
+118        
+119        
+120        /*
+121        
+122        
+123        
+124        proc template;
+125        define statgraph shiftplot2;
+126        	begingraph;
+127        			layout overlayequated /equatetype = square;
+                                                           The SAS System
+
+128        				scatterplot x = base y = aval / group = trta name = "legend";
+129        				discretelegend "legend";
+130        			endlayout;
+131        	endgraph;
+132        end;
+133        run;
+134        
+135        proc sgrender data = advsmax_final template = shiftplot2;
+136        by studyid;
+137        run;
+138        
+139        
+140        */
+141        
+142        
+143        
+144        
+145        
+146        
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           7.25 seconds
+      user cpu time       0.67 seconds
+      system cpu time     0.85 seconds
+      memory              28065.15k
+      OS Memory           29644.00k
+      Timestamp           10/27/2026 10:54:11 AM
+      Step Count                        13  Switch Count  38
+      

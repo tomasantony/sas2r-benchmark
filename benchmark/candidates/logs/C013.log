@@ -1,0 +1,179 @@
+1                                                          The SAS System                            11:22 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           3.58 seconds
+      cpu time            1.10 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\general
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+NOTE: benchmark autoexec: pid=general family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /************************************************************************************************
+2           USING DATE DIRECTIVES ON THE PICTURE STATEMENT
+3               This program creates formats to display dates in a customized way.
+4               Keywords: PROC FORMAT, FORMAT, PICTURE, DATATYPE
+5               SAS Versions: SAS 9, SAS Viya
+6               Documentation:
+6        ! https://documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=default&docsetId=proc&docsetTarget=p1xidhqypi0fnwn1if8opjpqpbmn
+6        ! .htm
+7               1. The PICTURE statement can create formats that can be used to display dates. Start by using PROC FORMAT with a
+7        ! PICTURE
+8                  statement that has a DATATYPE= option.
+9               2. The PICTURE statement identifies the name of the new format. It then specifies the range of values to which a
+9        ! template
+10                 will be applied. Use the LOW and HIGH to keywords to indicate that the range includes everything from the lowest
+10       ! value
+11                 to the highest.
+12              3. The template or pattern for the format is specified. In this case we use date directives to define the template.
+12       ! The quoted
+13                 template includes three date directives - %0d specifies that the day of the month be written out in one or two
+14                 digits, %b specifies that the month be written out in a three letter abbreviation, and %Y specifies that a
+14       ! 4-digit
+15                 year be written out. These elements are separated by the tilde character (~). The pattern closes with extra
+                                                           The SAS System
+
+15       ! spaces to account for
+16                 the length of labels.
+17              4. The DATATYPE= option specifies that the format is a date, a time, or a datetime.
+18              5. Apply the format in PROC PRINT to view the results.
+19              6. Text can be combined with picture templates to create truly customized formats. Text be can be used for some
+19       ! levels of a
+20                 format and date directives for other levels.
+21              7. SAS date constants (as well as time constants and datetime constants) can be used to specify the beginning and
+21       ! end of
+22                 a date range.
+23              8. When using date directives, remember that case can matter. A lower case 'b' results in a 3-letter abbreviation
+23       ! for month, while
+24                 an upper case 'B' spells out the whole month.
+25         ************************************************************************************************/
+26         
+27         proc format;
+28            picture /*1*/ hirefmt   /*2*/ low-high = '%0d~%b~%Y    '  /*3*/  (datatype=date) /*4*/ ;
+NOTE: Format HIREFMT has been output.
+29         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              149.87k
+      OS Memory           8520.00k
+      Timestamp           10/27/2026 11:22:40 AM
+      Step Count                        1  Switch Count  0
+      
+
+30         
+31         data crew;
+32            infile cards;
+33            input FirstName : $35. LastName : $35. HireDate : date9.;
+34            cards;
+
+NOTE: The data set WORK.CREW has 20 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.10 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.03 seconds
+      memory              1263.90k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:40 AM
+      Step Count                        2  Switch Count  0
+      
+
+55         ;
+56         run;
+57         
+58         proc print data=crew; /*5*/
+59            var firstname lastname hiredate;
+60            format hiredate hirefmt.;
+61            title 'Crew Hire Dates with Custom Date Format';
+62         run;
+
+NOTE: There were 20 observations read from the data set WORK.CREW.
+NOTE: The PROCEDURE PRINT printed page 1.
+                                                           The SAS System
+
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              475.71k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:40 AM
+      Step Count                        3  Switch Count  0
+      
+
+63         
+64         proc format;
+65            picture mrg /*6*/
+66               low-<'01apr1990'd = 'Pre-Merger' /*7*/
+67               '01apr1990'd-'31mar1993'd = '%B during Merger Process      ' (datatype=date) /*8*/
+68               other = 'Post-Merger';
+NOTE: Format MRG has been output.
+69         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              100.21k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:40 AM
+      Step Count                        4  Switch Count  0
+      
+
+70         proc print data=crew(obs=20);
+71            var firstname lastname hiredate;
+72            format hiredate mrg.;
+73            title 'Crew Hire Dates with Text/Date Format';
+74         run;
+
+NOTE: There were 20 observations read from the data set WORK.CREW.
+NOTE: The PROCEDURE PRINT printed page 2.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              361.00k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:40 AM
+      Step Count                        5  Switch Count  0
+      
+
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           4.15 seconds
+      user cpu time       0.45 seconds
+      system cpu time     0.95 seconds
+      memory              8753.75k
+      OS Memory           10068.00k
+      Timestamp           10/27/2026 11:22:40 AM
+      Step Count                        5  Switch Count  22
+      

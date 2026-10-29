@@ -1,0 +1,355 @@
+1                                                          The SAS System                            10:51 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+NOTE: SAS initialization used:
+      real time           1.77 seconds
+      cpu time            0.68 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P035
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1133,
+      Last Modified=27Oct2026:10:26:09,
+      Create Time=27Oct2026:10:26:09
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 14.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:51:44 AM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P035 family=phuse
+NOTE: Libref INLIB refers to the same physical library as PADAM.
+NOTE: Libref INLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+
+                                                           The SAS System
+
+NOTE: AUTOEXEC processing completed.
+
+1          %* modification 2019-12-23 - update path as data has been moved;
+2          
+3          filename source "&rawadam./adpp.xpt";
+4          libname source xport;
+NOTE: Libref SOURCE was successfully assigned as follows: 
+      Engine:        XPORT 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\cdisc-pilot\adam\adpp.xpt
+5          
+6          /*
+7          from table shell:
+8          
+9          Sheet: PPTS
+10         Compound: ANLPRNT
+11         Matrix: PPSPECL
+12         Analyte: PPCATL
+13         Actual Treatment: TRTAN
+14         Period Day: PPSDY
+15         Stat Order: s_order
+16         PARAM: _PARAM=compbl(put(PPTESTCD ,$pk.)||' ('||strip(PPORRESU)||')')
+17         */
+18         
+19         proc format;
+20            value TRTAN 1 = "Period 1 Treatment"
+21                        2 = "Period 2 Treatment"
+22                        3 = "Period 3 Treatment";
+NOTE: Format TRTAN has been output.
+23         
+24            value statg 1 = "n"
+25                        2 = "Mean (SD)"
+26                        3 = "CV% mean"
+27                        4 = "Geo-mean"
+28                        5 = "CV% geo-mean"
+29                        6 = "Median"
+30                        7 = "[Min; Max]        ";
+NOTE: Format STATG has been output.
+31         
+32            value $ pk "AUCINFO" = "AUC"
+33                       "AUCTAU"  = "AUCtau"
+34                       "AUCLAST" = "AUC(0-tlast)"
+35                       "CMAX"    = "Cmax"
+36                       "CMAXD"   = "Cmax/Dose"
+37                       "MRTLAST" = "MRT"
+38                       "TLAST"   = "tlast"
+39                       "TMAX"    = "tmax"
+40                       "CLRFO"   = "CL/F"
+41                       "VZFO"    = "VzF"
+42                       "LAMZ"    = "lambdaZ"
+43                       "LAMZHL"  = "t1/2"
+44                       "CLAST"   = "Clast";
+NOTE: Format $PK has been output.
+45         run;
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              160.93k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 10:51:44 AM
+      Step Count                        2  Switch Count  0
+      
+
+46         
+47         data adpp;
+48           set source.adpp;
+49           where PKFN=1 and ANL01FN ne 1 and paramcd in ('AUCINFO' 'AUCLAST' 'CMAX' 'TMAX' 'MRTLAST' 'LAMZHL') and PPSTRESN ne .
+49       ! and compress(PPCATL)='ANAL2';
+50           _PARAM = compbl(put(PPTESTCD,$pk.)||' ('||strip(PPORRESU)||')');
+51           AVAL_log = log(AVAL);
+52         run;
+
+NOTE: There were 330 observations read from the data set SOURCE.ADPP.
+      WHERE (PKFN=1) and (ANL01FN not = 1) and paramcd in ('AUCINFO', 'AUCLAST', 'CMAX', 'LAMZHL', 'MRTLAST', 'TMAX') and (PPSTRESN 
+      not = .) and (COMPRESS(PPCATL)='ANAL2');
+NOTE: The data set WORK.ADPP has 330 observations and 159 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.10 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.01 seconds
+      memory              1231.53k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 10:51:44 AM
+      Step Count                        3  Switch Count  0
+      
+
+53         
+54         proc sort data=adpp;
+55           by ANLPRNT PPSPECL PPCATL TRTAN PPSDY _PARAM;
+56         run;
+
+NOTE: There were 330 observations read from the data set WORK.ADPP.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADPP has 330 observations and 159 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              4787.56k
+      OS Memory           14704.00k
+      Timestamp           10/27/2026 10:51:44 AM
+      Step Count                        4  Switch Count  0
+      
+
+57         
+58         proc univariate data=adpp noprint;
+59           by ANLPRNT PPSPECL PPCATL TRTAN PPSDY _PARAM;
+60           var AVAL AVAL_log;
+61           output out=adpp_sum
+62                  n=n1 n2 mean=mn1 mn2 std=std1 std2 cv=cv1 cv2 median=med1 med2 min=min1 min2 max=max1 max2;
+63         run;
+
+NOTE: The data set WORK.ADPP_SUM has 12 observations and 20 variables.
+NOTE: PROCEDURE UNIVARIATE used (Total process time):
+      real time           0.01 seconds
+                                                           The SAS System
+
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1426.76k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 10:51:44 AM
+      Step Count                        5  Switch Count  0
+      
+
+64         
+65         data adpp_sum_t; * adpp_sum transposed;
+66           set adpp_sum;
+67           length value $ 30.;
+68           by ANLPRNT PPSPECL PPCATL;
+69           s_order = 1; * n;
+70           value = put(n1, 2.);
+71           output;
+72           s_order = 2; * mean (sd);
+73           select;
+74             when(index(_PARAM,'AUC')>0)  value = put(mn1,6.) ||' ('||put(std1,5.) ||')';
+75             when(index(_PARAM,'Cmax')>0) value = put(mn1,5.) ||' ('||put(std1,4.) ||')';
+76             when(index(_PARAM,'MRT')>0)  value = put(mn1,4.1)||' ('||put(std1,4.2)||')';
+77             when(index(_PARAM,'t1/2')>0) value = put(mn1,4.2)||' ('||put(std1,4.2)||')';
+78         	otherwise value = ' ';
+79           end;
+80           output;
+81           s_order = 3; * CV% mean;
+82           if index(_PARAM,'tmax')=0 then value = put(cv1,4.1);
+83           else value = ' ';
+84           output;
+85           s_order = 4; * geo-mean;
+86           select;
+87             when(index(_PARAM,'AUC')>0)  value = put(exp(mn2),6.);
+88             when(index(_PARAM,'Cmax')>0) value = put(exp(mn2),5.);
+89             when(index(_PARAM,'MRT')>0)  value = put(exp(mn2),4.1);
+90             when(index(_PARAM,'t1/2')>0) value = put(exp(mn2),4.2);
+91         	otherwise value = ' ';
+92           end;
+93           output;
+94           s_order = 5; * CV% geo-mean;
+95           if index(_PARAM,'tmax')=0 then value = put(sqrt(exp(std2**2)-1)*100,4.1);
+96           else value = ' ';
+97           output;
+98           s_order = 6; * median;
+99           select;
+100            when(index(_PARAM,'AUC')>0)  value = put(med1,6.);
+101            when(index(_PARAM,'Cmax')>0) value = put(med1,5.);
+102            when(index(_PARAM,'MRT')>0)  value = put(med1,4.1);
+103            when(index(_PARAM,'t1/2')>0) value = put(med1,4.2);
+104            when(index(_PARAM,'tmax')>0) value = put(med1,4.2);
+105        	otherwise;
+106          end;
+107          output;
+108          s_order = 7; /* [min; max] */;
+109          select;
+110            when(index(_PARAM,'AUC')>0)  value = '['||put(min1,6.) ||';'||put(max1,6.) ||']';
+111            when(index(_PARAM,'Cmax')>0) value = '['||put(min1,4.) ||';'||put(max1,5.) ||']';
+112            when(index(_PARAM,'MRT')>0)  value = '['||put(min1,4.2)||';'||put(max1,4.1)||']';
+113            when(index(_PARAM,'t1/2')>0) value = '['||put(min1,4.2)||';'||put(max1,4.1)||']';
+                                                           The SAS System
+
+114            when(index(_PARAM,'tmax')>0) value = '['||put(min1,4.2)||';'||put(max1,4.2)||']';
+115        	otherwise;
+116          end;
+117          output;
+118        run;
+
+NOTE: There were 12 observations read from the data set WORK.ADPP_SUM.
+NOTE: The data set WORK.ADPP_SUM_T has 84 observations and 22 variables.
+NOTE: At least one W.D format was too small for the number to be printed. The decimal may be shifted by the "BEST" format.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              938.75k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 10:51:44 AM
+      Step Count                        6  Switch Count  0
+      
+
+119        
+120        proc sort data=adpp_sum_t;
+121          by ANLPRNT PPSPECL PPCATL TRTAN PPSDY s_order _PARAM;
+122        run;
+
+NOTE: There were 84 observations read from the data set WORK.ADPP_SUM_T.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ADPP_SUM_T has 84 observations and 22 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              759.65k
+      OS Memory           11612.00k
+      Timestamp           10/27/2026 10:51:44 AM
+      Step Count                        7  Switch Count  0
+      
+
+123        
+124        TITLE;
+125        FOOTNOTE;
+126        
+127        options NOBYLINE;
+128        
+129        TITLE1 j=L "Study001";
+130        TITLE2 j=C "Table 14.2-PPTS (Page xxx of xxx)";
+131        TITLE3 j=C "Summary statistics for PK parameters";
+132        TITLE4 j=C "by compound, matrix, analyte and actual treatment";
+133        TITLE5 j=C "Analysis Set: PK analysis set";
+134        
+135        FOOTNOTE1 j=L "CV% = coefficient of variation (%) = sd/mean*100";
+136        FOOTNOTE2 j=L "CV% geo-mean = (sqrt(exp(variance for log transformed data)-1))*100";
+137        FOOTNOTE3 j=L "Geo-mean: Geometric mean";
+138        FOOTNOTE4 j=L "Geo-mean and CV% geo-mean not presented when the minimum value for a parameter is zero.";
+139        FOOTNOTE5 j=L "Data: adpp  Program: pps.sas  Output: t.14.2.ppts.txt";
+140        FOOTNOTE6 j=L "Fake Data/ Production Run on 17MAR2014:23:57";
+141        
+142        proc report data=adpp_sum_t split="#" nowindows headline formchar(2)="_" headskip spacing=1
+143                    missing out=CLXCHECKNOBS;
+                                                           The SAS System
+
+144          * Add by variables;
+145          by ANLPRNT PPSPECL PPCATL;
+146          * Generate column statement for proc report;
+147          column ( ANLPRNT PPSPECL PPCATL TRTAN PPSDY s_order _PARAM, value );
+148          * Generate define statement for all variables;
+149          define ANLPRNT / " " width=2 left format=$10. noprint group order=data id;
+150          define PPSPECL / " " width=2 left format=$10. noprint group order=data id;
+151          define PPCATL  / " " width=2 left format=$15. group noprint id;
+152          define TRTAN   / "Actual treatment" width=20 left group format=TRTAN. order=data flow;
+153          define PPSDY   / "Period day" width=8 left group missing;
+154          define s_order / "Statistic" width=14 left group format=statg. order=internal id;
+155          define _PARAM  / " " width=15 left across;
+156          define value   / " " width=19 left group missing flow;
+157          * If value of macro variable SELECTVAR is not empty, generate a break after statement with it;
+158          break after PPSDY/skip;
+159          * Add compute page before statement;
+160          compute before _page_ / left;
+161            line +1 "Compound:" +1 ANLPRNT $10. +1 ", Matrix:" +1 PPSPECL $10. +1 ", Analyte:" +1 PPCATL $15.;
+162            line ' ';
+163          endcomp;
+164          * Add compute variables statements (for changing cell styles using criterias);
+165        run;
+
+NOTE: Variable ANLPRNT already exists on file WORK.CLXCHECKNOBS, using ANLPRNT2 instead.
+NOTE: Variable PPSPECL already exists on file WORK.CLXCHECKNOBS, using PPSPECL2 instead.
+NOTE: Variable PPCATL already exists on file WORK.CLXCHECKNOBS, using PPCATL2 instead.
+NOTE: The above message was for the following BY group:
+      Analyte parent=A Specimen material type=Plasma Category for pharmacokinetic parameter=ANAL 2
+NOTE: There were 84 observations read from the data set WORK.ADPP_SUM_T.
+NOTE: The data set WORK.CLXCHECKNOBS has 17 observations and 16 variables.
+NOTE: The PROCEDURE REPORT printed pages 1-2.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.09 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.04 seconds
+      memory              2956.90k
+      OS Memory           12892.00k
+      Timestamp           10/27/2026 10:51:44 AM
+      Step Count                        8  Switch Count  0
+      
+
+166        
+167        options BYLINE;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           2.28 seconds
+      user cpu time       0.34 seconds
+      system cpu time     0.60 seconds
+      memory              13085.87k
+      OS Memory           14704.00k
+      Timestamp           10/27/2026 10:51:44 AM
+      Step Count                        8  Switch Count  28
+      

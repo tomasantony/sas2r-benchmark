@@ -1,0 +1,159 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              222.81k
+      OS Memory           14168.00k
+      Timestamp           10/27/2026 03:58:53 PM
+      Step Count                        85  Switch Count  0
+      
+
+1352       %let pid = P028; %let outds = &root./output/sas/datasets/P028; libname outds "&outds.";
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P028
+1353       %put NOTE: ===== pipeline faijal: P028 P028_tr.sas =====;
+NOTE: ===== pipeline faijal: P028 P028_tr.sas =====
+1354       %let _bench_t0 = %sysfunc(datetime());
+1355       %include "&root./programs/sas_run/P028_tr.sas";
+
+NOTE: There were 5 observations read from the data set WORK.SDTM_DM.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.DM_FOR_TR has 5 observations and 2 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1201.15k
+      OS Memory           15200.00k
+      Timestamp           10/27/2026 03:58:53 PM
+      Step Count                        86  Switch Count  0
+      
+                                                           The SAS System
+
+
+
+NOTE: There were 4 observations read from the data set WORK.EDC_TR.
+NOTE: The data set WORK.TR_PREP has 4 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              910.09k
+      OS Memory           14424.00k
+      Timestamp           10/27/2026 03:58:53 PM
+      Step Count                        87  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.TR_PREP.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TR_PREP has 4 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              691.53k
+      OS Memory           14684.00k
+      Timestamp           10/27/2026 03:58:53 PM
+      Step Count                        88  Switch Count  0
+      
+
+
+NOTE: Input data set is already sorted, no sorting done.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              264.37k
+      OS Memory           14168.00k
+      Timestamp           10/27/2026 03:58:54 PM
+      Step Count                        89  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.TR_PREP.
+NOTE: There were 5 observations read from the data set WORK.DM_FOR_TR.
+NOTE: The data set WORK.SDTM_TR1 has 4 observations and 24 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1081.50k
+      OS Memory           14936.00k
+      Timestamp           10/27/2026 03:58:54 PM
+      Step Count                        90  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.SDTM_TR1.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.SDTM_TR1 has 4 observations and 24 variables.
+                                                           The SAS System
+
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              686.87k
+      OS Memory           14940.00k
+      Timestamp           10/27/2026 03:58:54 PM
+      Step Count                        91  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.SDTM_TR1.
+NOTE: The data set WORK.SDTM_TR has 4 observations and 16 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              926.62k
+      OS Memory           14680.00k
+      Timestamp           10/27/2026 03:58:54 PM
+      Step Count                        92  Switch Count  0
+      
+
+
+NOTE: There were 4 observations read from the data set WORK.SDTM_TR.
+NOTE: The PROCEDURE PRINT printed page 7.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              471.34k
+      OS Memory           14424.00k
+      Timestamp           10/27/2026 03:58:54 PM
+      Step Count                        93  Switch Count  0
+      
+
+
+NOTE: The export data set has 4 observations and 16 variables.
+NOTE: "D:\tr.xlsx" file was successfully created.
+NOTE: PROCEDURE EXPORT used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              1406.03k
+      OS Memory           14936.00k
+      Timestamp           10/27/2026 03:58:54 PM
+      Step Count                        94  Switch Count  0
+      
+
+1510       %_bench_capture;
+NOTE: No rows were selected.
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5194.03k
+      OS Memory           20060.00k
+      Timestamp           10/27/2026 03:58:54 PM
+                                                           The SAS System
+
+      Step Count                        95  Switch Count  0
+      
+
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+1511       proc printto; run;
+

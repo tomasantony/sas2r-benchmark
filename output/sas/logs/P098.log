@@ -1,0 +1,3364 @@
+1                                                          The SAS System                            15:59 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.55 seconds
+      cpu time            0.62 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P098
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1271.28k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P098 family=general
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*--------------------------------------------------------------------------------------------
+2            Please be aware that as a matter of policy, R&D is not able to provide programming services
+                                                           The SAS System
+
+3            or consulting services for SAS customers.  However, there are times when a coding example can
+4            be of general use to customers and we can justify writing an example to demonstrate the type
+5            of method or logic needed.  This program is for demonstration purpose only, and may work ONLY
+6            for the combination of variables and data provided.  We cannot directly write a customer
+7            program nor can we support or maintain the example program.  If there are further data changes
+8            or requirements it will be up to you to make the necessary changes to the program to best
+9            fit your data.
+10         ---------------------------------------------------------------------------------------------*/
+11         
+12         options cmplib=sasuser.funcs;
+13         
+14         %macro WaterFall_3D_Macro (
+15                Data=, 		/*--Required - Data set name--*/
+16                Duration=,	/*--Required - Treatment Duration variable--*/
+17                Response=, 	/*--Required - Tumor Response variable--*/
+18                Dropped=, 	/*--Required - Subjects dropped--*/
+19                Group=,		/*--Required - Treatment Drug--*/
+20                Code=, 		/*--Required - RECIST Code--*/
+21                AttrMap=,	/*--Required - Attribute Map--*/
+22                Lblx=X, 		/*--X-Axis (Front) Label--*/
+23                Lbly=Y,		/*--Y-Axis (Horizontal plane) Label--*/
+24                Lblz=Z,		/*--Z-Axis (Vertical) Label--*/
+25                xFac=1,		/*--X-Axis scale factor--*/
+26                Tilt=65,		/*--View Tilt 60 to 80--*/
+27                Rotate=-55,	/*--View Rotation -15 to -75--*/
+28                Title=		/*--Graph Title--*/
+29         );
+30         
+31         /*--Check for Required Parameters   --*/
+32         /*--Terminate if these required parameters are not supplied--*/
+33         %if %length(&Data) eq 0 %then %do;
+34         %put The parameter 'Data' is required - WaterFall 3D Macro Terminated.;
+35         %goto finished;
+36         %end;
+37         
+38         %if %length(&Duration) eq 0 %then %do;
+39         %put The parameter 'Duration' is required - WaterFall 3D Macro Terminated.;
+40         %goto finished;
+41         %end;
+42         
+43         %if %length(&Response) eq 0 %then %do;
+44         %put The parameter 'Response' is required - WaterFall 3D Macro Terminated.;
+45         %goto finished;
+46         %end;
+47         
+48         %if %length(&Dropped) eq 0 %then %do;
+49         %put The parameter 'Dropped' is required - WaterFall 3D Macro Terminated.;
+50         %goto finished;
+51         %end;
+52         
+53         %if %length(&Group) eq 0 %then %do;
+54         %put The parameter 'Group' is required - WaterFall 3D Macro Terminated.;
+55         %goto finished;
+56         %end;
+57         
+58         %if %length(&Code) eq 0 %then %do;
+59         %put The parameter 'Code' is required - WaterFall 3D Macro Terminated.;
+60         %goto finished;
+                                                           The SAS System
+
+61         %end;
+62         
+63         %if &xFac > 4 %then %let xFac=4;
+64         %if &xFac < 0.5 %then %let xFac=0.5;
+65         
+66         %let A=&Tilt;
+67         %if &Tilt > 80 %then %let A=80;
+68         %if &Tilt < 60 %then %let A=60;
+69         
+70         %let B=0;
+71         
+72         %let C=&Rotate;
+73         %if &Rotate > -15 %then %let C=-15;
+74         %if &Rotate < -75 %then %let C=-75;
+75         
+76         /*--Define walls and axes in the unit space including xFac for stretching the x-axis--*/
+77         data Wall_Axes;
+78           length id $8 wgroup $1;
+79           dx=&xFac;
+80           id='X1-Axis'; wgroup='D'; xw=-dx; yw=-1; zw=-1; xw2= dx; yw2=-1; zw2=-1; xl=0; yl=-1; zl=-1.1; label=1; output;
+81           id='X3-Axis'; wgroup='L'; xw=-dx; yw=-1; zw= 1; xw2= dx; yw2=-1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+82           id='X4-Axis'; wgroup='D'; xw=-dx; yw= 1; zw= 1; xw2= dx; yw2= 1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+83           id='Y2-Axis'; wgroup='D'; xw=-dx; yw=-1; zw= 1; xw2=-dx; yw2= 1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+84           id='Y3-Axis'; wgroup='D'; xw= dx; yw=-1; zw=-1; xw2= dx; yw2= 1; zw2=-1; xl=dx+0.1; yl= 0; zl=-0.1; label=2; output;
+85           id='Y4-Axis'; wgroup='L'; xw= dx; yw=-1; zw= 1; xw2= dx; yw2= 1; zw2= 1; xl=.; yl=.; zl=.;   label=.; output;
+86           id='Z1-Axis'; wgroup='D'; xw=-dx; yw=-1; zw=-1; xw2=-dx; yw2=-1; zw2= 1; xl=-dx; yl=-1.2; zl=0;  label=3; output;
+87           id='Z2-Axis'; wgroup='L'; xw= dx; yw=-1; zw=-1; xw2= dx; yw2=-1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+88           id='Z4-Axis'; wgroup='D'; xw= dx; yw= 1; zw=-1; xw2= dx; yw2= 1; zw2= 1; xl=.; yl= .; zl= .;   label=.; output;
+89           call missing(xw2, yw2, zw2, xl, yl, zl, label);
+90           id='Back';   wgroup='D'; xw=-dx; yw=-1; zw=-1; output;
+91           id='Back';   wgroup='D'; xw=-dx; yw= 1; zw=-1; output;
+92           id='Back';   wgroup='D'; xw=-dx; yw= 1; zw= 1; output;
+93           id='Back';   wgroup='D'; xw=-dx; yw=-1; zw= 1; output;
+94           id='Right';  wgroup='D'; xw=-dx; yw= 1; zw=-1; output;
+95           id='Right';  wgroup='D'; xw= dx; yw= 1; zw=-1; output;
+96           id='Right';  wgroup='D'; xw= dx; yw= 1; zw= 1; output;
+97           id='Right';  wgroup='D'; xw=-dx; yw= 1; zw= 1; output;
+98           id='Bottom'; wgroup='D'; xw=-dx; yw=-1; zw=-1; output;
+99           id='Bottom'; wgroup='D'; xw= dx; yw=-1; zw=-1; output;
+100          id='Bottom'; wgroup='D'; xw= dx; yw= 1; zw=-1; output;
+101          id='Bottom'; wgroup='D'; xw=-dx; yw= 1; zw=-1; output;
+102          id='Center'; wgroup='D'; xw=-dx; yw=-1; zw=-0; output;
+103          id='Center'; wgroup='D'; xw= dx; yw=-1; zw=-0; output;
+104          id='Center'; wgroup='D'; xw= dx; yw= 1; zw=-0; output;
+105          id='Center'; wgroup='D'; xw=-dx; yw= 1; zw=-0; output;
+106        run;
+107        
+108        /*--Project the walls and axes--*/
+109        data projected_walls;
+110          keep id wgroup xw yw zw xw2 yw2 zw2 xl yl zl lbx lby lbz label;
+111          array u[4,4]  _temporary_;  /*--Intermediate Matrix--*/
+112          array v[4,4]  _temporary_;  /*--Intermediate Matrix--*/
+113          array w[4,4]  _temporary_;  /*--Final View Matrix--*/
+114          array m[4,4]  _temporary_;  /*--Projection Matrix--*/
+115          array rx[4,4] _temporary_;  /*--X rotation Matrix--*/
+116          array ry[4,4] _temporary_;  /*--Y rotation Matrix--*/
+117          array rz[4,4] _temporary_;  /*--Z rotation Matrix--*/
+118          array d[4,1]  _temporary_;  /*--World Data Array --*/
+                                                           The SAS System
+
+119          array p[4,1]  _temporary_;  /*--Projected Data Array --*/
+120          retain r t f n;
+121          r=1; t=1; f=1; n=-1;
+122          pi=constant("PI");
+123          fac=pi/180;
+124          A=&A*fac; B=&B*fac; C=&C*fac;
+125        
+126          /*--Set up projection matrix--*/
+127          m[1,1]=1/r;   m[1,2]=0.0;  m[1,3]=0.0;      m[1,4]=0.0;
+128          m[2,1]=0.0;   m[2,2]=1/t;  m[2,3]=0.0;      m[2,4]=0.0;
+129          m[3,1]=0.0;   m[3,2]=0.0;  m[3,3]=-2/(f-n); m[3,4]=-(f+n)/(f-n);
+130          m[4,1]=0.0;   m[4,2]=0.0;  m[4,3]=0.0;      m[4,4]=1.0;
+131        
+132          /*--Set up X rotation matrix--*/
+133          rx[1,1]=1;     rx[1,2]=0.0;     rx[1,3]=0.0;      rx[1,4]=0.0;
+134          rx[2,1]=0.0;   rx[2,2]=cos(A);  rx[2,3]=-sin(A);  rx[2,4]=0.0;
+135          rx[3,1]=0.0;   rx[3,2]=sin(A);  rx[3,3]=cos(A);   rx[3,4]=0.0;
+136          rx[4,1]=0.0;   rx[4,2]=0.0;     rx[4,3]=0.0;      rx[4,4]=1.0;
+137        
+138          /*--Set up Y rotation matrix--*/
+139          ry[1,1]=cos(B);  ry[1,2]=0.0;  ry[1,3]=sin(B);  ry[1,4]=0.0;
+140          ry[2,1]=0.0;     ry[2,2]=1.0;  ry[2,3]=0.0;     ry[2,4]=0.0;
+141          ry[3,1]=-sin(B); ry[3,2]=0.0;  ry[3,3]=cos(B);  ry[3,4]=0.0;
+142          ry[4,1]=0.0;     ry[4,2]=0.0;  ry[4,3]=0.0;     ry[4,4]=1.0;
+143        
+144          /*--Set up Z rotation matrix--*/
+145          rz[1,1]=cos(C);  rz[1,2]=-sin(C); rz[1,3]=0.0;  rz[1,4]=0.0;
+146          rz[2,1]=sin(C);  rz[2,2]=cos(C);  rz[2,3]=0.0;  rz[2,4]=0.0;
+147          rz[3,1]=0.0;     rz[3,2]=0.0;     rz[3,3]=1.0;  rz[3,4]=0.0;
+148          rz[4,1]=0.0;     rz[4,2]=0.0;     rz[4,3]=0.0;  rz[4,4]=1.0;
+149        
+150          /*--Build transform matris--*/
+151          call MatMult(rz, m, u);
+152          call MatMult(ry, u, v);
+153          call MatMult(rx, v, w);
+154        
+155          set Wall_Axes;
+156        
+157          /*--Set axis labels--*/
+158          if label eq 1 then lbx="&Lblx";
+159          if label eq 2 then lby="&Lbly";
+160          if label eq 3 then lbz="&Lblz";
+161        
+162          /*--Transform walls--*/
+163          d[1,1]=xw; d[2,1]=yw; d[3,1]=zw; d[4,1]=1;
+164          call MatMult(w, d, p);
+165          xw=p[1,1]; yw=p[2,1]; zw=p[3,1];
+166        
+167          /*--Transform axes--*/
+168          d[1,1]=xw2; d[2,1]=yw2; d[3,1]=zw2; d[4,1]=1;
+169          call MatMult(w, d, p);
+170          xw2=p[1,1]; yw2=p[2,1]; zw2=p[3,1];
+171        
+172          /*--Transform labels--*/
+173          d[1,1]=xl; d[2,1]=yl; d[3,1]=zl; d[4,1]=1;
+174          call MatMult(w, d, p);
+175          xl=p[1,1]; yl=p[2,1]; zl=p[3,1];
+176        run;
+                                                           The SAS System
+
+177        
+178        /*--Compute slope of X & Y axes after transformation for label angle--*/
+179        data _null_;
+180          fac=sqrt(&xFac);
+181          set projected_walls;
+182          dx=xw2-xw;
+183          if id='X1-Axis' then do;
+184        	if abs(dx) > 0.001 then xaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+185        	else xaxisRot=90;
+186        	call symput ("xaxisRot", xaxisRot);
+187          end;
+188          if id='Y3-Axis' then do;
+189        	if abs(dx) > 0.001 then yaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+190        	else yaxisRot=90;
+191        	 call symput ("yaxisRot", yaxisRot);
+192          end;
+193        run;
+194        
+195        /*--Find min & max for Duration and Response--*/
+196        data _null_;
+197          retain durmin 1e6 durmax -1e6 resmin 1e6 resmax -1e6;
+198          set &Data end=last;
+199        
+200          durmin=min(durmin, &Duration);
+201          durmax=max(durmax, &Duration);
+202        
+203          resmin=min(resmin, &Response);
+204          resmax=max(resmax, &Response);
+205        
+206          if last then do;
+207            call symput ("DurMin", durmin);
+208        	call symput ("DurMax", durmax);
+209            call symput ("ResMin", resmin);
+210        	call symput ("ResMax", resmax);
+211          end;
+212        run;
+213        
+214        /*--Create all data from input waterfall data (not in unit coordinates)--*/
+215        data polygons;
+216          retain pid 0 maxy -1e6 miny 1e6 maxz -1e6 minz 1e6;
+217          set &Data end=last;
+218        
+219          durfac=1.05;
+220          resfac=1.05;
+221          dx=&xFac;
+222          i=_n_-1;
+223        
+224          /*--Max range for Duration and Response--*/
+225          aResMax=resfac*max(abs(&ResMax), abs(&ResMin));
+226          aDurMax=durfac*max(abs(&DurMax), abs(&DurMin));
+227        
+228          /*--Create bars in z=0 plane for Duration--*/
+229          Lid=.;
+230        
+231          type='Duration';
+232          pid+1;
+233          z=0;
+234        
+                                                           The SAS System
+
+235          x=dx*(i-0.5-0.4); y=0; output;
+236          x=x;              y=&Duration; output;
+237          x=dx*(i-0.5+0.4); y=y; output;
+238          x=x;              y=0; output;
+239        
+240          /*--Create bars in y=0 plane for Response--*/
+241          type='Response';
+242          pid+1;
+243          y=0;
+244        
+245          x=dx*(i-0.5-0.4); z=0; output;
+246          x=x;              z=&Response; output;
+247          x=dx*(i-0.5+0.4); z=z; output;
+248          x=x;              z=0; output;
+249        
+250          /*--Create diamond polygons for dropped subjects--*/
+251          if Dropped then do;
+252            pid+1;
+253            z=0;
+254        
+255            type='Dropped';
+256            x=dx*(i-0.5-0.3); y=&Duration-0.03*&DurMax; output;
+257            x=dx*(i-0.5);     y=&Duration; output;
+258            x=dx*(i-0.5+0.3); y=&Duration-0.03*&DurMax; output;
+259            x=dx*(i-0.5);     y=&Duration-0.06*&DurMax; output;
+260          end;
+261        
+262          /*--Save XMax value for bars--*/
+263          xMax=dx*(i);
+264        
+265          /*--Create code locations--*/
+266          type='Code';
+267          x=dx*(i-0.5);
+268          z=ifn(&Response < 0, &Response, 0);
+269          y=0;
+270          output;
+271        
+272          /*--Create two more polygons to set aspect--*/
+273          if last then do;
+274            call missing (&duration, &response, &Code);
+275        	type='Response';
+276            pid+1;
+277            x=-dx; y=0; z=-aResMax; output;
+278            x=-dx; y=0; z= aResMax; output;
+279        
+280            pid+1;
+281        	type='Duration';
+282            x=-dx; y=0;       z=aResMax; output;
+283            x=-dx; y=aDurMax; z=aResMax; output;
+284        
+285            /*--Create Y axis (Duration) grid--*/
+286        	pid=.;
+287            type='Y-Axis';
+288        	Lid=1;
+289        	z=0;
+290            do y=0 to aDurMax by 10;
+291        	  x=-dx; output;
+292              x=xMax; output;
+                                                           The SAS System
+
+293        	  Lid+1;
+294        	end;
+295        
+296            /*--Create Y axis (Duration) tick values--*/
+297            type='Y-Values';
+298        	Lid=.;
+299        	z=0;
+300            do y=0 to aDurMax by 10;
+301              x=xMax;
+302        	  yTickVal=y;
+303        	  output;
+304        	end;
+305        
+306            /*--Create Z axis (Vertical Response) tick values--*/
+307            type='Z-Values';
+308        	yTickVal=.;
+309        	Lid=.;
+310        	y=0;
+311        	x=dx*(-1);
+312            do z=-10 to -aResMax by -10;
+313        	  zTickVal=z;
+314        	  output;
+315        	end;
+316            do z=0 to aResMax by 10;
+317        	  zTickVal=z;
+318        	  output;
+319        	end;
+320          end;
+321        run;
+322        
+323        /*ods html;*/
+324        /*proc print data=polygons;*/
+325        /*var type pid x y z code Lid yTickVal zTickVal;*/
+326        /*run;*/
+327        /*ods html close;*/
+328        
+329        /*--Compute data ranges--*/
+330        data _null_;
+331          retain xmin 1e10 xmax -1e10 ymin 1e10 ymax -1e10 zmin 1e10 zmax -1e10;
+332          set polygons end=last;
+333          xmin=min(xmin, x);
+334          xmax=max(xmax, x);
+335          ymin=min(ymin, y);
+336          ymax=max(ymax, y);
+337          zmin=min(zmin, z);
+338          zmax=max(zmax, z);
+339          if last then do;
+340            call symput("xmin", xmin); call symput("xmax", xmax);
+341        	call symput("ymin", ymin); call symput("ymax", ymax);
+342        	call symput("zmin", zmin); call symput("zmax", zmax);
+343          end;
+344        run;
+345        
+346        /*%put "xmin=&xmin xmax=&xmax ymin=&ymin ymax=&ymax zmin=&zmin zmax=&zmax";*/
+347        
+348        
+349        /*--Normalize the data to -1 to +1 ranges with xFac for stretching in x direction--*/
+350        data normalized;
+                                                           The SAS System
+
+351          keep &Group pid type x y z code Lid YTickVal zTickVal;
+352          xrange=&xmax-&xmin;
+353          yrange=&ymax-&ymin;
+354          zrange=&zmax-&zmin;
+355          set polygons;
+356        
+357          /*--data points--*/
+358          x=2*&xFac *(x-&xmin)/xrange -&xFac;
+359          y=2*(y-&ymin)/yrange -1;
+360          z=2*(z-&zmin)/zrange -1;
+361        run;
+362        
+363        /*ods html;*/
+364        /*proc print data=normalized;run;*/
+365        /*ods html close;*/
+366        
+367        /*--Project the data--*/
+368        data projected_data;
+369          keep  &Group pid type xd yd zd xr yr zr xc yc zc code xcode ycode zcode
+370                Lid xAy yAy zAy xAz yAz zAz xYv yYv yTickVal xZv yZv zTickVal;
+371          array u[4,4] _temporary_;  /*--Intermediate Matrix--*/
+372          array v[4,4] _temporary_;  /*--Intermediate Matrix--*/
+373          array w[4,4] _temporary_;  /*--Final View Matrix--*/
+374          array m[4,4] _temporary_;  /*--Projection Matrix--*/
+375          array rx[4,4] _temporary_; /*--X rotation Matrix--*/
+376          array ry[4,4] _temporary_; /*--Y rotation Matrix--*/
+377          array rz[4,4] _temporary_; /*--Z rotation Matrix--*/
+378          array d[4,1] _temporary_;  /*--World Data Array --*/
+379          array p[4,1] _temporary_;  /*--Projected Data Array --*/
+380          retain r t f n;
+381          r=1; t=1; f=1; n=-1;
+382          pi=constant("PI");
+383          fac=pi/180;
+384        
+385          A=&A*fac; B=&B*fac; C=&C*fac;
+386        
+387          /*--Set up projection matrix--*/
+388          m[1,1]=1/r;   m[1,2]=0.0;  m[1,3]=0.0;      m[1,4]=0.0;
+389          m[2,1]=0.0;   m[2,2]=1/t;  m[2,3]=0.0;      m[2,4]=0.0;
+390          m[3,1]=0.0;   m[3,2]=0.0;  m[3,3]=-2/(f-n); m[3,4]=-(f+n)/(f-n);
+391          m[4,1]=0.0;   m[4,2]=0.0;  m[4,3]=0.0;      m[4,4]=1.0;
+392        
+393          /*--Set up X rotation matrix--*/
+394          rx[1,1]=1;     rx[1,2]=0.0;     rx[1,3]=0.0;      rx[1,4]=0.0;
+395          rx[2,1]=0.0;   rx[2,2]=cos(A);  rx[2,3]=-sin(A);  rx[2,4]=0.0;
+396          rx[3,1]=0.0;   rx[3,2]=sin(A);  rx[3,3]=cos(A);   rx[3,4]=0.0;
+397          rx[4,1]=0.0;   rx[4,2]=0.0;     rx[4,3]=0.0;      rx[4,4]=1.0;
+398        
+399          /*--Set up Y rotation matrix--*/
+400          ry[1,1]=cos(B);  ry[1,2]=0.0;  ry[1,3]=sin(B);  ry[1,4]=0.0;
+401          ry[2,1]=0.0;     ry[2,2]=1.0;  ry[2,3]=0.0;     ry[2,4]=0.0;
+402          ry[3,1]=-sin(B); ry[3,2]=0.0;  ry[3,3]=cos(B);  ry[3,4]=0.0;
+403          ry[4,1]=0.0;     ry[4,2]=0.0;  ry[4,3]=0.0;     ry[4,4]=1.0;
+404        
+405          /*--Set up Z rotation matrix--*/
+406          rz[1,1]=cos(C);  rz[1,2]=-sin(C); rz[1,3]=0.0;  rz[1,4]=0.0;
+407          rz[2,1]=sin(C);  rz[2,2]=cos(C);  rz[2,3]=0.0;  rz[2,4]=0.0;
+408          rz[3,1]=0.0;     rz[3,2]=0.0;     rz[3,3]=1.0;  rz[3,4]=0.0;
+                                                           The SAS System
+
+409          rz[4,1]=0.0;     rz[4,2]=0.0;     rz[4,3]=0.0;  rz[4,4]=1.0;
+410        
+411          /*--Build transform matris--*/
+412          call MatMult(rz, m, u);
+413          call MatMult(ry, u, v);
+414          call MatMult(rx, v, w);
+415        
+416          set normalized;
+417        
+418          /*--Transform coordinates--*/
+419          d[1,1]=x; d[2,1]=y; d[3,1]=z; d[4,1]=1;
+420          call MatMult(w, d, p);
+421        
+422          /*--extract data for Duration polygons--*/
+423          if type='Duration' then do;
+424            xd=p[1,1]; yd=p[2,1]; zd=p[3,1]; wd=p[4,1];
+425          end;
+426        
+427          /*--extract data for Response polygons--*/
+428          else if type='Response' then do;
+429            xr=p[1,1]; yr=p[2,1]; zr=p[3,1]; wr=p[4,1];
+430          end;
+431        
+432          /*--extract data for Dropped polygons--*/
+433          else if type='Dropped' then do;
+434            xc=p[1,1]; yc=p[2,1]; zc=p[3,1]; wc=p[4,1];
+435          end;
+436        
+437          /*--extract data for Code position--*/
+438          else if type='Code' then do;
+439            xcode=p[1,1]; ycode=p[2,1]; zcode=p[3,1]; wcode=p[4,1];
+440          end;
+441        
+442          /*--extract data for y-axis grid lines--*/
+443          else if type='Y-Axis' then do;
+444            xAy=p[1,1]; yAy=p[2,1]; zAy=p[3,1]; wAy=p[4,1];
+445          end;
+446        
+447          /*--extract data for y-axis tick values--*/
+448          else if type='Y-Values' then do;
+449            xYv=p[1,1]; yYv=p[2,1]; zYv=p[3,1]; wYv=p[4,1];
+450          end;
+451        
+452          /*--extract data for z-axis tick values--*/
+453          else if type='Z-Values' then do;
+454            xZv=p[1,1]; yZv=p[2,1]; zZv=p[3,1]; wZv=p[4,1];
+455          end;
+456        run;
+457        /**/
+458        /*proc print data=projected_data;run;*/
+459        
+460        /*--Combine data with walls--*/
+461        data combined;
+462          merge projected_walls projected_data;
+463        run;
+464        
+465        /*proc print data=combined;*/
+466        /*var type pid Lid xAy yAy zAy xZv yZv zTickVal;*/
+                                                           The SAS System
+
+467        /*run;*/
+468        title;
+469        /*--Draw the graph--*/
+470        %if %length(&Title) > 0 %then %do;
+471        title h=12pt "&Title";
+472        %end;
+473        footnote j=l  h=5pt italic "X-Rotation=&A  Y-Rotation=&B  Z-Rotation=&C";
+474        proc sgplot data=combined nowall  noborder aspect=1 noautolegend dattrmap=&attrmap;
+475          /*--Walls and axis lines--*/
+476          polygon id=id x=xw y=yw / fill lineattrs=(color=lightgray) group=id transparency=0 attrid=walls;
+477        
+478          /*--Y-Axis gridlines--*/
+479          series x=xAy y=yAy / group=lid lineattrs=(color=cxb0b0b0 pattern=solid);
+480        
+481          /*--Duration Bars--*/
+482          polygon id=pid x=xd y=yd / fill outline dataskin=sheen fillattrs=graphdata1 name='D' legendlabel='Duration'
+483                  lineattrs=(color=black);
+484        
+485          /*--Drop Markers--*/
+486          polygon id=pid x=xc y=yc / fill  dataskin=none fillattrs=(color=gold)  name='C' legendlabel='Drop';
+487        
+488          /*--Response Bars--*/
+489          polygon id=pid x=xr y=yr / fill outline  dataskin=none name='R' legendlabel='Response'
+490                  group=&Group lineattrs=(color=black) attrid=Resp dataskin=sheen;
+491        
+492          /*--Solid and dashed Axis Lines--*/
+493          vector x=xw2 y=yw2 / xorigin=xw yorigin=yw group=wgroup noarrowheads attrid=Axes;
+494        
+495          /*--Axis Labels--*/
+496          text x=xl y=yl text=lbx / position=bottomleft rotate=&xaxisRot textattrs=(size=5);
+497          text x=xl y=yl text=lby / position=bottom rotate=&yaxisRot textattrs=(size=5);
+498          text x=xl y=yl text=lbz / position=left rotate=90 position=top textattrs=(size=5);
+499        
+500          /*--Y-Axis tick values--*/
+501          text x=xYv y=yYv text=yTickVal / position=bottomright textattrs=(size=4);
+502        
+503          /*--Z-Axis tick values--*/
+504          text x=xZv y=yZv text=zTickVal / position=left textattrs=(size=4);
+505          scatter x=xZv y=yZv / markerattrs=(size=2 symbol=dot);
+506        
+507          /*--Code Labels--*/
+508          text x=xcode y=ycode text=code / position=left rotate=90 textattrs=(size=4);
+509        /*  scatter x=xcode y=ycode / markerattrs=(size=3);*/
+510        
+511          keylegend 'R' 'C' / type=fillcolor title='CC-122' across=1 location=inside position=bottomright
+512                     fillheight=5px fillaspect=1.5 titleattrs=(size=5) valueattrs=(size=5) opaque;
+513        
+514          xaxis display=none offsetmin=0.05 offsetmax=0.05;
+515          yaxis display=none offsetmin=0.05 offsetmax=0.05;
+516        
+517          run;
+518        footnote;
+519        
+520        %finished:
+521        %mend WaterFall_3D_Macro;
+522        
+523        
+524        
+                                                           The SAS System
+
+525        /* benchmark driver: the program only defines %WaterFall_3D_Macro. Its companions from the same SGF 2019 folder
+526           (programs/sas/macros/sgf2019-matange) compile the FCMP matrix routines and build the tumor data, attribute map
+527           and the three example calls. */
+528        %include "&root./programs/sas/macros/sgf2019-matange/Matrix_Functions.sas";
+NOTE: No CMP or C functions found in library sasuser.funcs.
+
+NOTE: Function MatIdent saved to sasuser.funcs.mat.
+NOTE: Function MatMult saved to sasuser.funcs.mat.
+NOTE: Function MatInv saved to sasuser.funcs.mat.
+NOTE: PROCEDURE FCMP used (Total process time):
+      real time           0.14 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.06 seconds
+      memory              1373.87k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        2  Switch Count  0
+      
+
+550        %include "&root./programs/sas/macros/sgf2019-matange/WaterFall_3D.sas";
+NOTE: Format RES has been output.
+
+NOTE: PROCEDURE FORMAT used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              151.71k
+      OS Memory           11092.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        3  Switch Count  0
+      
+
+
+NOTE: The data set WORK.TUMOR has 20 observations and 8 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              770.37k
+      OS Memory           11092.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        4  Switch Count  0
+      
+
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.TUMOR has 20 observations and 8 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1216.34k
+      OS Memory           12124.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        5  Switch Count  0
+      
+
+                                                           The SAS System
+
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: The data set WORK.TUMORSORTED has 20 observations and 9 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              909.00k
+      OS Memory           11348.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        6  Switch Count  0
+      
+
+
+NOTE: The data set WORK.ATTRMAP has 12 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              737.21k
+      OS Memory           11092.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        7  Switch Count  0
+      
+
+MLOGIC(WATERFALL_3D_MACRO):  Beginning execution.
+MLOGIC(WATERFALL_3D_MACRO):  Parameter DATA has value tumor
+MLOGIC(WATERFALL_3D_MACRO):  Parameter DURATION has value Duration
+MLOGIC(WATERFALL_3D_MACRO):  Parameter RESPONSE has value response
+MLOGIC(WATERFALL_3D_MACRO):  Parameter DROPPED has value dropped
+MLOGIC(WATERFALL_3D_MACRO):  Parameter GROUP has value Drug
+MLOGIC(WATERFALL_3D_MACRO):  Parameter CODE has value Code
+MLOGIC(WATERFALL_3D_MACRO):  Parameter ATTRMAP has value attrmap
+MLOGIC(WATERFALL_3D_MACRO):  Parameter LBLX has value Subject
+MLOGIC(WATERFALL_3D_MACRO):  Parameter LBLY has value Duration of Treatment in Days
+MLOGIC(WATERFALL_3D_MACRO):  Parameter LBLZ has value Tumor Lesion Best Change
+MLOGIC(WATERFALL_3D_MACRO):  Parameter XFAC has value 1.0
+MLOGIC(WATERFALL_3D_MACRO):  Parameter TILT has value 75
+MLOGIC(WATERFALL_3D_MACRO):  Parameter ROTATE has value -45
+MLOGIC(WATERFALL_3D_MACRO):  Parameter TITLE has value Tumor Response and Duration
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Data) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Duration) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Response) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Dropped) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Group) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Code) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &xFac > 4 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &xFac < 0.5 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %LET (variable name is A)
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Tilt > 80 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Tilt < 60 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %LET (variable name is B)
+MLOGIC(WATERFALL_3D_MACRO):  %LET (variable name is C)
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Rotate > -15 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Rotate < -75 is FALSE
+MPRINT(WATERFALL_3D_MACRO):   data Wall_Axes;
+MPRINT(WATERFALL_3D_MACRO):   length id $8 wgroup $1;
+MPRINT(WATERFALL_3D_MACRO):   dx=1.0;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   id='X1-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   xl=0;
+MPRINT(WATERFALL_3D_MACRO):   yl=-1;
+MPRINT(WATERFALL_3D_MACRO):   zl=-1.1;
+MPRINT(WATERFALL_3D_MACRO):   label=1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='X3-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='L';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='X4-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Y2-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Y3-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   xl=dx+0.1;
+MPRINT(WATERFALL_3D_MACRO):   yl= 0;
+MPRINT(WATERFALL_3D_MACRO):   zl=-0.1;
+MPRINT(WATERFALL_3D_MACRO):   label=2;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Y4-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='L';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl=.;
+MPRINT(WATERFALL_3D_MACRO):   zl=.;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Z1-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yl=-1.2;
+MPRINT(WATERFALL_3D_MACRO):   zl=0;
+MPRINT(WATERFALL_3D_MACRO):   label=3;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Z2-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='L';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Z4-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   call missing(xw2, yw2, zw2, xl, yl, zl, label);
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: The data set WORK.WALL_AXES has 25 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              763.62k
+      OS Memory           11604.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        8  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data projected_walls;
+MPRINT(WATERFALL_3D_MACRO):   keep id wgroup xw yw zw xw2 yw2 zw2 xl yl zl lbx lby lbz label;
+MPRINT(WATERFALL_3D_MACRO):   array u[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array v[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array w[4,4] _temporary_;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   array m[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rx[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array ry[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rz[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array d[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array p[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   retain r t f n;
+MPRINT(WATERFALL_3D_MACRO):   r=1;
+MPRINT(WATERFALL_3D_MACRO):   t=1;
+MPRINT(WATERFALL_3D_MACRO):   f=1;
+MPRINT(WATERFALL_3D_MACRO):   n=-1;
+MPRINT(WATERFALL_3D_MACRO):   pi=constant("PI");
+MPRINT(WATERFALL_3D_MACRO):   fac=pi/180;
+MPRINT(WATERFALL_3D_MACRO):   A=75*fac;
+MPRINT(WATERFALL_3D_MACRO):   B=0*fac;
+MPRINT(WATERFALL_3D_MACRO):   C=-45*fac;
+MPRINT(WATERFALL_3D_MACRO):   m[1,1]=1/r;
+MPRINT(WATERFALL_3D_MACRO):   m[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,2]=1/t;
+MPRINT(WATERFALL_3D_MACRO):   m[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,3]=-2/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[3,4]=-(f+n)/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,2]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,3]=-sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,2]=sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,3]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,1]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,3]=sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,2]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,1]=-sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,2]=0.0;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   ry[3,3]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,1]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,2]=-sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,1]=sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,2]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,3]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rz, m, u);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(ry, u, v);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rx, v, w);
+MPRINT(WATERFALL_3D_MACRO):   set Wall_Axes;
+MPRINT(WATERFALL_3D_MACRO):   if label eq 1 then lbx="Subject";
+MPRINT(WATERFALL_3D_MACRO):   if label eq 2 then lby="Duration of Treatment in Days";
+MPRINT(WATERFALL_3D_MACRO):   if label eq 3 then lbz="Tumor Lesion Best Change";
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=xw;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=yw;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=zw;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   xw=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yw=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zw=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=xw2;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=yw2;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=zw2;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   xw2=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yw2=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zw2=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=xl;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=yl;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=zl;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   xl=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yl=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zl=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 25 observations read from the data set WORK.WALL_AXES.
+NOTE: The data set WORK.PROJECTED_WALLS has 25 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+                                                           The SAS System
+
+      real time           0.08 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.04 seconds
+      memory              1706.15k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        9  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data _null_;
+MPRINT(WATERFALL_3D_MACRO):   fac=sqrt(1.0);
+MPRINT(WATERFALL_3D_MACRO):   set projected_walls;
+MPRINT(WATERFALL_3D_MACRO):   dx=xw2-xw;
+MPRINT(WATERFALL_3D_MACRO):   if id='X1-Axis' then do;
+MPRINT(WATERFALL_3D_MACRO):   if abs(dx) > 0.001 then xaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+MPRINT(WATERFALL_3D_MACRO):   else xaxisRot=90;
+MPRINT(WATERFALL_3D_MACRO):   call symput ("xaxisRot", xaxisRot);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   if id='Y3-Axis' then do;
+MPRINT(WATERFALL_3D_MACRO):   if abs(dx) > 0.001 then yaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+MPRINT(WATERFALL_3D_MACRO):   else yaxisRot=90;
+MPRINT(WATERFALL_3D_MACRO):   call symput ("yaxisRot", yaxisRot);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      646:22    646:181   
+NOTE: Missing values were generated as a result of performing an operation on missing values.
+      Each place is given by: (Number of times) at (Line):(Column).
+      16 at 914:132   
+NOTE: There were 25 observations read from the data set WORK.PROJECTED_WALLS.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              923.34k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 03:59:28 PM
+      Step Count                        10  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data _null_;
+MPRINT(WATERFALL_3D_MACRO):   retain durmin 1e6 durmax -1e6 resmin 1e6 resmax -1e6;
+MPRINT(WATERFALL_3D_MACRO):   set tumor end=last;
+MPRINT(WATERFALL_3D_MACRO):   durmin=min(durmin, Duration);
+MPRINT(WATERFALL_3D_MACRO):   durmax=max(durmax, Duration);
+MPRINT(WATERFALL_3D_MACRO):   resmin=min(resmin, response);
+MPRINT(WATERFALL_3D_MACRO):   resmax=max(resmax, response);
+MPRINT(WATERFALL_3D_MACRO):   if last then do;
+MPRINT(WATERFALL_3D_MACRO):   call symput ("DurMin", durmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput ("DurMax", durmax);
+MPRINT(WATERFALL_3D_MACRO):   call symput ("ResMin", resmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput ("ResMax", resmax);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      646:229   646:13    646:49    646:82    
+                                                           The SAS System
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              908.21k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 03:59:29 PM
+      Step Count                        11  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data polygons;
+MPRINT(WATERFALL_3D_MACRO):   retain pid 0 maxy -1e6 miny 1e6 maxz -1e6 minz 1e6;
+MPRINT(WATERFALL_3D_MACRO):   set tumor end=last;
+MPRINT(WATERFALL_3D_MACRO):   durfac=1.05;
+MPRINT(WATERFALL_3D_MACRO):   resfac=1.05;
+MPRINT(WATERFALL_3D_MACRO):   dx=1.0;
+MPRINT(WATERFALL_3D_MACRO):   i=_n_-1;
+MPRINT(WATERFALL_3D_MACRO):   aResMax=resfac*max(abs(29.397788709), abs(-52.68726998));
+MPRINT(WATERFALL_3D_MACRO):   aDurMax=durfac*max(abs(45.513307348), abs(1.5047965578));
+MPRINT(WATERFALL_3D_MACRO):   Lid=.;
+MPRINT(WATERFALL_3D_MACRO):   type='Duration';
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5-0.4);
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   y=Duration;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5+0.4);
+MPRINT(WATERFALL_3D_MACRO):   y=y;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   type='Response';
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5-0.4);
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   z=response;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5+0.4);
+MPRINT(WATERFALL_3D_MACRO):   z=z;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   if Dropped then do;
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   type='Dropped';
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5-0.3);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration-0.03*45.513307348;
+MPRINT(WATERFALL_3D_MACRO):   output;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5+0.3);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration-0.03*45.513307348;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration-0.06*45.513307348;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   xMax=dx*(i);
+MPRINT(WATERFALL_3D_MACRO):   type='Code';
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5);
+MPRINT(WATERFALL_3D_MACRO):   z=ifn(response < 0, response, 0);
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   if last then do;
+MPRINT(WATERFALL_3D_MACRO):   call missing (Duration, response, Code);
+MPRINT(WATERFALL_3D_MACRO):   type='Response';
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   z=-aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   z= aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   type='Duration';
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   z=aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=aDurMax;
+MPRINT(WATERFALL_3D_MACRO):   z=aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   pid=.;
+MPRINT(WATERFALL_3D_MACRO):   type='Y-Axis';
+MPRINT(WATERFALL_3D_MACRO):   Lid=1;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   do y=0 to aDurMax by 10;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=xMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   Lid+1;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   type='Y-Values';
+MPRINT(WATERFALL_3D_MACRO):   Lid=.;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   do y=0 to aDurMax by 10;
+MPRINT(WATERFALL_3D_MACRO):   x=xMax;
+MPRINT(WATERFALL_3D_MACRO):   yTickVal=y;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   type='Z-Values';
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   yTickVal=.;
+MPRINT(WATERFALL_3D_MACRO):   Lid=.;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(-1);
+MPRINT(WATERFALL_3D_MACRO):   do z=-10 to -aResMax by -10;
+MPRINT(WATERFALL_3D_MACRO):   zTickVal=z;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   do z=0 to aResMax by 10;
+MPRINT(WATERFALL_3D_MACRO):   zTickVal=z;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: The data set WORK.POLYGONS has 230 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              930.68k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 03:59:29 PM
+      Step Count                        12  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data _null_;
+MPRINT(WATERFALL_3D_MACRO):   retain xmin 1e10 xmax -1e10 ymin 1e10 ymax -1e10 zmin 1e10 zmax -1e10;
+MPRINT(WATERFALL_3D_MACRO):   set polygons end=last;
+MPRINT(WATERFALL_3D_MACRO):   xmin=min(xmin, x);
+MPRINT(WATERFALL_3D_MACRO):   xmax=max(xmax, x);
+MPRINT(WATERFALL_3D_MACRO):   ymin=min(ymin, y);
+MPRINT(WATERFALL_3D_MACRO):   ymax=max(ymax, y);
+MPRINT(WATERFALL_3D_MACRO):   zmin=min(zmin, z);
+MPRINT(WATERFALL_3D_MACRO):   zmax=max(zmax, z);
+MPRINT(WATERFALL_3D_MACRO):   if last then do;
+MPRINT(WATERFALL_3D_MACRO):   call symput("xmin", xmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput("xmax", xmax);
+MPRINT(WATERFALL_3D_MACRO):   call symput("ymin", ymin);
+MPRINT(WATERFALL_3D_MACRO):   call symput("ymax", ymax);
+MPRINT(WATERFALL_3D_MACRO):   call symput("zmin", zmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput("zmax", zmax);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      646:149   646:176   646:204   646:231   646:10    646:37    
+NOTE: There were 230 observations read from the data set WORK.POLYGONS.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              914.46k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 03:59:29 PM
+      Step Count                        13  Switch Count  0
+      
+                                                           The SAS System
+
+
+MPRINT(WATERFALL_3D_MACRO):   data normalized;
+MPRINT(WATERFALL_3D_MACRO):   keep Drug pid type x y z code Lid YTickVal zTickVal;
+MPRINT(WATERFALL_3D_MACRO):   xrange= 19- -1;
+MPRINT(WATERFALL_3D_MACRO):   yrange=47.788972715- 0;
+MPRINT(WATERFALL_3D_MACRO):   zrange=55.321633479--55.32163348;
+MPRINT(WATERFALL_3D_MACRO):   set polygons;
+MPRINT(WATERFALL_3D_MACRO):   x=2*1.0 *(x- -1)/xrange -1.0;
+MPRINT(WATERFALL_3D_MACRO):   y=2*(y- 0)/yrange -1;
+MPRINT(WATERFALL_3D_MACRO):   z=2*(z--55.32163348)/zrange -1;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 230 observations read from the data set WORK.POLYGONS.
+NOTE: The data set WORK.NORMALIZED has 230 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              922.75k
+      OS Memory           12376.00k
+      Timestamp           10/27/2026 03:59:29 PM
+      Step Count                        14  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data projected_data;
+MPRINT(WATERFALL_3D_MACRO):   keep Drug pid type xd yd zd xr yr zr xc yc zc code xcode ycode zcode Lid xAy yAy zAy xAz yAz zAz xYv 
+yYv yTickVal xZv yZv zTickVal;
+MPRINT(WATERFALL_3D_MACRO):   array u[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array v[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array w[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array m[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rx[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array ry[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rz[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array d[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array p[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   retain r t f n;
+MPRINT(WATERFALL_3D_MACRO):   r=1;
+MPRINT(WATERFALL_3D_MACRO):   t=1;
+MPRINT(WATERFALL_3D_MACRO):   f=1;
+MPRINT(WATERFALL_3D_MACRO):   n=-1;
+MPRINT(WATERFALL_3D_MACRO):   pi=constant("PI");
+MPRINT(WATERFALL_3D_MACRO):   fac=pi/180;
+MPRINT(WATERFALL_3D_MACRO):   A=75*fac;
+MPRINT(WATERFALL_3D_MACRO):   B=0*fac;
+MPRINT(WATERFALL_3D_MACRO):   C=-45*fac;
+MPRINT(WATERFALL_3D_MACRO):   m[1,1]=1/r;
+MPRINT(WATERFALL_3D_MACRO):   m[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,2]=1/t;
+MPRINT(WATERFALL_3D_MACRO):   m[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,3]=-2/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[3,4]=-(f+n)/(f-n);
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   m[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,2]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,3]=-sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,2]=sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,3]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,1]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,3]=sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,2]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,1]=-sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,3]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,1]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,2]=-sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,1]=sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,2]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,3]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rz, m, u);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(ry, u, v);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rx, v, w);
+MPRINT(WATERFALL_3D_MACRO):   set normalized;
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=x;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=y;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=z;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   if type='Duration' then do;
+MPRINT(WATERFALL_3D_MACRO):   xd=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yd=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zd=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wd=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Response' then do;
+MPRINT(WATERFALL_3D_MACRO):   xr=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yr=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zr=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wr=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Dropped' then do;
+MPRINT(WATERFALL_3D_MACRO):   xc=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yc=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zc=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wc=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Code' then do;
+MPRINT(WATERFALL_3D_MACRO):   xcode=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   ycode=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zcode=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wcode=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Y-Axis' then do;
+MPRINT(WATERFALL_3D_MACRO):   xAy=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yAy=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zAy=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wAy=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Y-Values' then do;
+MPRINT(WATERFALL_3D_MACRO):   xYv=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yYv=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zYv=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wYv=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Z-Values' then do;
+MPRINT(WATERFALL_3D_MACRO):   xZv=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yZv=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zZv=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wZv=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+WARNING: The variable xAz in the DROP, KEEP, or RENAME list has never been referenced.
+WARNING: The variable yAz in the DROP, KEEP, or RENAME list has never been referenced.
+WARNING: The variable zAz in the DROP, KEEP, or RENAME list has never been referenced.
+NOTE: There were 230 observations read from the data set WORK.NORMALIZED.
+NOTE: The data set WORK.PROJECTED_DATA has 230 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.05 seconds
+      user cpu time       0.03 seconds
+      system cpu time     0.01 seconds
+      memory              1460.15k
+      OS Memory           12376.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 03:59:29 PM
+      Step Count                        15  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data combined;
+MPRINT(WATERFALL_3D_MACRO):   merge projected_walls projected_data;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 25 observations read from the data set WORK.PROJECTED_WALLS.
+NOTE: There were 230 observations read from the data set WORK.PROJECTED_DATA.
+NOTE: The data set WORK.COMBINED has 230 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1061.53k
+      OS Memory           12632.00k
+      Timestamp           10/27/2026 03:59:29 PM
+      Step Count                        16  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   title;
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Title) > 0 is TRUE
+MPRINT(WATERFALL_3D_MACRO):   title h=12pt "Tumor Response and Duration";
+MPRINT(WATERFALL_3D_MACRO):   footnote j=l h=5pt italic "X-Rotation=75  Y-Rotation=0  Z-Rotation=-45";
+MPRINT(WATERFALL_3D_MACRO):   proc sgplot data=combined nowall noborder aspect=1 noautolegend dattrmap=attrmap;
+MPRINT(WATERFALL_3D_MACRO):   polygon id=id x=xw y=yw / fill lineattrs=(color=lightgray) group=id transparency=0 attrid=walls;
+MPRINT(WATERFALL_3D_MACRO):   series x=xAy y=yAy / group=lid lineattrs=(color=cxb0b0b0 pattern=solid);
+MPRINT(WATERFALL_3D_MACRO):   polygon id=pid x=xd y=yd / fill outline dataskin=sheen fillattrs=graphdata1 name='D' 
+legendlabel='Duration' lineattrs=(color=black);
+MPRINT(WATERFALL_3D_MACRO):   polygon id=pid x=xc y=yc / fill dataskin=none fillattrs=(color=gold) name='C' legendlabel='Drop';
+MPRINT(WATERFALL_3D_MACRO):   polygon id=pid x=xr y=yr / fill outline dataskin=none name='R' legendlabel='Response' group=Drug 
+lineattrs=(color=black) attrid=Resp dataskin=sheen;
+MPRINT(WATERFALL_3D_MACRO):   vector x=xw2 y=yw2 / xorigin=xw yorigin=yw group=wgroup noarrowheads attrid=Axes;
+MPRINT(WATERFALL_3D_MACRO):   text x=xl y=yl text=lbx / position=bottomleft rotate=-14.51124667 textattrs=(size=5);
+MPRINT(WATERFALL_3D_MACRO):   text x=xl y=yl text=lby / position=bottom rotate=14.511246673 textattrs=(size=5);
+MPRINT(WATERFALL_3D_MACRO):   text x=xl y=yl text=lbz / position=left rotate=90 position=top textattrs=(size=5);
+MPRINT(WATERFALL_3D_MACRO):   text x=xYv y=yYv text=yTickVal / position=bottomright textattrs=(size=4);
+MPRINT(WATERFALL_3D_MACRO):   text x=xZv y=yZv text=zTickVal / position=left textattrs=(size=4);
+MPRINT(WATERFALL_3D_MACRO):   scatter x=xZv y=yZv / markerattrs=(size=2 symbol=dot);
+MPRINT(WATERFALL_3D_MACRO):   text x=xcode y=ycode text=code / position=left rotate=90 textattrs=(size=4);
+MPRINT(WATERFALL_3D_MACRO):   keylegend 'R' 'C' / type=fillcolor title='CC-122' across=1 location=inside position=bottomright 
+fillheight=5px fillaspect=1.5 titleattrs=(size=5) valueattrs=(size=5) opaque;
+MPRINT(WATERFALL_3D_MACRO):   xaxis display=none offsetmin=0.05 offsetmax=0.05;
+MPRINT(WATERFALL_3D_MACRO):   yaxis display=none offsetmin=0.05 offsetmax=0.05;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           6.81 seconds
+      user cpu time       0.32 seconds
+      system cpu time     0.67 seconds
+      memory              11361.46k
+      OS Memory           22484.00k
+      Timestamp           10/27/2026 03:59:35 PM
+      Step Count                        17  Switch Count  0
+      
+NOTE: SYMBOL=DOT is invalid. The default will be used.
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P098\Waterfall_Xf_100.png.
+                                                           The SAS System
+
+NOTE: There were 230 observations read from the data set WORK.COMBINED.
+NOTE: There were 12 observations read from the data set WORK.ATTRMAP.
+
+MPRINT(WATERFALL_3D_MACRO):   footnote;
+MLOGIC(WATERFALL_3D_MACRO):  Ending execution.
+MLOGIC(WATERFALL_3D_MACRO):  Beginning execution.
+MLOGIC(WATERFALL_3D_MACRO):  Parameter DATA has value tumor
+MLOGIC(WATERFALL_3D_MACRO):  Parameter DURATION has value Duration
+MLOGIC(WATERFALL_3D_MACRO):  Parameter RESPONSE has value response
+MLOGIC(WATERFALL_3D_MACRO):  Parameter DROPPED has value dropped
+MLOGIC(WATERFALL_3D_MACRO):  Parameter GROUP has value Drug
+MLOGIC(WATERFALL_3D_MACRO):  Parameter CODE has value Code
+MLOGIC(WATERFALL_3D_MACRO):  Parameter ATTRMAP has value attrmap
+MLOGIC(WATERFALL_3D_MACRO):  Parameter LBLX has value Subject
+MLOGIC(WATERFALL_3D_MACRO):  Parameter LBLY has value Duration of Treatment in Days
+MLOGIC(WATERFALL_3D_MACRO):  Parameter LBLZ has value Tumor Lesion Best Change
+MLOGIC(WATERFALL_3D_MACRO):  Parameter XFAC has value 1.25
+MLOGIC(WATERFALL_3D_MACRO):  Parameter TILT has value 75
+MLOGIC(WATERFALL_3D_MACRO):  Parameter ROTATE has value -45
+MLOGIC(WATERFALL_3D_MACRO):  Parameter TITLE has value Tumor Response and Duration
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Data) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Duration) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Response) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Dropped) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Group) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Code) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &xFac > 4 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &xFac < 0.5 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %LET (variable name is A)
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Tilt > 80 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Tilt < 60 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %LET (variable name is B)
+MLOGIC(WATERFALL_3D_MACRO):  %LET (variable name is C)
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Rotate > -15 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Rotate < -75 is FALSE
+MPRINT(WATERFALL_3D_MACRO):   data Wall_Axes;
+MPRINT(WATERFALL_3D_MACRO):   length id $8 wgroup $1;
+MPRINT(WATERFALL_3D_MACRO):   dx=1.25;
+MPRINT(WATERFALL_3D_MACRO):   id='X1-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   xl=0;
+MPRINT(WATERFALL_3D_MACRO):   yl=-1;
+MPRINT(WATERFALL_3D_MACRO):   zl=-1.1;
+MPRINT(WATERFALL_3D_MACRO):   label=1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='X3-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='L';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='X4-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Y2-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Y3-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   xl=dx+0.1;
+MPRINT(WATERFALL_3D_MACRO):   yl= 0;
+MPRINT(WATERFALL_3D_MACRO):   zl=-0.1;
+MPRINT(WATERFALL_3D_MACRO):   label=2;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Y4-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='L';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl=.;
+MPRINT(WATERFALL_3D_MACRO):   zl=.;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   id='Z1-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yl=-1.2;
+MPRINT(WATERFALL_3D_MACRO):   zl=0;
+MPRINT(WATERFALL_3D_MACRO):   label=3;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Z2-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='L';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Z4-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   call missing(xw2, yw2, zw2, xl, yl, zl, label);
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: The data set WORK.WALL_AXES has 25 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              799.40k
+      OS Memory           18264.00k
+      Timestamp           10/27/2026 03:59:36 PM
+      Step Count                        18  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data projected_walls;
+MPRINT(WATERFALL_3D_MACRO):   keep id wgroup xw yw zw xw2 yw2 zw2 xl yl zl lbx lby lbz label;
+MPRINT(WATERFALL_3D_MACRO):   array u[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array v[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array w[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array m[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rx[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array ry[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rz[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array d[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array p[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   retain r t f n;
+MPRINT(WATERFALL_3D_MACRO):   r=1;
+MPRINT(WATERFALL_3D_MACRO):   t=1;
+MPRINT(WATERFALL_3D_MACRO):   f=1;
+MPRINT(WATERFALL_3D_MACRO):   n=-1;
+MPRINT(WATERFALL_3D_MACRO):   pi=constant("PI");
+MPRINT(WATERFALL_3D_MACRO):   fac=pi/180;
+MPRINT(WATERFALL_3D_MACRO):   A=75*fac;
+MPRINT(WATERFALL_3D_MACRO):   B=0*fac;
+MPRINT(WATERFALL_3D_MACRO):   C=-45*fac;
+MPRINT(WATERFALL_3D_MACRO):   m[1,1]=1/r;
+MPRINT(WATERFALL_3D_MACRO):   m[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,4]=0.0;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   m[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,2]=1/t;
+MPRINT(WATERFALL_3D_MACRO):   m[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,3]=-2/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[3,4]=-(f+n)/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,2]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,3]=-sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,2]=sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,3]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,1]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,3]=sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,2]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,1]=-sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,3]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,1]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,2]=-sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,1]=sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,2]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,3]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,2]=0.0;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   rz[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rz, m, u);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(ry, u, v);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rx, v, w);
+MPRINT(WATERFALL_3D_MACRO):   set Wall_Axes;
+MPRINT(WATERFALL_3D_MACRO):   if label eq 1 then lbx="Subject";
+MPRINT(WATERFALL_3D_MACRO):   if label eq 2 then lby="Duration of Treatment in Days";
+MPRINT(WATERFALL_3D_MACRO):   if label eq 3 then lbz="Tumor Lesion Best Change";
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=xw;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=yw;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=zw;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   xw=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yw=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zw=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=xw2;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=yw2;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=zw2;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   xw2=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yw2=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zw2=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=xl;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=yl;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=zl;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   xl=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yl=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zl=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 25 observations read from the data set WORK.WALL_AXES.
+NOTE: The data set WORK.PROJECTED_WALLS has 25 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.04 seconds
+      memory              1440.78k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:36 PM
+      Step Count                        19  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data _null_;
+MPRINT(WATERFALL_3D_MACRO):   fac=sqrt(1.25);
+MPRINT(WATERFALL_3D_MACRO):   set projected_walls;
+MPRINT(WATERFALL_3D_MACRO):   dx=xw2-xw;
+MPRINT(WATERFALL_3D_MACRO):   if id='X1-Axis' then do;
+MPRINT(WATERFALL_3D_MACRO):   if abs(dx) > 0.001 then xaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+MPRINT(WATERFALL_3D_MACRO):   else xaxisRot=90;
+MPRINT(WATERFALL_3D_MACRO):   call symput ("xaxisRot", xaxisRot);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   if id='Y3-Axis' then do;
+MPRINT(WATERFALL_3D_MACRO):   if abs(dx) > 0.001 then yaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   else yaxisRot=90;
+MPRINT(WATERFALL_3D_MACRO):   call symput ("yaxisRot", yaxisRot);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      651:22    651:181   
+NOTE: Missing values were generated as a result of performing an operation on missing values.
+      Each place is given by: (Number of times) at (Line):(Column).
+      16 at 1081:132   
+NOTE: There were 25 observations read from the data set WORK.PROJECTED_WALLS.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              959.56k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:36 PM
+      Step Count                        20  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data _null_;
+MPRINT(WATERFALL_3D_MACRO):   retain durmin 1e6 durmax -1e6 resmin 1e6 resmax -1e6;
+MPRINT(WATERFALL_3D_MACRO):   set tumor end=last;
+MPRINT(WATERFALL_3D_MACRO):   durmin=min(durmin, Duration);
+MPRINT(WATERFALL_3D_MACRO):   durmax=max(durmax, Duration);
+MPRINT(WATERFALL_3D_MACRO):   resmin=min(resmin, response);
+MPRINT(WATERFALL_3D_MACRO):   resmax=max(resmax, response);
+MPRINT(WATERFALL_3D_MACRO):   if last then do;
+MPRINT(WATERFALL_3D_MACRO):   call symput ("DurMin", durmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput ("DurMax", durmax);
+MPRINT(WATERFALL_3D_MACRO):   call symput ("ResMin", resmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput ("ResMax", resmax);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      651:229   651:13    651:49    651:82    
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              942.56k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:36 PM
+      Step Count                        21  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data polygons;
+MPRINT(WATERFALL_3D_MACRO):   retain pid 0 maxy -1e6 miny 1e6 maxz -1e6 minz 1e6;
+MPRINT(WATERFALL_3D_MACRO):   set tumor end=last;
+MPRINT(WATERFALL_3D_MACRO):   durfac=1.05;
+MPRINT(WATERFALL_3D_MACRO):   resfac=1.05;
+MPRINT(WATERFALL_3D_MACRO):   dx=1.25;
+MPRINT(WATERFALL_3D_MACRO):   i=_n_-1;
+MPRINT(WATERFALL_3D_MACRO):   aResMax=resfac*max(abs(29.397788709), abs(-52.68726998));
+MPRINT(WATERFALL_3D_MACRO):   aDurMax=durfac*max(abs(45.513307348), abs(1.5047965578));
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   Lid=.;
+MPRINT(WATERFALL_3D_MACRO):   type='Duration';
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5-0.4);
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   y=Duration;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5+0.4);
+MPRINT(WATERFALL_3D_MACRO):   y=y;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   type='Response';
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5-0.4);
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   z=response;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5+0.4);
+MPRINT(WATERFALL_3D_MACRO):   z=z;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   if Dropped then do;
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   type='Dropped';
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5-0.3);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration-0.03*45.513307348;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5+0.3);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration-0.03*45.513307348;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration-0.06*45.513307348;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   xMax=dx*(i);
+MPRINT(WATERFALL_3D_MACRO):   type='Code';
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5);
+MPRINT(WATERFALL_3D_MACRO):   z=ifn(response < 0, response, 0);
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   if last then do;
+MPRINT(WATERFALL_3D_MACRO):   call missing (Duration, response, Code);
+MPRINT(WATERFALL_3D_MACRO):   type='Response';
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   z=-aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   z= aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   type='Duration';
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   z=aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=aDurMax;
+MPRINT(WATERFALL_3D_MACRO):   z=aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   pid=.;
+MPRINT(WATERFALL_3D_MACRO):   type='Y-Axis';
+MPRINT(WATERFALL_3D_MACRO):   Lid=1;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   do y=0 to aDurMax by 10;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=xMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   Lid+1;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   type='Y-Values';
+MPRINT(WATERFALL_3D_MACRO):   Lid=.;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   do y=0 to aDurMax by 10;
+MPRINT(WATERFALL_3D_MACRO):   x=xMax;
+MPRINT(WATERFALL_3D_MACRO):   yTickVal=y;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   type='Z-Values';
+MPRINT(WATERFALL_3D_MACRO):   yTickVal=.;
+MPRINT(WATERFALL_3D_MACRO):   Lid=.;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(-1);
+MPRINT(WATERFALL_3D_MACRO):   do z=-10 to -aResMax by -10;
+MPRINT(WATERFALL_3D_MACRO):   zTickVal=z;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   do z=0 to aResMax by 10;
+MPRINT(WATERFALL_3D_MACRO):   zTickVal=z;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: The data set WORK.POLYGONS has 230 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+                                                           The SAS System
+
+      system cpu time     0.01 seconds
+      memory              966.56k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:36 PM
+      Step Count                        22  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data _null_;
+MPRINT(WATERFALL_3D_MACRO):   retain xmin 1e10 xmax -1e10 ymin 1e10 ymax -1e10 zmin 1e10 zmax -1e10;
+MPRINT(WATERFALL_3D_MACRO):   set polygons end=last;
+MPRINT(WATERFALL_3D_MACRO):   xmin=min(xmin, x);
+MPRINT(WATERFALL_3D_MACRO):   xmax=max(xmax, x);
+MPRINT(WATERFALL_3D_MACRO):   ymin=min(ymin, y);
+MPRINT(WATERFALL_3D_MACRO):   ymax=max(ymax, y);
+MPRINT(WATERFALL_3D_MACRO):   zmin=min(zmin, z);
+MPRINT(WATERFALL_3D_MACRO):   zmax=max(zmax, z);
+MPRINT(WATERFALL_3D_MACRO):   if last then do;
+MPRINT(WATERFALL_3D_MACRO):   call symput("xmin", xmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput("xmax", xmax);
+MPRINT(WATERFALL_3D_MACRO):   call symput("ymin", ymin);
+MPRINT(WATERFALL_3D_MACRO):   call symput("ymax", ymax);
+MPRINT(WATERFALL_3D_MACRO):   call symput("zmin", zmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput("zmax", zmax);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      651:149   651:176   651:204   651:231   651:10    651:37    
+NOTE: There were 230 observations read from the data set WORK.POLYGONS.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              950.59k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:36 PM
+      Step Count                        23  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data normalized;
+MPRINT(WATERFALL_3D_MACRO):   keep Drug pid type x y z code Lid YTickVal zTickVal;
+MPRINT(WATERFALL_3D_MACRO):   xrange= 23.75- -1.25;
+MPRINT(WATERFALL_3D_MACRO):   yrange=47.788972715- 0;
+MPRINT(WATERFALL_3D_MACRO):   zrange=55.321633479--55.32163348;
+MPRINT(WATERFALL_3D_MACRO):   set polygons;
+MPRINT(WATERFALL_3D_MACRO):   x=2*1.25 *(x- -1.25)/xrange -1.25;
+MPRINT(WATERFALL_3D_MACRO):   y=2*(y- 0)/yrange -1;
+MPRINT(WATERFALL_3D_MACRO):   z=2*(z--55.32163348)/zrange -1;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 230 observations read from the data set WORK.POLYGONS.
+NOTE: The data set WORK.NORMALIZED has 230 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              957.59k
+      OS Memory           18520.00k
+                                                           The SAS System
+
+      Timestamp           10/27/2026 03:59:36 PM
+      Step Count                        24  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data projected_data;
+MPRINT(WATERFALL_3D_MACRO):   keep Drug pid type xd yd zd xr yr zr xc yc zc code xcode ycode zcode Lid xAy yAy zAy xAz yAz zAz xYv 
+yYv yTickVal xZv yZv zTickVal;
+MPRINT(WATERFALL_3D_MACRO):   array u[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array v[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array w[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array m[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rx[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array ry[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rz[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array d[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array p[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   retain r t f n;
+MPRINT(WATERFALL_3D_MACRO):   r=1;
+MPRINT(WATERFALL_3D_MACRO):   t=1;
+MPRINT(WATERFALL_3D_MACRO):   f=1;
+MPRINT(WATERFALL_3D_MACRO):   n=-1;
+MPRINT(WATERFALL_3D_MACRO):   pi=constant("PI");
+MPRINT(WATERFALL_3D_MACRO):   fac=pi/180;
+MPRINT(WATERFALL_3D_MACRO):   A=75*fac;
+MPRINT(WATERFALL_3D_MACRO):   B=0*fac;
+MPRINT(WATERFALL_3D_MACRO):   C=-45*fac;
+MPRINT(WATERFALL_3D_MACRO):   m[1,1]=1/r;
+MPRINT(WATERFALL_3D_MACRO):   m[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,2]=1/t;
+MPRINT(WATERFALL_3D_MACRO):   m[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,3]=-2/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[3,4]=-(f+n)/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,2]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,3]=-sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,2]=sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,3]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,4]=1.0;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   ry[1,1]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,3]=sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,2]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,1]=-sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,3]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,1]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,2]=-sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,1]=sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,2]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,3]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rz, m, u);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(ry, u, v);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rx, v, w);
+MPRINT(WATERFALL_3D_MACRO):   set normalized;
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=x;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=y;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=z;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   if type='Duration' then do;
+MPRINT(WATERFALL_3D_MACRO):   xd=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yd=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zd=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wd=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Response' then do;
+MPRINT(WATERFALL_3D_MACRO):   xr=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yr=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zr=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wr=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Dropped' then do;
+MPRINT(WATERFALL_3D_MACRO):   xc=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yc=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zc=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wc=p[4,1];
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Code' then do;
+MPRINT(WATERFALL_3D_MACRO):   xcode=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   ycode=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zcode=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wcode=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Y-Axis' then do;
+MPRINT(WATERFALL_3D_MACRO):   xAy=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yAy=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zAy=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wAy=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Y-Values' then do;
+MPRINT(WATERFALL_3D_MACRO):   xYv=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yYv=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zYv=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wYv=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Z-Values' then do;
+MPRINT(WATERFALL_3D_MACRO):   xZv=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yZv=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zZv=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wZv=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+WARNING: The variable xAz in the DROP, KEEP, or RENAME list has never been referenced.
+WARNING: The variable yAz in the DROP, KEEP, or RENAME list has never been referenced.
+WARNING: The variable zAz in the DROP, KEEP, or RENAME list has never been referenced.
+NOTE: There were 230 observations read from the data set WORK.NORMALIZED.
+NOTE: The data set WORK.PROJECTED_DATA has 230 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.06 seconds
+      memory              1451.03k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:36 PM
+      Step Count                        25  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data combined;
+MPRINT(WATERFALL_3D_MACRO):   merge projected_walls projected_data;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 25 observations read from the data set WORK.PROJECTED_WALLS.
+NOTE: There were 230 observations read from the data set WORK.PROJECTED_DATA.
+NOTE: The data set WORK.COMBINED has 230 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              1095.93k
+      OS Memory           18776.00k
+      Timestamp           10/27/2026 03:59:36 PM
+      Step Count                        26  Switch Count  0
+      
+                                                           The SAS System
+
+
+MPRINT(WATERFALL_3D_MACRO):   title;
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Title) > 0 is TRUE
+MPRINT(WATERFALL_3D_MACRO):   title h=12pt "Tumor Response and Duration";
+MPRINT(WATERFALL_3D_MACRO):   footnote j=l h=5pt italic "X-Rotation=75  Y-Rotation=0  Z-Rotation=-45";
+MPRINT(WATERFALL_3D_MACRO):   proc sgplot data=combined nowall noborder aspect=1 noautolegend dattrmap=attrmap;
+MPRINT(WATERFALL_3D_MACRO):   polygon id=id x=xw y=yw / fill lineattrs=(color=lightgray) group=id transparency=0 attrid=walls;
+MPRINT(WATERFALL_3D_MACRO):   series x=xAy y=yAy / group=lid lineattrs=(color=cxb0b0b0 pattern=solid);
+MPRINT(WATERFALL_3D_MACRO):   polygon id=pid x=xd y=yd / fill outline dataskin=sheen fillattrs=graphdata1 name='D' 
+legendlabel='Duration' lineattrs=(color=black);
+MPRINT(WATERFALL_3D_MACRO):   polygon id=pid x=xc y=yc / fill dataskin=none fillattrs=(color=gold) name='C' legendlabel='Drop';
+MPRINT(WATERFALL_3D_MACRO):   polygon id=pid x=xr y=yr / fill outline dataskin=none name='R' legendlabel='Response' group=Drug 
+lineattrs=(color=black) attrid=Resp dataskin=sheen;
+MPRINT(WATERFALL_3D_MACRO):   vector x=xw2 y=yw2 / xorigin=xw yorigin=yw group=wgroup noarrowheads attrid=Axes;
+MPRINT(WATERFALL_3D_MACRO):   text x=xl y=yl text=lbx / position=bottomleft rotate= -16.224067 textattrs=(size=5);
+MPRINT(WATERFALL_3D_MACRO):   text x=xl y=yl text=lby / position=bottom rotate=16.224066999 textattrs=(size=5);
+MPRINT(WATERFALL_3D_MACRO):   text x=xl y=yl text=lbz / position=left rotate=90 position=top textattrs=(size=5);
+MPRINT(WATERFALL_3D_MACRO):   text x=xYv y=yYv text=yTickVal / position=bottomright textattrs=(size=4);
+MPRINT(WATERFALL_3D_MACRO):   text x=xZv y=yZv text=zTickVal / position=left textattrs=(size=4);
+MPRINT(WATERFALL_3D_MACRO):   scatter x=xZv y=yZv / markerattrs=(size=2 symbol=dot);
+MPRINT(WATERFALL_3D_MACRO):   text x=xcode y=ycode text=code / position=left rotate=90 textattrs=(size=4);
+MPRINT(WATERFALL_3D_MACRO):   keylegend 'R' 'C' / type=fillcolor title='CC-122' across=1 location=inside position=bottomright 
+fillheight=5px fillaspect=1.5 titleattrs=(size=5) valueattrs=(size=5) opaque;
+MPRINT(WATERFALL_3D_MACRO):   xaxis display=none offsetmin=0.05 offsetmax=0.05;
+MPRINT(WATERFALL_3D_MACRO):   yaxis display=none offsetmin=0.05 offsetmax=0.05;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           1.99 seconds
+      user cpu time       0.14 seconds
+      system cpu time     0.03 seconds
+      memory              5727.59k
+      OS Memory           22740.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        27  Switch Count  0
+      
+NOTE: SYMBOL=DOT is invalid. The default will be used.
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P098\Waterfall_Xf_125.png.
+NOTE: There were 230 observations read from the data set WORK.COMBINED.
+NOTE: There were 12 observations read from the data set WORK.ATTRMAP.
+
+MPRINT(WATERFALL_3D_MACRO):   footnote;
+MLOGIC(WATERFALL_3D_MACRO):  Ending execution.
+MLOGIC(WATERFALL_3D_MACRO):  Beginning execution.
+MLOGIC(WATERFALL_3D_MACRO):  Parameter DATA has value tumor
+MLOGIC(WATERFALL_3D_MACRO):  Parameter DURATION has value Duration
+MLOGIC(WATERFALL_3D_MACRO):  Parameter RESPONSE has value response
+MLOGIC(WATERFALL_3D_MACRO):  Parameter DROPPED has value dropped
+MLOGIC(WATERFALL_3D_MACRO):  Parameter GROUP has value Drug
+MLOGIC(WATERFALL_3D_MACRO):  Parameter CODE has value Code
+MLOGIC(WATERFALL_3D_MACRO):  Parameter ATTRMAP has value attrmap
+MLOGIC(WATERFALL_3D_MACRO):  Parameter LBLX has value Subject
+MLOGIC(WATERFALL_3D_MACRO):  Parameter LBLY has value Duration of Treatment in Days
+MLOGIC(WATERFALL_3D_MACRO):  Parameter LBLZ has value Tumor Lesion Best Change
+MLOGIC(WATERFALL_3D_MACRO):  Parameter XFAC has value 1.5
+MLOGIC(WATERFALL_3D_MACRO):  Parameter TILT has value 75
+MLOGIC(WATERFALL_3D_MACRO):  Parameter ROTATE has value -45
+MLOGIC(WATERFALL_3D_MACRO):  Parameter TITLE has value Tumor Response and Duration
+                                                           The SAS System
+
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Data) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Duration) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Response) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Dropped) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Group) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Code) eq 0 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &xFac > 4 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &xFac < 0.5 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %LET (variable name is A)
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Tilt > 80 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Tilt < 60 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %LET (variable name is B)
+MLOGIC(WATERFALL_3D_MACRO):  %LET (variable name is C)
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Rotate > -15 is FALSE
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition &Rotate < -75 is FALSE
+MPRINT(WATERFALL_3D_MACRO):   data Wall_Axes;
+MPRINT(WATERFALL_3D_MACRO):   length id $8 wgroup $1;
+MPRINT(WATERFALL_3D_MACRO):   dx=1.5;
+MPRINT(WATERFALL_3D_MACRO):   id='X1-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   xl=0;
+MPRINT(WATERFALL_3D_MACRO):   yl=-1;
+MPRINT(WATERFALL_3D_MACRO):   zl=-1.1;
+MPRINT(WATERFALL_3D_MACRO):   label=1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='X3-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='L';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='X4-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Y2-Axis';
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Y3-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   xl=dx+0.1;
+MPRINT(WATERFALL_3D_MACRO):   yl= 0;
+MPRINT(WATERFALL_3D_MACRO):   zl=-0.1;
+MPRINT(WATERFALL_3D_MACRO):   label=2;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Y4-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='L';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl=.;
+MPRINT(WATERFALL_3D_MACRO):   zl=.;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Z1-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yl=-1.2;
+MPRINT(WATERFALL_3D_MACRO):   zl=0;
+MPRINT(WATERFALL_3D_MACRO):   label=3;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Z2-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='L';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2=-1;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Z4-Axis';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   xw2= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw2= 1;
+MPRINT(WATERFALL_3D_MACRO):   xl=.;
+MPRINT(WATERFALL_3D_MACRO):   yl= .;
+MPRINT(WATERFALL_3D_MACRO):   zl= .;
+MPRINT(WATERFALL_3D_MACRO):   label=.;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   call missing(xw2, yw2, zw2, xl, yl, zl, label);
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Back';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Right';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw= 1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Bottom';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-1;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw=-1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw= dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   id='Center';
+MPRINT(WATERFALL_3D_MACRO):   wgroup='D';
+MPRINT(WATERFALL_3D_MACRO):   xw=-dx;
+MPRINT(WATERFALL_3D_MACRO):   yw= 1;
+MPRINT(WATERFALL_3D_MACRO):   zw=-0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: The data set WORK.WALL_AXES has 25 observations and 13 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.03 seconds
+      memory              800.15k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        28  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data projected_walls;
+MPRINT(WATERFALL_3D_MACRO):   keep id wgroup xw yw zw xw2 yw2 zw2 xl yl zl lbx lby lbz label;
+MPRINT(WATERFALL_3D_MACRO):   array u[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array v[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array w[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array m[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rx[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array ry[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rz[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array d[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array p[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   retain r t f n;
+MPRINT(WATERFALL_3D_MACRO):   r=1;
+MPRINT(WATERFALL_3D_MACRO):   t=1;
+MPRINT(WATERFALL_3D_MACRO):   f=1;
+MPRINT(WATERFALL_3D_MACRO):   n=-1;
+MPRINT(WATERFALL_3D_MACRO):   pi=constant("PI");
+MPRINT(WATERFALL_3D_MACRO):   fac=pi/180;
+MPRINT(WATERFALL_3D_MACRO):   A=75*fac;
+MPRINT(WATERFALL_3D_MACRO):   B=0*fac;
+MPRINT(WATERFALL_3D_MACRO):   C=-45*fac;
+MPRINT(WATERFALL_3D_MACRO):   m[1,1]=1/r;
+MPRINT(WATERFALL_3D_MACRO):   m[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,2]=1/t;
+MPRINT(WATERFALL_3D_MACRO):   m[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,3]=-2/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[3,4]=-(f+n)/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,2]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,3]=-sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,4]=0.0;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   rx[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,2]=sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,3]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,1]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,3]=sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,2]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,1]=-sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,3]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,1]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,2]=-sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,1]=sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,2]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,3]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rz, m, u);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(ry, u, v);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rx, v, w);
+MPRINT(WATERFALL_3D_MACRO):   set Wall_Axes;
+MPRINT(WATERFALL_3D_MACRO):   if label eq 1 then lbx="Subject";
+MPRINT(WATERFALL_3D_MACRO):   if label eq 2 then lby="Duration of Treatment in Days";
+MPRINT(WATERFALL_3D_MACRO):   if label eq 3 then lbz="Tumor Lesion Best Change";
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=xw;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=yw;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=zw;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   xw=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yw=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zw=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=xw2;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=yw2;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=zw2;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   xw2=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yw2=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zw2=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=xl;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=yl;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=zl;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   xl=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yl=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zl=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 25 observations read from the data set WORK.WALL_AXES.
+NOTE: The data set WORK.PROJECTED_WALLS has 25 observations and 15 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.07 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1440.78k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        29  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data _null_;
+MPRINT(WATERFALL_3D_MACRO):   fac=sqrt(1.5);
+MPRINT(WATERFALL_3D_MACRO):   set projected_walls;
+MPRINT(WATERFALL_3D_MACRO):   dx=xw2-xw;
+MPRINT(WATERFALL_3D_MACRO):   if id='X1-Axis' then do;
+MPRINT(WATERFALL_3D_MACRO):   if abs(dx) > 0.001 then xaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+MPRINT(WATERFALL_3D_MACRO):   else xaxisRot=90;
+MPRINT(WATERFALL_3D_MACRO):   call symput ("xaxisRot", xaxisRot);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   if id='Y3-Axis' then do;
+MPRINT(WATERFALL_3D_MACRO):   if abs(dx) > 0.001 then yaxisRot=fac*180*atan((yw2-yw)/dx)/3.1415;
+MPRINT(WATERFALL_3D_MACRO):   else yaxisRot=90;
+MPRINT(WATERFALL_3D_MACRO):   call symput ("yaxisRot", yaxisRot);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      656:22    656:181   
+NOTE: Missing values were generated as a result of performing an operation on missing values.
+      Each place is given by: (Number of times) at (Line):(Column).
+      16 at 1248:132   
+NOTE: There were 25 observations read from the data set WORK.PROJECTED_WALLS.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              960.03k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        30  Switch Count  0
+      
+                                                           The SAS System
+
+
+MPRINT(WATERFALL_3D_MACRO):   data _null_;
+MPRINT(WATERFALL_3D_MACRO):   retain durmin 1e6 durmax -1e6 resmin 1e6 resmax -1e6;
+MPRINT(WATERFALL_3D_MACRO):   set tumor end=last;
+MPRINT(WATERFALL_3D_MACRO):   durmin=min(durmin, Duration);
+MPRINT(WATERFALL_3D_MACRO):   durmax=max(durmax, Duration);
+MPRINT(WATERFALL_3D_MACRO):   resmin=min(resmin, response);
+MPRINT(WATERFALL_3D_MACRO):   resmax=max(resmax, response);
+MPRINT(WATERFALL_3D_MACRO):   if last then do;
+MPRINT(WATERFALL_3D_MACRO):   call symput ("DurMin", durmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput ("DurMax", durmax);
+MPRINT(WATERFALL_3D_MACRO):   call symput ("ResMin", resmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput ("ResMax", resmax);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      656:229   656:13    656:49    656:82    
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              942.03k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        31  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data polygons;
+MPRINT(WATERFALL_3D_MACRO):   retain pid 0 maxy -1e6 miny 1e6 maxz -1e6 minz 1e6;
+MPRINT(WATERFALL_3D_MACRO):   set tumor end=last;
+MPRINT(WATERFALL_3D_MACRO):   durfac=1.05;
+MPRINT(WATERFALL_3D_MACRO):   resfac=1.05;
+MPRINT(WATERFALL_3D_MACRO):   dx=1.5;
+MPRINT(WATERFALL_3D_MACRO):   i=_n_-1;
+MPRINT(WATERFALL_3D_MACRO):   aResMax=resfac*max(abs(29.397788709), abs(-52.68726998));
+MPRINT(WATERFALL_3D_MACRO):   aDurMax=durfac*max(abs(45.513307348), abs(1.5047965578));
+MPRINT(WATERFALL_3D_MACRO):   Lid=.;
+MPRINT(WATERFALL_3D_MACRO):   type='Duration';
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5-0.4);
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   y=Duration;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5+0.4);
+MPRINT(WATERFALL_3D_MACRO):   y=y;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   type='Response';
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5-0.4);
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   z=response;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5+0.4);
+MPRINT(WATERFALL_3D_MACRO):   z=z;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=x;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   if Dropped then do;
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   type='Dropped';
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5-0.3);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration-0.03*45.513307348;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5+0.3);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration-0.03*45.513307348;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5);
+MPRINT(WATERFALL_3D_MACRO):   y=Duration-0.06*45.513307348;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   xMax=dx*(i);
+MPRINT(WATERFALL_3D_MACRO):   type='Code';
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(i-0.5);
+MPRINT(WATERFALL_3D_MACRO):   z=ifn(response < 0, response, 0);
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   if last then do;
+MPRINT(WATERFALL_3D_MACRO):   call missing (Duration, response, Code);
+MPRINT(WATERFALL_3D_MACRO):   type='Response';
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   z=-aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   z= aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   pid+1;
+MPRINT(WATERFALL_3D_MACRO):   type='Duration';
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   z=aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   y=aDurMax;
+MPRINT(WATERFALL_3D_MACRO):   z=aResMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   pid=.;
+MPRINT(WATERFALL_3D_MACRO):   type='Y-Axis';
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   Lid=1;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   do y=0 to aDurMax by 10;
+MPRINT(WATERFALL_3D_MACRO):   x=-dx;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   x=xMax;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   Lid+1;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   type='Y-Values';
+MPRINT(WATERFALL_3D_MACRO):   Lid=.;
+MPRINT(WATERFALL_3D_MACRO):   z=0;
+MPRINT(WATERFALL_3D_MACRO):   do y=0 to aDurMax by 10;
+MPRINT(WATERFALL_3D_MACRO):   x=xMax;
+MPRINT(WATERFALL_3D_MACRO):   yTickVal=y;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   type='Z-Values';
+MPRINT(WATERFALL_3D_MACRO):   yTickVal=.;
+MPRINT(WATERFALL_3D_MACRO):   Lid=.;
+MPRINT(WATERFALL_3D_MACRO):   y=0;
+MPRINT(WATERFALL_3D_MACRO):   x=dx*(-1);
+MPRINT(WATERFALL_3D_MACRO):   do z=-10 to -aResMax by -10;
+MPRINT(WATERFALL_3D_MACRO):   zTickVal=z;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   do z=0 to aResMax by 10;
+MPRINT(WATERFALL_3D_MACRO):   zTickVal=z;
+MPRINT(WATERFALL_3D_MACRO):   output;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 20 observations read from the data set WORK.TUMOR.
+NOTE: The data set WORK.POLYGONS has 230 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              966.78k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        32  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data _null_;
+MPRINT(WATERFALL_3D_MACRO):   retain xmin 1e10 xmax -1e10 ymin 1e10 ymax -1e10 zmin 1e10 zmax -1e10;
+MPRINT(WATERFALL_3D_MACRO):   set polygons end=last;
+MPRINT(WATERFALL_3D_MACRO):   xmin=min(xmin, x);
+MPRINT(WATERFALL_3D_MACRO):   xmax=max(xmax, x);
+MPRINT(WATERFALL_3D_MACRO):   ymin=min(ymin, y);
+MPRINT(WATERFALL_3D_MACRO):   ymax=max(ymax, y);
+MPRINT(WATERFALL_3D_MACRO):   zmin=min(zmin, z);
+MPRINT(WATERFALL_3D_MACRO):   zmax=max(zmax, z);
+MPRINT(WATERFALL_3D_MACRO):   if last then do;
+MPRINT(WATERFALL_3D_MACRO):   call symput("xmin", xmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput("xmax", xmax);
+MPRINT(WATERFALL_3D_MACRO):   call symput("ymin", ymin);
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   call symput("ymax", ymax);
+MPRINT(WATERFALL_3D_MACRO):   call symput("zmin", zmin);
+MPRINT(WATERFALL_3D_MACRO):   call symput("zmax", zmax);
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: Numeric values have been converted to character values at the places given by: (Line):(Column).
+      656:149   656:176   656:204   656:231   656:10    656:37    
+NOTE: There were 230 observations read from the data set WORK.POLYGONS.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              949.43k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        33  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data normalized;
+MPRINT(WATERFALL_3D_MACRO):   keep Drug pid type x y z code Lid YTickVal zTickVal;
+MPRINT(WATERFALL_3D_MACRO):   xrange= 28.5- -1.5;
+MPRINT(WATERFALL_3D_MACRO):   yrange=47.788972715- 0;
+MPRINT(WATERFALL_3D_MACRO):   zrange=55.321633479--55.32163348;
+MPRINT(WATERFALL_3D_MACRO):   set polygons;
+MPRINT(WATERFALL_3D_MACRO):   x=2*1.5 *(x- -1.5)/xrange -1.5;
+MPRINT(WATERFALL_3D_MACRO):   y=2*(y- 0)/yrange -1;
+MPRINT(WATERFALL_3D_MACRO):   z=2*(z--55.32163348)/zrange -1;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 230 observations read from the data set WORK.POLYGONS.
+NOTE: The data set WORK.NORMALIZED has 230 observations and 10 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              957.65k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        34  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data projected_data;
+MPRINT(WATERFALL_3D_MACRO):   keep Drug pid type xd yd zd xr yr zr xc yc zc code xcode ycode zcode Lid xAy yAy zAy xAz yAz zAz xYv 
+yYv yTickVal xZv yZv zTickVal;
+MPRINT(WATERFALL_3D_MACRO):   array u[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array v[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array w[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array m[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rx[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array ry[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array rz[4,4] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array d[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   array p[4,1] _temporary_;
+MPRINT(WATERFALL_3D_MACRO):   retain r t f n;
+MPRINT(WATERFALL_3D_MACRO):   r=1;
+MPRINT(WATERFALL_3D_MACRO):   t=1;
+MPRINT(WATERFALL_3D_MACRO):   f=1;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   n=-1;
+MPRINT(WATERFALL_3D_MACRO):   pi=constant("PI");
+MPRINT(WATERFALL_3D_MACRO):   fac=pi/180;
+MPRINT(WATERFALL_3D_MACRO):   A=75*fac;
+MPRINT(WATERFALL_3D_MACRO):   B=0*fac;
+MPRINT(WATERFALL_3D_MACRO):   C=-45*fac;
+MPRINT(WATERFALL_3D_MACRO):   m[1,1]=1/r;
+MPRINT(WATERFALL_3D_MACRO):   m[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,2]=1/t;
+MPRINT(WATERFALL_3D_MACRO):   m[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[3,3]=-2/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[3,4]=-(f+n)/(f-n);
+MPRINT(WATERFALL_3D_MACRO):   m[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   m[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[2,2]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,3]=-sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[3,2]=sin(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,3]=cos(A);
+MPRINT(WATERFALL_3D_MACRO):   rx[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rx[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,1]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[1,3]=sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[1,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,2]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,1]=-sin(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[3,3]=cos(B);
+MPRINT(WATERFALL_3D_MACRO):   ry[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   ry[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,1]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,2]=-sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[1,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[1,4]=0.0;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   rz[2,1]=sin(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,2]=cos(C);
+MPRINT(WATERFALL_3D_MACRO):   rz[2,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[2,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,3]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[3,4]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,1]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,2]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,3]=0.0;
+MPRINT(WATERFALL_3D_MACRO):   rz[4,4]=1.0;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rz, m, u);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(ry, u, v);
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(rx, v, w);
+MPRINT(WATERFALL_3D_MACRO):   set normalized;
+MPRINT(WATERFALL_3D_MACRO):   d[1,1]=x;
+MPRINT(WATERFALL_3D_MACRO):   d[2,1]=y;
+MPRINT(WATERFALL_3D_MACRO):   d[3,1]=z;
+MPRINT(WATERFALL_3D_MACRO):   d[4,1]=1;
+MPRINT(WATERFALL_3D_MACRO):   call MatMult(w, d, p);
+MPRINT(WATERFALL_3D_MACRO):   if type='Duration' then do;
+MPRINT(WATERFALL_3D_MACRO):   xd=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yd=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zd=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wd=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Response' then do;
+MPRINT(WATERFALL_3D_MACRO):   xr=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yr=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zr=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wr=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Dropped' then do;
+MPRINT(WATERFALL_3D_MACRO):   xc=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yc=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zc=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wc=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Code' then do;
+MPRINT(WATERFALL_3D_MACRO):   xcode=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   ycode=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zcode=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wcode=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Y-Axis' then do;
+MPRINT(WATERFALL_3D_MACRO):   xAy=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yAy=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zAy=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wAy=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Y-Values' then do;
+MPRINT(WATERFALL_3D_MACRO):   xYv=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yYv=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zYv=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wYv=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   else if type='Z-Values' then do;
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   xZv=p[1,1];
+MPRINT(WATERFALL_3D_MACRO):   yZv=p[2,1];
+MPRINT(WATERFALL_3D_MACRO):   zZv=p[3,1];
+MPRINT(WATERFALL_3D_MACRO):   wZv=p[4,1];
+MPRINT(WATERFALL_3D_MACRO):   end;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+WARNING: The variable xAz in the DROP, KEEP, or RENAME list has never been referenced.
+WARNING: The variable yAz in the DROP, KEEP, or RENAME list has never been referenced.
+WARNING: The variable zAz in the DROP, KEEP, or RENAME list has never been referenced.
+NOTE: There were 230 observations read from the data set WORK.NORMALIZED.
+NOTE: The data set WORK.PROJECTED_DATA has 230 observations and 26 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.09 seconds
+      user cpu time       0.04 seconds
+      system cpu time     0.03 seconds
+      memory              1450.90k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        35  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   data combined;
+MPRINT(WATERFALL_3D_MACRO):   merge projected_walls projected_data;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: There were 25 observations read from the data set WORK.PROJECTED_WALLS.
+NOTE: There were 230 observations read from the data set WORK.PROJECTED_DATA.
+NOTE: The data set WORK.COMBINED has 230 observations and 41 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.01 seconds
+      memory              1096.25k
+      OS Memory           18520.00k
+      Timestamp           10/27/2026 03:59:38 PM
+      Step Count                        36  Switch Count  0
+      
+
+MPRINT(WATERFALL_3D_MACRO):   title;
+MLOGIC(WATERFALL_3D_MACRO):  %IF condition %length(&Title) > 0 is TRUE
+MPRINT(WATERFALL_3D_MACRO):   title h=12pt "Tumor Response and Duration";
+MPRINT(WATERFALL_3D_MACRO):   footnote j=l h=5pt italic "X-Rotation=75  Y-Rotation=0  Z-Rotation=-45";
+MPRINT(WATERFALL_3D_MACRO):   proc sgplot data=combined nowall noborder aspect=1 noautolegend dattrmap=attrmap;
+MPRINT(WATERFALL_3D_MACRO):   polygon id=id x=xw y=yw / fill lineattrs=(color=lightgray) group=id transparency=0 attrid=walls;
+MPRINT(WATERFALL_3D_MACRO):   series x=xAy y=yAy / group=lid lineattrs=(color=cxb0b0b0 pattern=solid);
+MPRINT(WATERFALL_3D_MACRO):   polygon id=pid x=xd y=yd / fill outline dataskin=sheen fillattrs=graphdata1 name='D' 
+legendlabel='Duration' lineattrs=(color=black);
+MPRINT(WATERFALL_3D_MACRO):   polygon id=pid x=xc y=yc / fill dataskin=none fillattrs=(color=gold) name='C' legendlabel='Drop';
+MPRINT(WATERFALL_3D_MACRO):   polygon id=pid x=xr y=yr / fill outline dataskin=none name='R' legendlabel='Response' group=Drug 
+lineattrs=(color=black) attrid=Resp dataskin=sheen;
+MPRINT(WATERFALL_3D_MACRO):   vector x=xw2 y=yw2 / xorigin=xw yorigin=yw group=wgroup noarrowheads attrid=Axes;
+MPRINT(WATERFALL_3D_MACRO):   text x=xl y=yl text=lbx / position=bottomleft rotate=-17.77257494 textattrs=(size=5);
+MPRINT(WATERFALL_3D_MACRO):   text x=xl y=yl text=lby / position=bottom rotate= 17.77257494 textattrs=(size=5);
+MPRINT(WATERFALL_3D_MACRO):   text x=xl y=yl text=lbz / position=left rotate=90 position=top textattrs=(size=5);
+MPRINT(WATERFALL_3D_MACRO):   text x=xYv y=yYv text=yTickVal / position=bottomright textattrs=(size=4);
+MPRINT(WATERFALL_3D_MACRO):   text x=xZv y=yZv text=zTickVal / position=left textattrs=(size=4);
+MPRINT(WATERFALL_3D_MACRO):   scatter x=xZv y=yZv / markerattrs=(size=2 symbol=dot);
+                                                           The SAS System
+
+MPRINT(WATERFALL_3D_MACRO):   text x=xcode y=ycode text=code / position=left rotate=90 textattrs=(size=4);
+MPRINT(WATERFALL_3D_MACRO):   keylegend 'R' 'C' / type=fillcolor title='CC-122' across=1 location=inside position=bottomright 
+fillheight=5px fillaspect=1.5 titleattrs=(size=5) valueattrs=(size=5) opaque;
+MPRINT(WATERFALL_3D_MACRO):   xaxis display=none offsetmin=0.05 offsetmax=0.05;
+MPRINT(WATERFALL_3D_MACRO):   yaxis display=none offsetmin=0.05 offsetmax=0.05;
+MPRINT(WATERFALL_3D_MACRO):   run;
+
+NOTE: PROCEDURE SGPLOT used (Total process time):
+      real time           2.23 seconds
+      user cpu time       0.14 seconds
+      system cpu time     0.04 seconds
+      memory              6026.06k
+      OS Memory           22740.00k
+      Timestamp           10/27/2026 03:59:40 PM
+      Step Count                        37  Switch Count  0
+      
+NOTE: SYMBOL=DOT is invalid. The default will be used.
+NOTE: Listing image output written to D:\meta_hackathon\sas2r-agent\output\sas\datasets\P098\Waterfall_Xf_150.png.
+NOTE: There were 230 observations read from the data set WORK.COMBINED.
+NOTE: There were 12 observations read from the data set WORK.ATTRMAP.
+
+MPRINT(WATERFALL_3D_MACRO):   footnote;
+MLOGIC(WATERFALL_3D_MACRO):  Ending execution.
+
+MLOGIC(_BENCH_CAPTURE):  Beginning execution.
+MLOGIC(_BENCH_CAPTURE):  %LOCAL  N I LIB MEM
+MLOGIC(_BENCH_CAPTURE):  %LET (variable name is _BENCH_LIST)
+MPRINT(_BENCH_CAPTURE):   proc sql noprint;
+MPRINT(_BENCH_CAPTURE):   select distinct catx(' ', t.libname, t.memname) into :_bench_list separated by '|' from dictionary.tables 
+t where t.memtype = 'DATA' and t.modate >= 2108735968.436 and t.libname not in 
+('WORK','SASHELP','SASUSER','MAPS','MAPSGFK','MAPSSAS','OUTDS','LIBRARY','PADAM','PSDTM') and t.libname in (select distinct libname 
+from dictionary.libnames where engine ne 'XPORT');
+NOTE: No rows were selected.
+MPRINT(_BENCH_CAPTURE):   quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5290.96k
+      OS Memory           23644.00k
+      Timestamp           10/27/2026 03:59:40 PM
+      Step Count                        38  Switch Count  0
+      
+
+MLOGIC(_BENCH_CAPTURE):  %LET (variable name is N)
+MLOGIC(_BENCH_CAPTURE):  %DO loop beginning; index variable I; start value is 1; stop value is 0; by value is 1.  Loop will not be 
+      executed.
+MLOGIC(_BENCH_CAPTURE):  %PUT NOTE: benchmark capture: &n permanent dataset(s) copied to outds (%superq(_bench_list))
+NOTE: benchmark capture: 0 permanent dataset(s) copied to outds ()
+MLOGIC(_BENCH_CAPTURE):  Ending execution.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           14.07 seconds
+      user cpu time       1.29 seconds
+      system cpu time     1.70 seconds
+      memory              20736.18k
+      OS Memory           23644.00k
+      Timestamp           10/27/2026 03:59:40 PM
+                                                           The SAS System
+
+      Step Count                        38  Switch Count  88
+      

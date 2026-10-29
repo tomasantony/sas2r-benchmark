@@ -1,0 +1,523 @@
+1                                                          The SAS System                            15:46 Tuesday, October 27, 2026
+
+NOTE: Copyright (c) 2002-2012 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M3) 
+      Licensed to [licence holder removed], Site [removed].
+NOTE: This session is executing on the [platform removed] platform.
+
+
+
+NOTE: Updated analytical products:
+      
+      SAS/STAT 14.1
+      SAS/IML 14.1
+
+NOTE: Additional host information:
+
+ [platform removed]
+
+NOTE: SAS initialization used:
+      real time           1.76 seconds
+      cpu time            0.57 seconds
+      
+
+NOTE: AUTOEXEC processing beginning; file is D:\meta_hackathon\sas2r-agent\benchmark\autoexec.sas.
+
+NOTE: Libref OUTDS was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\datasets\P073
+NOTE: Libref PADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\adam
+NOTE: Libref PSDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\cdisc-pilot\sdtm
+
+NOTE: The infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv" is:
+      Filename=D:\meta_hackathon\sas2r-agent\benchmark\families.csv,
+      RECFM=V,LRECL=32767,File Size (bytes)=1168,
+      Last Modified=27Oct2026:15:24:49,
+      Create Time=27Oct2026:15:24:49
+
+NOTE: 100 records were read from the infile "D:\meta_hackathon\sas2r-agent\benchmark\families.csv".
+      The minimum record length was 8.
+      The maximum record length was 13.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              1271.31k
+      OS Memory           9812.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        1  Switch Count  0
+      
+
+NOTE: benchmark autoexec: pid=P073 family=own-tlf
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+                                                           The SAS System
+
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+
+NOTE: AUTOEXEC processing completed.
+
+1          /*****************************************************************************
+2          * Program:    t_exposure.sas
+3          * Purpose:    Table 14.1.3 - Summary of Study Drug Exposure
+4          * Study:      [STUDYID]
+5          * Author:     [Programmer Name]
+6          * Date:       [Date]
+7          * Input:      adam.adsl, adam.adex
+8          * Output:     t_exposure.rtf
+9          * Population: Safety Analysis Set (SAFFL='Y')
+10         *****************************************************************************/
+11         
+12         %include "&pgmpath./utilities/u_setup.sas";
+NOTE: Libref ADAM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\adam
+NOTE: Libref SDTM was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\raw\own-synthetic\sdtm
+NOTE: Libref OUTLIB was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\output\sas\tlf
+NOTE: Libref LIBRARY was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\meta_hackathon\sas2r-agent\data\derived\own-formats
+NOTE: ============================================
+NOTE: Setup completed at   27OCT2026:15:46:55
+NOTE: Study: [STUDYID]
+NOTE: Data cutoff: [DDMONYYYY]
+NOTE: ============================================
+78         %include "&macpath./m_counts.sas";
+170        %include "&macpath./m_desc_stats.sas";
+332        %include "&macpath./m_report.sas";
+404        %include "&pgmpath./utilities/u_titles.sas";
+566        
+567        /*--- Step 1: Get Big N ---*/
+568        %m_counts(inds=adam.adsl, trtvar=TRTA, popflag=SAFFL, popval=Y);
+NOTE: Table WORK._BIGN created, with 3 rows and 2 columns.
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5545.06k
+      OS Memory           15192.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        2  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._BIGN.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+                                                           The SAS System
+
+      memory              888.48k
+      OS Memory           10584.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        3  Switch Count  0
+      
+
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5398.59k
+      OS Memory           15708.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        4  Switch Count  0
+      
+
+NOTE: ============================================
+NOTE: Treatment group counts:
+NOTE:   Drug X High Dose: N=63
+NOTE:   Drug X Low Dose: N=82
+NOTE:   Placebo: N=95
+NOTE:   Total: N=240
+NOTE: ============================================
+569        
+570        /*--- Step 2: Derive exposure data ---*/
+571        proc sql noprint;
+572            create table ex as
+573            select a.USUBJID, a.TRTA, a.TRTAN,
+574                   a.PARAMCD, a.PARAM,
+575                   a.AVAL  /* e.g., duration in days, total dose, etc. */
+576            from adam.adex a
+577            inner join adam.adsl b on a.USUBJID = b.USUBJID
+578            where b.SAFFL = 'Y'
+579            order by a.TRTAN, a.PARAMCD;
+NOTE: SAS threaded sort was used.
+NOTE: Table WORK.EX created, with 720 rows and 6 columns.
+
+580        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              15277.90k
+      OS Memory           24132.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        5  Switch Count  0
+      
+
+581        
+582        /*--- Alternative: Derive from ADSL if ADEX not available ---*/
+583        data ex_adsl;
+584            set adam.adsl;
+585            where SAFFL = 'Y';
+586        
+587            /* Duration of treatment (days) */
+588            if TRTEDT ne . and TRTSDT ne . then
+589                TRTDUR = TRTEDT - TRTSDT + 1;
+590            else TRTDUR = .;
+                                                           The SAS System
+
+591        run;
+
+NOTE: There were 240 observations read from the data set ADAM.ADSL.
+      WHERE SAFFL='Y';
+NOTE: The data set WORK.EX_ADSL has 240 observations and 44 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1005.39k
+      OS Memory           10840.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        6  Switch Count  0
+      
+
+592        
+593        /*--- Step 3: Duration statistics ---*/
+594        %m_cont_stats(inds=ex_adsl, anavar=TRTDUR, trtvar=TRTA, outds=_dur_stats, decimals=1);
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 240 observations read from the data set WORK.EX_ADSL.
+NOTE: The data set WORK._STATS has 3 observations and 9 variables.
+NOTE: PROCEDURE MEANS used (Total process time):
+      real time           0.03 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              7811.87k
+      OS Memory           17264.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        7  Switch Count  0
+      
+
+
+NOTE: There were 3 observations read from the data set WORK._STATS.
+NOTE: The data set WORK._DUR_STATS has 18 observations and 4 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              940.60k
+      OS Memory           11864.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        8  Switch Count  0
+      
+
+
+NOTE: There were 18 observations read from the data set WORK._DUR_STATS.
+NOTE: SAS sort was used.
+NOTE: The data set WORK._DUR_STATS has 18 observations and 4 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              674.46k
+      OS Memory           11868.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        9  Switch Count  0
+      
+                                                           The SAS System
+
+
+
+NOTE: Deleting WORK._STATS (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.00 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              261.62k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        10  Switch Count  0
+      
+
+595        
+596        data _dur_stats;
+597            set _dur_stats;
+598            length category $60;
+599            category = 'Duration of Treatment (days)';
+600            block = 1;
+601        run;
+
+NOTE: There were 18 observations read from the data set WORK._DUR_STATS.
+NOTE: The data set WORK._DUR_STATS has 18 observations and 6 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              892.43k
+      OS Memory           11608.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        11  Switch Count  0
+      
+
+602        
+603        /*--- Step 4: Duration categories ---*/
+604        data dur_cat;
+605            set ex_adsl;
+606            length DURCAT $30;
+607        
+608            if      TRTDUR = . then DURCAT = 'Missing';
+609            else if TRTDUR <= 28 then DURCAT = '<=28 days';
+610            else if TRTDUR <= 84 then DURCAT = '>28 to <=84 days';
+611            else if TRTDUR <= 168 then DURCAT = '>84 to <=168 days';
+612            else if TRTDUR <= 336 then DURCAT = '>168 to <=336 days';
+613            else DURCAT = '>336 days';
+614        
+615            /* Order */
+616            select(DURCAT);
+617                when('<=28 days')           DURCATN = 1;
+618                when('>28 to <=84 days')    DURCATN = 2;
+619                when('>84 to <=168 days')   DURCATN = 3;
+620                when('>168 to <=336 days')  DURCATN = 4;
+621                when('>336 days')           DURCATN = 5;
+622                when('Missing')             DURCATN = 6;
+623                otherwise                   DURCATN = 99;
+624            end;
+625        run;
+
+                                                           The SAS System
+
+NOTE: There were 240 observations read from the data set WORK.EX_ADSL.
+NOTE: The data set WORK.DUR_CAT has 240 observations and 46 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              994.06k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        12  Switch Count  0
+      
+
+626        
+627        /*--- Step 5: Duration category counts ---*/
+628        proc sql noprint;
+629            create table _durcat_cnt as
+630            select TRTA, DURCAT, DURCATN,
+631                   count(distinct USUBJID) as cnt
+632            from dur_cat
+633            group by TRTA, DURCAT, DURCATN
+634            order by DURCATN, TRTA;
+NOTE: Table WORK._DURCAT_CNT created, with 10 rows and 4 columns.
+
+635        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.02 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              5421.93k
+      OS Memory           16476.00k
+      Timestamp           10/27/2026 03:46:54 PM
+      Step Count                        13  Switch Count  0
+      
+
+636        
+637        proc sql noprint;
+638            create table _durcat_pct as
+639            select a.*, b.bign,
+640                   case when b.bign > 0 then a.cnt / b.bign * 100 else . end as pct
+641            from _durcat_cnt a
+642            left join work._bign b on a.TRTA = b.TRTA;
+NOTE: Table WORK._DURCAT_PCT created, with 10 rows and 6 columns.
+
+643        quit;
+NOTE: PROCEDURE SQL used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              5489.25k
+      OS Memory           16220.00k
+      Timestamp           10/27/2026 03:46:55 PM
+      Step Count                        14  Switch Count  0
+      
+
+644        
+645        data _durcat_fmt;
+646            set _durcat_pct;
+647            length value $30 stat $40 category $60;
+                                                           The SAS System
+
+648            category = 'Duration Categories';
+649            stat = '  ' || strip(DURCAT);
+650            ord = 100 + DURCATN;
+651            block = 2;
+652            if cnt > 0 then
+653                value = cat(strip(put(cnt, 8.)), ' (', strip(put(pct, 5.1)), ')');
+654            else value = '0';
+655        run;
+
+NOTE: There were 10 observations read from the data set WORK._DURCAT_PCT.
+NOTE: The data set WORK._DURCAT_FMT has 10 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              951.81k
+      OS Memory           11096.00k
+      Timestamp           10/27/2026 03:46:55 PM
+      Step Count                        15  Switch Count  0
+      
+
+656        
+657        /*--- Step 6: Combine ---*/
+658        data all_exp;
+659            set _dur_stats _durcat_fmt;
+660        run;
+
+NOTE: There were 18 observations read from the data set WORK._DUR_STATS.
+NOTE: There were 10 observations read from the data set WORK._DURCAT_FMT.
+NOTE: The data set WORK.ALL_EXP has 28 observations and 11 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.01 seconds
+      system cpu time     0.00 seconds
+      memory              1038.00k
+      OS Memory           11352.00k
+      Timestamp           10/27/2026 03:46:55 PM
+      Step Count                        16  Switch Count  0
+      
+
+661        
+662        /*--- Step 7: Transpose ---*/
+663        proc sort data=all_exp; by block ord stat; run;
+
+NOTE: There were 28 observations read from the data set WORK.ALL_EXP.
+NOTE: SAS sort was used.
+NOTE: The data set WORK.ALL_EXP has 28 observations and 11 variables.
+NOTE: PROCEDURE SORT used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              672.75k
+      OS Memory           11356.00k
+      Timestamp           10/27/2026 03:46:55 PM
+      Step Count                        17  Switch Count  0
+      
+
+664        
+                                                           The SAS System
+
+665        proc transpose data=all_exp out=final(drop=_name_ rename=(colPlacebo=col1 colDrug_X_Low_Dose=col2
+665      ! colDrug_X_High_Dose=col3)) prefix=col;  /* test-copy patch: name the transposed columns col1-col3 as the report expects
+665      ! */
+666            by block category ord stat;
+667            id TRTA;
+668            var value;
+669        run;
+
+NOTE: There were 28 observations read from the data set WORK.ALL_EXP.
+NOTE: The data set WORK.FINAL has 10 observations and 7 variables.
+NOTE: PROCEDURE TRANSPOSE used (Total process time):
+      real time           0.04 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.01 seconds
+      memory              2548.71k
+      OS Memory           13148.00k
+      Timestamp           10/27/2026 03:46:55 PM
+      Step Count                        18  Switch Count  0
+      
+
+670        
+671        /*--- Step 8: Generate output ---*/
+672        %set_titles(output=T_EXPOSURE, population=Safety Analysis Set);
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+WARNING: Apparent symbolic reference SYSIN not resolved.
+673        %ods_on(filename=t_exposure);
+NOTE: Writing RTF Body file: D:/meta_hackathon/sas2r-agent/output/sas/tlf/t_exposure.rtf
+674        
+675        proc report data=final nowd split='~'
+676            style(report)=[outputwidth=9.5in]
+677            style(header)=[just=center fontweight=bold];
+678        
+679            columns block category ord stat col1 col2 col3;
+680        
+681            define block    / order noprint;
+682            define category / order '' style(column)=[width=2in fontweight=bold];
+683            define ord      / order noprint;
+684            define stat     / display 'Statistic' style(column)=[width=2in];
+685            define col1     / display "&col1hdr." style(column)=[width=1.5in just=center];
+686            define col2     / display "&col2hdr." style(column)=[width=1.5in just=center];
+                                                           The SAS System
+
+687            define col3     / display "&col3hdr." style(column)=[width=1.5in just=center];
+688        
+689        run;
+
+NOTE: Multiple concurrent threads will be used to summarize data.
+NOTE: There were 10 observations read from the data set WORK.FINAL.
+NOTE: PROCEDURE REPORT used (Total process time):
+      real time           0.06 seconds
+      user cpu time       0.06 seconds
+      system cpu time     0.00 seconds
+      memory              8061.28k
+      OS Memory           19560.00k
+      Timestamp           10/27/2026 03:46:56 PM
+      Step Count                        19  Switch Count  0
+      
+
+690        
+691        %ods_off;
+692        %clear_titles;
+693        
+694        proc datasets lib=work nolist;
+695            delete ex ex_adsl dur_cat _dur: all_exp final;
+696        quit;
+
+NOTE: Deleting WORK.EX (memtype=DATA).
+NOTE: Deleting WORK.EX_ADSL (memtype=DATA).
+NOTE: Deleting WORK.DUR_CAT (memtype=DATA).
+NOTE: Deleting WORK._DURCAT_CNT (memtype=DATA).
+NOTE: Deleting WORK._DURCAT_FMT (memtype=DATA).
+NOTE: Deleting WORK._DURCAT_PCT (memtype=DATA).
+NOTE: Deleting WORK._DUR_STATS (memtype=DATA).
+NOTE: Deleting WORK.ALL_EXP (memtype=DATA).
+NOTE: Deleting WORK.FINAL (memtype=DATA).
+NOTE: PROCEDURE DATASETS used (Total process time):
+      real time           0.01 seconds
+      user cpu time       0.00 seconds
+      system cpu time     0.00 seconds
+      memory              230.03k
+      OS Memory           13144.00k
+      Timestamp           10/27/2026 03:46:56 PM
+      Step Count                        20  Switch Count  0
+                                                           The SAS System
+
+      
+
+697        
+698        %put NOTE: t_exposure.sas completed successfully.;
+NOTE: t_exposure.sas completed successfully.
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           3.26 seconds
+      user cpu time       0.76 seconds
+      system cpu time     0.60 seconds
+      memory              22997.75k
+      OS Memory           24132.00k
+      Timestamp           10/27/2026 03:46:56 PM
+      Step Count                        20  Switch Count  52
+      
