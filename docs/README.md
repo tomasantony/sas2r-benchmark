@@ -18,9 +18,9 @@ programs that were tried and retired carry R001-R049 in `benchmark/retired.csv`.
 | `benchmark/manifest.csv` | one row per program: id (P001-P100; old_id gives the pre-renumbering id, see id_map.csv), file, group, original corpus path, source repo, licence, data source, outputs, lines |
 | `benchmark/retired.csv` | the same columns for R001-R049 and why each was retired |
 | `benchmark/data_map.csv` | every libname, path macro, URL fetch, import and %include statement per program, redirected before the SAS reference run |
-| `benchmark/candidates/` | the trial run (C001-C045, `candidates.csv`, `results.csv`, logs) used on 2026-10-27 to pick the 26 general-purpose replacement programs; not part of the scored set |
+| `benchmark/candidates/` | the trial run (C001-C045 programs, `candidates.csv`, `results.csv`, logs; the work folders were dropped) used on 2026-10-27 to pick the 26 general-purpose replacement programs; not part of the scored set |
 | `programs/sas/` | the 100 SAS programs, verbatim, named `Pnnn_<original name>.sas`; `retired/` holds R001-R049; `own_originals/` the owner's programs before patching; `macros/` the macro libraries |
-| `programs/sas_run/` | the copies the runner executes: verbatim plus the minimal patches in `benchmark/patches.csv`; `retired/` keeps the run copies of retired programs under their old P-ids |
+| `programs/sas_run/` | the copies the runner executes: verbatim plus the minimal patches in `benchmark/patches.csv` (active programs only; retired sources stay under `programs/sas/retired/`) |
 | `programs/r/human/` | 6 hand-written R counterparts from the source repositories (kbd0011 pilot ADSL pipeline, PHUSE WPCT figures, demo_summary.R), kept as human reference; no translations |
 | `data/raw/` | inputs: CDISC pilot ADaM/SDTM xpt, clinical-data-to-cdisc raw CSVs, faijal-oncology raw xlsx, wxzhai sas7bdat, METABRIC csv, the owner's synthetic study. Read-only |
 | `data/derived/` | data the pipeline steps produce and later steps read: the CDISC pilot loaded from xpt by `load_pilot.sas` (adam, sdtm, adam-split), the c2c and wxzhai pipeline outputs. 103 files committed; `sasuser/` and `saswork/` are scratch and ignored |
@@ -107,7 +107,9 @@ before regenerating `sas_output_hashes.csv`, because scrubbing changes the log b
 What remains by design: PROC CONTENTS listings and a few logs carry the reference machine's
 host name and the `Host Created` platform tag, and two RTF outputs carry the operator name.
 These files are among the ones the entry repository froze and hashed before the model runs, so
-they are left byte-for-byte as run; rewriting them now would break that chain. The same host
+they are left byte-for-byte as run; rewriting them now would break that chain. For the same
+reason the whole `output/sas` tree, including `shipped/retired/` and `logs/retired/`, is kept
+exactly as frozen (600 files). The same host
 name is recorded in every provenance entry of the entry repository.
 
 ## Program ids
@@ -115,8 +117,7 @@ name is recorded in every provenance entry of the entry repository.
 Ids were renumbered on 2026-10-27 so the active set reads P001-P100 with no gaps: P001-P090 are
 clinical, P091-P100 general-purpose. Retired programs carry R001-R049. `benchmark/id_map.csv`
 maps every old id to its new one, and `manifest.csv` / `retired.csv` keep the old id in `old_id`.
-Logs, hashes, patches and pipelines all use the new ids; the run copies under
-`programs/sas_run/retired/` still carry their old P-ids, matching `old_id` in `retired.csv`.
+Logs, hashes, patches and pipelines all use the new ids.
 
 ## History
 
