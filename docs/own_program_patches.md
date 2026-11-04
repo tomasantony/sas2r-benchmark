@@ -1,4 +1,4 @@
-# Patches applied to the TLF test copies (originals kept as *.sas.orig)
+# Patches applied to the owner's programs (originals in programs/sas/own_originals/)
 
 - t_ae_soc_pt, t_ae_sum, t_cm, t_disp, t_dm, t_exposure: PROC TRANSPOSE OUT= gained RENAME=(colPlacebo=col1 colDrug_X_Low_Dose=col2 colDrug_X_High_Dose=col3); the reports reference col1-col3 but ID TRTA produces columns named after the treatment labels.
   that builds the display columns. With prefix=col the programs reference col1-col3, which only exist
